@@ -12,9 +12,12 @@
   "minimize": "Minimize",
   "maximize": "Maximize",
   "restore": "Restore",
+  "groupByStatus": "Group by status",
   "sections": {
     "desktop": "Desktop apps",
-    "web": "Web tools"
+    "web": "Web tools",
+    "installedGroup": "Installed",
+    "toInstall": "Not yet installed"
   },
   "status": {
     "notInstalled": "Not installed",
@@ -26,6 +29,7 @@
     "install": "Install",
     "update": "Update",
     "launch": "Launch",
+    "open": "Open",
     "openWeb": "Open in browser",
     "github": "Source on GitHub",
     "website": "Website",

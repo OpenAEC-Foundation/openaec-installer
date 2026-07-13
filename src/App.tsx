@@ -34,6 +34,9 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme] = useState("light");
   const [search, setSearch] = useState("");
+  // false = huidige indeling (Desktop-apps / Webtools); true = op status
+  // (Al geïnstalleerd / Nog te installeren). Keuze wordt bewaard.
+  const [groupByStatus, setGroupByStatus] = useState(false);
 
   const [installed, setInstalled] = useState<Record<string, InstalledTool>>({});
   const [releases, setReleases] = useState<Record<string, ReleaseInfo>>({});
@@ -45,6 +48,9 @@ function App() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const refreshingRef = useRef(false);
+  // Voorkomt dat de trage opstart-load van groupByStatus een klik overschrijft
+  // die de gebruiker doet vóór die load klaar is (race bij opstart).
+  const groupTouchedRef = useRef(false);
 
   const scanInstalled = useCallback(async () => {
     try {
@@ -94,6 +100,9 @@ function App() {
     getSetting("theme", "light").then((saved) => {
       setTheme(saved);
       applyTheme(saved);
+    });
+    getSetting("groupByStatus", false).then((saved) => {
+      if (!groupTouchedRef.current) setGroupByStatus(saved);
     });
     import("@tauri-apps/api/window")
       .then(({ getCurrentWindow }) => getCurrentWindow().show())
@@ -174,6 +183,26 @@ function App() {
   const desktopTools = useMemo(() => DESKTOP_TOOLS.filter(matches), [matches]);
   const webTools = useMemo(() => WEB_TOOLS.filter(matches), [matches]);
 
+  // Statusindeling: geïnstalleerde tools (updates eerst) vs. nog te installeren.
+  const installedGroup = useMemo(() => {
+    const rank = (tool: CatalogTool) =>
+      deriveStatus(tool, installed[tool.id], releases[tool.id]) === "update_available" ? 0 : 1;
+    return desktopTools
+      .filter((tool) => installed[tool.id])
+      .sort((a, b) => rank(a) - rank(b));
+  }, [desktopTools, installed, releases]);
+
+  const toInstallGroup = useMemo(
+    () => desktopTools.filter((tool) => !installed[tool.id]),
+    [desktopTools, installed],
+  );
+
+  const toggleGroupByStatus = useCallback((value: boolean) => {
+    groupTouchedRef.current = true;
+    setGroupByStatus(value);
+    void setSetting("groupByStatus", value);
+  }, []);
+
   const updateCount = useMemo(
     () =>
       DESKTOP_TOOLS.filter(
@@ -215,6 +244,14 @@ function App() {
         </div>
 
         <div className="app-header-actions">
+          <label className="view-toggle">
+            <input
+              type="checkbox"
+              checked={groupByStatus}
+              onChange={(e) => toggleGroupByStatus(e.target.checked)}
+            />
+            <span>{t("groupByStatus")}</span>
+          </label>
           <div className="search-box">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" />
@@ -255,11 +292,32 @@ function App() {
       </header>
 
       <main className="app-main">
-        {desktopTools.length > 0 && (
-          <section>
-            <div className="section-label">{t("sections.desktop")}</div>
-            <div className="tool-grid">{desktopTools.map(renderCard)}</div>
-          </section>
+        {groupByStatus ? (
+          <>
+            {installedGroup.length > 0 && (
+              <section>
+                <div className="section-label">
+                  {t("sections.installedGroup")} ({installedGroup.length})
+                </div>
+                <div className="tool-grid">{installedGroup.map(renderCard)}</div>
+              </section>
+            )}
+            {toInstallGroup.length > 0 && (
+              <section>
+                <div className="section-label">
+                  {t("sections.toInstall")} ({toInstallGroup.length})
+                </div>
+                <div className="tool-grid">{toInstallGroup.map(renderCard)}</div>
+              </section>
+            )}
+          </>
+        ) : (
+          desktopTools.length > 0 && (
+            <section>
+              <div className="section-label">{t("sections.desktop")}</div>
+              <div className="tool-grid">{desktopTools.map(renderCard)}</div>
+            </section>
+          )
         )}
 
         {webTools.length > 0 && (

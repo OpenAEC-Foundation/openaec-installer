@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { CatalogTool } from "../data/catalog";
 import type { DownloadProgress, InstalledTool, ReleaseInfo } from "../lib/api";
 import type { ToolStatus } from "../lib/status";
-import OpenAecLogo from "./OpenAecLogo";
+import CategoryIcon from "./CategoryIcon";
 import "./ToolCard.css";
 
 interface ToolCardProps {
@@ -46,6 +47,7 @@ export default function ToolCard({
   onLaunch,
 }: ToolCardProps) {
   const { t, i18n } = useTranslation();
+  const [previewFailed, setPreviewFailed] = useState(false);
   const lang = i18n.language?.startsWith("en") ? "en" : "nl";
   const badge = statusBadge(status);
 
@@ -72,11 +74,70 @@ export default function ToolCard({
     if (url) openUrl(url).catch(() => {});
   };
 
+  // Lokaal gebundelde previewafbeelding (screenshot van open-aec.com);
+  // valt terug op het categorie-icoon als er geen afbeelding is of laden faalt.
+  const previewUrl = tool.preview ?? null;
+
+  // Snelkoppeling op de preview: de tool bekijken of gebruiken — bewust nooit
+  // installeren (dat blijft een expliciete knop, zodat een klik geen ongewenste
+  // download start). Geïnstalleerd → starten; anders → web-demo/productpagina.
+  const openTarget =
+    tool.webUrl ?? tool.siteUrl ?? (tool.repo ? `https://github.com/${tool.repo}` : undefined);
+  const shortcut = (() => {
+    if (tool.kind !== "web" && canLaunch) {
+      return { kind: "launch" as const, label: t("actions.launch"), run: () => onLaunch?.(tool) };
+    }
+    if (openTarget) {
+      return { kind: "open" as const, label: t("actions.open"), run: () => open(openTarget) };
+    }
+    return null;
+  })();
+
   return (
     <article className={`tool-card${status === "update_available" ? " update" : ""}`}>
+      <button
+        type="button"
+        className="tool-preview"
+        onClick={() => shortcut?.run()}
+        disabled={!shortcut}
+        title={shortcut?.label}
+        aria-label={shortcut ? `${tool.name} — ${shortcut.label}` : tool.name}
+      >
+        <div className="tool-preview-fallback">
+          <CategoryIcon category={tool.category} size={46} />
+        </div>
+        {previewUrl && !previewFailed && (
+          <img
+            className="tool-preview-img"
+            src={previewUrl}
+            loading="lazy"
+            alt=""
+            onError={() => setPreviewFailed(true)}
+          />
+        )}
+        {shortcut && (
+          <div className="tool-preview-overlay">
+            <span className="tool-preview-action">
+              {shortcut.kind === "launch" ? (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <polygon points="6 3 20 12 6 21 6 3" />
+                </svg>
+              ) : (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              )}
+              {shortcut.label}
+            </span>
+          </div>
+        )}
+      </button>
+
       <div className="tool-card-head">
         <div className="tool-icon">
-          <OpenAecLogo size={26} />
+          <CategoryIcon category={tool.category} size={22} />
         </div>
         <div className="tool-card-titles">
           <h3 className="tool-name">{tool.name}</h3>

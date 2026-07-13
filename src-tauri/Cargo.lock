@@ -2331,7 +2331,7 @@ dependencies = [
 
 [[package]]
 name = "openaec-installer"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "futures-util",
  "reqwest 0.12.28",
@@ -2341,6 +2341,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tauri-plugin-store",
+ "windows-sys 0.59.0",
  "winreg",
 ]
 

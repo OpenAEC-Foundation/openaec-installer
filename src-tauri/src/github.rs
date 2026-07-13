@@ -121,10 +121,16 @@ fn score_windows_asset(name: &str) -> Option<u32> {
     }
     let x64 = n.contains("x64") || n.contains("x86_64") || n.contains("amd64");
     if n.ends_with("-setup.exe") || n.ends_with("_setup.exe") {
+        // Voorkeur voor de per-gebruiker-installer: die vraagt geen
+        // beheerdersrechten (geen UAC) en vermijdt zo ERROR_ELEVATION_REQUIRED
+        // (os error 740). Past bij een tool die apps voor de huidige gebruiker
+        // installeert. Valt terug op de systeem-installer als die er niet is.
+        // Binnen dezelfde installer-klasse blijft x64 altijd boven niet-x64,
+        // zodat architectuur nooit door install-scope wordt omgedraaid.
         if n.contains("user-setup") {
-            return Some(80);
+            return Some(if x64 { 110 } else { 95 });
         }
-        return if x64 { Some(100) } else { Some(90) };
+        return if x64 { Some(100) } else { Some(85) };
     }
     if n.ends_with(".msi") {
         return if x64 || n.contains("windows") {
@@ -186,11 +192,13 @@ mod tests {
     }
 
     #[test]
-    fn prefers_system_setup_over_user_setup_and_msi() {
+    fn prefers_user_setup_to_avoid_elevation() {
         let system = score_windows_asset("Open.PDF.Studio_1.67.0_x64-setup.exe");
         let user = score_windows_asset("Open.PDF.Studio_1.67.0_x64_user-setup.exe");
         let msi = score_windows_asset("Open.PDF.Studio_1.67.0_x64_en-US.msi");
-        assert!(system > user && user > msi && msi.is_some());
+        // De per-gebruiker-installer (geen UAC) wint van de systeem-installer,
+        // die weer van de msi wint.
+        assert!(user > system && system > msi && msi.is_some());
         assert_eq!(score_windows_asset("Open.PDF.Studio_1.67.0_x64-setup.exe.sig"), None);
         assert_eq!(score_windows_asset("Open.2D.Studio_0.35.0_amd64.AppImage"), None);
     }

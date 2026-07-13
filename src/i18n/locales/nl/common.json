@@ -12,9 +12,12 @@
   "minimize": "Minimaliseren",
   "maximize": "Maximaliseren",
   "restore": "Herstellen",
+  "groupByStatus": "Groeperen op status",
   "sections": {
     "desktop": "Desktop-apps",
-    "web": "Webtools"
+    "web": "Webtools",
+    "installedGroup": "Al geïnstalleerd",
+    "toInstall": "Nog te installeren"
   },
   "status": {
     "notInstalled": "Niet geïnstalleerd",
@@ -26,6 +29,7 @@
     "install": "Installeren",
     "update": "Bijwerken",
     "launch": "Starten",
+    "open": "Openen",
     "openWeb": "Openen in browser",
     "github": "Broncode op GitHub",
     "website": "Website",

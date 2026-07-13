@@ -39,6 +39,12 @@ export interface CatalogTool {
   webUrl?: string;
   /** Productpagina op open-aec.com. */
   siteUrl?: string;
+  /**
+   * Lokaal gebundelde previewafbeelding (van open-aec.com), pad onder /previews/.
+   * Ontbreekt als er geen screenshot beschikbaar is → dan valt de kaart terug op
+   * het categorie-icoon.
+   */
+  preview?: string;
   description: { nl: string; en: string };
   /** Community-project buiten de OpenAEC-Foundation org. */
   community?: boolean;
@@ -49,6 +55,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-calc-studio",
     name: "Open Calc Studio",
+    preview: "/previews/open-calc-studio.jpg",
     kind: "desktop",
     category: "calculatie",
     repo: "OpenAEC-Foundation/open-calc-studio",
@@ -63,6 +70,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-pdf-studio",
     name: "Open PDF Studio",
+    preview: "/previews/open-pdf-studio.jpg",
     kind: "desktop",
     category: "documenten",
     repo: "OpenAEC-Foundation/open-pdf-studio",
@@ -77,6 +85,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-planner-studio",
     name: "Open Planner Studio",
+    preview: "/previews/open-planner-studio.jpg",
     kind: "desktop",
     category: "planning",
     repo: "OpenAEC-Foundation/open-planner-studio",
@@ -92,6 +101,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-2d-studio",
     name: "Open 2D Studio",
+    preview: "/previews/open-2d-studio.jpg",
     kind: "desktop",
     category: "cad",
     repo: "OpenAEC-Foundation/open-2d-studio",
@@ -106,6 +116,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-cad-studio",
     name: "Open CAD Studio",
+    preview: "/previews/open-cad-studio.jpg",
     kind: "desktop",
     category: "cad",
     repo: "HakanSeven12/OpenCADStudio",
@@ -121,6 +132,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-calculations-studio",
     name: "Open Calculations Studio",
+    preview: "/previews/open-calculations-studio.jpg",
     kind: "desktop",
     category: "constructief",
     repo: "OpenAEC-Foundation/Open-Calculations-Studio",
@@ -161,6 +173,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-geotechniek-studio",
     name: "Open Geotechniek Studio",
+    preview: "/previews/open-geotechniek-studio.jpg",
     kind: "desktop",
     category: "geotechniek",
     repo: "OpenAEC-Foundation/open-geotechniek-studio",
@@ -175,6 +188,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "monty-ifc-viewer",
     name: "Monty IFC Viewer",
+    preview: "/previews/monty-ifc-viewer.jpg",
     kind: "desktop",
     category: "bim",
     repo: "OpenAEC-Foundation/monty-ifc-viewer",
@@ -189,6 +203,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-speech-studio",
     name: "Open Speech Studio",
+    preview: "/previews/open-speech-studio.jpg",
     kind: "desktop",
     category: "ai",
     repo: "OpenAEC-Foundation/open-speech-studio",
@@ -205,6 +220,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-heatloss-studio",
     name: "Open Heatloss Studio",
+    preview: "/previews/open-heatloss-studio.jpg",
     kind: "web",
     category: "energie",
     webUrl: "https://open-heatloss-studio.open-aec.com/",
@@ -216,6 +232,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-field-studio",
     name: "Open Field Studio",
+    preview: "/previews/open-field-studio.jpg",
     kind: "web",
     category: "veld",
     webUrl: "https://open-field-studio.open-aec.com/",
@@ -227,6 +244,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-energy-studio",
     name: "Open Energy Studio",
+    preview: "/previews/open-energy-studio.jpg",
     kind: "web",
     category: "energie",
     webUrl: "https://open-energy-studio.open-aec.com/",
@@ -238,6 +256,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-pointcloud-studio",
     name: "Open Pointcloud Studio",
+    preview: "/previews/open-pointcloud-studio.jpg",
     kind: "web",
     category: "bim",
     webUrl: "https://open-pointcloud-studio.open-aec.com/",
@@ -249,6 +268,7 @@ export const CATALOG: CatalogTool[] = [
   {
     id: "open-books",
     name: "Open Books Studio",
+    preview: "/previews/open-books.jpg",
     kind: "web",
     category: "documenten",
     webUrl: "https://open-books.open-aec.com/",

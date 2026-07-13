@@ -91,23 +91,61 @@ pub async fn download_and_run(
 
 #[cfg(windows)]
 fn run_installer(path: &std::path::Path) -> Result<(), String> {
-    use std::process::Command;
     let is_msi = path
         .extension()
         .map(|e| e.eq_ignore_ascii_case("msi"))
         .unwrap_or(false);
     if is_msi {
-        Command::new("msiexec")
-            .arg("/i")
-            .arg(path)
-            .spawn()
-            .map_err(|e| format!("msiexec: {e}"))?;
+        // msiexec vraagt zelf om elevatie voor een perMachine-installatie.
+        shell_execute("msiexec.exe", Some(&format!("/i \"{}\"", path.display())))
     } else {
-        Command::new(path)
-            .spawn()
-            .map_err(|e| format!("installer starten: {e}"))?;
+        // Direct starten via CreateProcess (std::process::Command) faalt met
+        // "os error 740" (ERROR_ELEVATION_REQUIRED) zodra de installer
+        // beheerdersrechten vereist — CreateProcess kan niet eleveren.
+        // ShellExecuteW honoreert het uitvoerbaar-manifest en toont zo nodig
+        // de UAC-prompt (net als dubbelklikken in Verkenner).
+        shell_execute(&path.to_string_lossy(), None)
     }
-    Ok(())
+}
+
+/// Start een bestand via de Windows-shell (ShellExecuteW). Met een leeg werkwoord
+/// gebruikt Windows de standaardactie ("open") en wordt het programma zo nodig
+/// geëleveerd volgens zijn manifest.
+#[cfg(windows)]
+fn shell_execute(file: &str, params: Option<&str>) -> Result<(), String> {
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::UI::Shell::ShellExecuteW;
+    use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+    fn wide(s: &str) -> Vec<u16> {
+        OsStr::new(s).encode_wide().chain(std::iter::once(0)).collect()
+    }
+
+    let file_w = wide(file);
+    let params_w = params.map(wide);
+    let result = unsafe {
+        ShellExecuteW(
+            std::ptr::null_mut(),                                     // geen ouder-venster
+            std::ptr::null(),                                        // standaardwerkwoord ("open")
+            file_w.as_ptr(),
+            params_w.as_ref().map_or(std::ptr::null(), |p| p.as_ptr()),
+            std::ptr::null(),                                        // standaard-werkmap
+            SW_SHOWNORMAL,
+        )
+    };
+    // ShellExecuteW geeft een pseudo-HINSTANCE > 32 terug bij succes.
+    let code = result as isize;
+    if code > 32 {
+        Ok(())
+    } else {
+        // 1223 = ERROR_CANCELLED (UAC geweigerd), 5 = SE_ERR_ACCESSDENIED.
+        let msg = match code {
+            5 | 1223 => "installatie geannuleerd (geen beheerdersrechten gegeven)".to_string(),
+            other => format!("installer starten (code {other})"),
+        };
+        Err(msg)
+    }
 }
 
 #[cfg(not(windows))]
