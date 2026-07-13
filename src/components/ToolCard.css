@@ -1,0 +1,284 @@
+/* ── Toolkaart — cards per DESIGN-SYSTEM.md (radius 12, border, hover-lift) ── */
+
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--theme-bg-lighter);
+  border: 1px solid var(--theme-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tool-card:hover {
+  border-color: var(--theme-accent-tint);
+  box-shadow: var(--theme-dialog-shadow);
+}
+
+.tool-card.update {
+  border-color: rgba(217, 119, 6, 0.45);
+}
+
+/* ── Kop ── */
+.tool-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.tool-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--theme-accent-soft);
+  border: 1px solid var(--theme-border-subtle);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.tool-card-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-name {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--theme-text);
+  line-height: 1.25;
+}
+
+.tool-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* JetBrains Mono sectielabel-patroon uit het stijlboek */
+.tool-category {
+  font-family: var(--font-code);
+  font-size: 9.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--theme-accent-tint);
+}
+
+.tool-community {
+  font-family: var(--font-code);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--theme-text-faint);
+  border: 1px solid var(--theme-border);
+  border-radius: 9999px;
+  padding: 0 6px;
+}
+
+/* ── Badges (pill, per stijlboek) ── */
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.25em 0.75em;
+  border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-success { background: #DCFCE7; color: #166534; }
+.badge-update  { background: #FEF3C7; color: #92400E; }
+.badge-muted   { background: #F4F4F5; color: #3F3F46; }
+.badge-info    { background: #DBEAFE; color: #1E40AF; }
+
+[data-theme="forge"] .badge-success,
+[data-theme="openaec"] .badge-success,
+[data-theme="blueprint"] .badge-success,
+[data-theme="contrast"] .badge-success { background: rgba(74, 222, 128, 0.14); color: #4ADE80; }
+
+[data-theme="forge"] .badge-update,
+[data-theme="openaec"] .badge-update,
+[data-theme="blueprint"] .badge-update,
+[data-theme="contrast"] .badge-update { background: rgba(245, 158, 11, 0.16); color: #FBBF24; }
+
+[data-theme="forge"] .badge-muted,
+[data-theme="openaec"] .badge-muted,
+[data-theme="blueprint"] .badge-muted,
+[data-theme="contrast"] .badge-muted { background: rgba(255, 255, 255, 0.08); color: var(--theme-text-secondary); }
+
+[data-theme="forge"] .badge-info,
+[data-theme="openaec"] .badge-info,
+[data-theme="blueprint"] .badge-info,
+[data-theme="contrast"] .badge-info { background: rgba(96, 165, 250, 0.15); color: #93C5FD; }
+
+/* ── Omschrijving ── */
+.tool-desc {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--theme-text-secondary);
+  flex: 1;
+}
+
+/* ── Versies ── */
+.tool-versions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--theme-text-muted);
+}
+
+.tool-versions span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tool-versions svg {
+  color: #16A34A;
+}
+
+[data-theme="forge"] .tool-versions svg,
+[data-theme="openaec"] .tool-versions svg,
+[data-theme="blueprint"] .tool-versions svg,
+[data-theme="contrast"] .tool-versions svg {
+  color: #4ADE80;
+}
+
+.tool-versions-arrow {
+  color: var(--theme-text-faint);
+}
+
+.latest-highlight {
+  color: var(--theme-accent);
+  font-weight: 500;
+}
+
+/* ── Voortgang (progress bar per stijlboek: 8px, pill, amber) ── */
+.tool-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tool-progress-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--theme-border-subtle);
+  overflow: hidden;
+}
+
+.tool-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--theme-accent);
+  transition: width 0.3s ease;
+  min-width: 4px;
+}
+
+.tool-progress-fill.indeterminate {
+  width: 40%;
+  animation: indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  0% { margin-left: 0; }
+  50% { margin-left: 60%; }
+  100% { margin-left: 0; }
+}
+
+.tool-progress-label {
+  font-family: var(--font-code);
+  font-size: 10.5px;
+  color: var(--theme-text-muted);
+}
+
+/* ── Meldingen ── */
+.tool-error {
+  font-size: 11.5px;
+  color: var(--theme-danger-color);
+}
+
+.tool-note {
+  font-size: 11.5px;
+  color: var(--theme-text-secondary);
+}
+
+.tool-hint {
+  font-size: 11px;
+  color: var(--theme-text-faint);
+}
+
+/* ── Acties ── */
+.tool-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 18px;
+  border: none;
+  cursor: default;
+  transition: all 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+}
+
+.btn-primary {
+  background: var(--theme-btn-primary-bg);
+  color: var(--theme-btn-primary-text);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--theme-btn-primary-hover-bg);
+  color: var(--theme-btn-primary-hover-text);
+}
+
+.btn-secondary {
+  background: var(--theme-btn-secondary-bg);
+  color: var(--theme-btn-secondary-text);
+  border: 1px solid var(--theme-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--theme-btn-secondary-hover-bg);
+  border-color: var(--theme-btn-secondary-hover-border);
+}
+
+.tool-links {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--theme-text-muted);
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--theme-hover);
+  color: var(--theme-accent);
+}

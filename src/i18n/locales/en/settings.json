@@ -1,0 +1,31 @@
+{
+  "title": "Settings",
+  "resetToDefaults": "Reset to Defaults",
+  "resetConfirm": "Are you sure you want to reset all settings to their default values?",
+  "tabs": {
+    "general": "General",
+    "appearance": "Appearance",
+    "about": "About"
+  },
+  "general": {
+    "application": "Application",
+    "language": "Language"
+  },
+  "appearance": {
+    "theme": "Theme",
+    "themeDescription": "Choose a color theme for the application.",
+    "light": "Light",
+    "forge": "Forge (dark)",
+    "dark": "OpenAEC (dark)",
+    "blueprint": "Blueprint",
+    "contrast": "High contrast"
+  },
+  "about": {
+    "appName": "OpenAEC Installer",
+    "version": "Version",
+    "framework": "Framework",
+    "license": "License",
+    "description": "Central hub for the OpenAEC Foundation's open-source construction software: install, update and launch all tools.",
+    "website": "open-aec.com"
+  }
+}

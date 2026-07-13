@@ -1,0 +1,67 @@
+{
+  "appName": "OpenAEC Installer",
+  "subtitle": "Open source software voor de bouw — installeren, bijwerken en starten",
+  "search": "Zoek een tool...",
+  "refresh": "Vernieuwen",
+  "refreshing": "Vernieuwen...",
+  "ok": "OK",
+  "cancel": "Annuleren",
+  "save": "Opslaan",
+  "close": "Sluiten",
+  "preferences": "Instellingen",
+  "minimize": "Minimaliseren",
+  "maximize": "Maximaliseren",
+  "restore": "Herstellen",
+  "sections": {
+    "desktop": "Desktop-apps",
+    "web": "Webtools"
+  },
+  "status": {
+    "notInstalled": "Niet geïnstalleerd",
+    "installed": "Geïnstalleerd",
+    "updateAvailable": "Update beschikbaar",
+    "web": "Webapp"
+  },
+  "actions": {
+    "install": "Installeren",
+    "update": "Bijwerken",
+    "launch": "Starten",
+    "openWeb": "Openen in browser",
+    "github": "Broncode op GitHub",
+    "website": "Website",
+    "downloading": "Downloaden...",
+    "starting": "Installer starten..."
+  },
+  "versions": {
+    "installed": "geïnstalleerd",
+    "latest": "laatste"
+  },
+  "categories": {
+    "calculatie": "Calculatie",
+    "cad": "CAD",
+    "constructief": "Constructief",
+    "geotechniek": "Geotechniek",
+    "bim": "BIM",
+    "planning": "Planning",
+    "documenten": "Documenten",
+    "ai": "AI",
+    "energie": "Energie",
+    "veld": "Veld"
+  },
+  "statusbar": {
+    "installed": "geïnstalleerd",
+    "updates": "update(s) beschikbaar",
+    "lastRefresh": "Vernieuwd",
+    "never": "nog niet vernieuwd"
+  },
+  "community": "Community",
+  "errors": {
+    "no_releases": "Geen releases gevonden",
+    "rate_limited": "GitHub-limiet bereikt, probeer later opnieuw",
+    "network": "Netwerkfout bij ophalen releases",
+    "noInstaller": "Geen Windows-installer in de laatste release",
+    "installFailed": "Installatie starten mislukt"
+  },
+  "installerStarted": "De installer is gestart — doorloop de stappen. De status wordt daarna automatisch bijgewerkt.",
+  "noResults": "Geen tools gevonden voor “{{query}}”."
+}

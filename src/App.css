@@ -1,0 +1,234 @@
+/* ============================================================
+   OpenAEC Installer — basislayout
+   Typografie per DESIGN-SYSTEM.md:
+     koppen  → Space Grotesk
+     body/UI → Inter
+     labels  → JetBrains Mono
+   ============================================================ */
+
+:root {
+  --font-heading: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", Consolas, monospace;
+
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--theme-text);
+  background-color: var(--theme-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Labels en chrome niet selecteerbaar; invoervelden wel */
+#root {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input,
+textarea,
+[contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--theme-border);
+  background: var(--theme-bg);
+  flex-shrink: 0;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.app-title {
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--theme-text);
+  white-space: nowrap;
+}
+
+/* Woordmerk-patroon uit het stijlboek: "Open" + "AEC" in amber */
+.app-title-accent {
+  color: var(--theme-accent);
+}
+
+.app-title-sub {
+  font-weight: 500;
+  color: var(--theme-text-secondary);
+}
+
+.app-subtitle {
+  font-size: 12px;
+  color: var(--theme-text-muted);
+  margin-top: 1px;
+}
+
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Zoekveld (focusring per stijlboek: amber + 3px zachte gloed) ── */
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 10px;
+  color: var(--theme-text-faint);
+  pointer-events: none;
+}
+
+.search-box input {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  width: 220px;
+  padding: 8px 12px 8px 30px;
+  border: 1.5px solid var(--theme-dialog-input-border);
+  border-radius: 8px;
+  background: var(--theme-dialog-input-bg);
+  color: var(--theme-text);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-box input::placeholder {
+  color: var(--theme-text-faint);
+}
+
+.search-box input:focus {
+  border-color: var(--theme-focus-color);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+/* ── Vernieuwen-knop ── */
+.refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-btn-secondary-bg);
+  color: var(--theme-btn-secondary-text);
+  transition: all 0.15s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: var(--theme-btn-secondary-hover-bg);
+  border-color: var(--theme-btn-secondary-hover-border);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.5;
+}
+
+.refresh-btn svg.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Hoofdinhoud ── */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 28px 40px;
+  background: var(--theme-content-bg);
+}
+
+/* Sectielabel: JetBrains Mono, uppercase, amber — patroon uit het stijlboek */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-code);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--theme-accent);
+  margin: 6px 0 14px;
+}
+
+.section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--theme-border);
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.no-results {
+  padding: 64px 0;
+  text-align: center;
+  color: var(--theme-text-muted);
+  font-size: 13px;
+}
+
+/* Scrollbars passend bij thema */
+.app-main::-webkit-scrollbar {
+  width: 10px;
+}
+
+.app-main::-webkit-scrollbar-thumb {
+  background: var(--theme-border);
+  border-radius: 9999px;
+}
+
+.app-main::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent-tint);
+}

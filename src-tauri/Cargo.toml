@@ -1,0 +1,31 @@
+[package]
+name = "openaec-installer"
+version = "0.1.0"
+description = "OpenAEC Installer — centrale hub voor het installeren, bijwerken en starten van OpenAEC Foundation tools"
+authors = ["OpenAEC Foundation"]
+license = "CC-BY-SA-4.0"
+edition = "2021"
+
+[lib]
+name = "openaec_installer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-store = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+futures-util = "0.3"
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
