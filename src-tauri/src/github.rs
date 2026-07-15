@@ -31,6 +31,10 @@ pub struct ReleaseInfo {
     pub asset_size: Option<u64>,
     pub page_url: Option<String>,
     pub published_at: Option<String>,
+    /// Bij `error = "rate_limited"`: wanneer de GitHub-limiet weer vrijgeeft
+    /// (epoch-seconden, uit de x-ratelimit-reset header). Hiermee kan de app
+    /// tonen wanneer het weer kan en tot dan onnodige pogingen overslaan.
+    pub rate_limit_reset: Option<u64>,
 }
 
 pub async fn fetch_all(repos: Vec<RepoRef>) -> Vec<ReleaseInfo> {
@@ -61,7 +65,18 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
     match resp.status().as_u16() {
         200 => {}
         404 => return error_info(repo.id, "no_releases".into()),
-        403 | 429 => return error_info(repo.id, "rate_limited".into()),
+        403 | 429 => {
+            // GitHub stuurt mee wanneer de limiet weer vrijgeeft; die geven we
+            // door zodat de app dat kan tonen en tot dan niet opnieuw probeert.
+            let reset = resp
+                .headers()
+                .get("x-ratelimit-reset")
+                .and_then(|v| v.to_str().ok())
+                .and_then(|s| s.parse::<u64>().ok());
+            let mut info = error_info(repo.id, "rate_limited".into());
+            info.rate_limit_reset = reset;
+            return info;
+        }
         s => return error_info(repo.id, format!("http {s}")),
     }
 
@@ -109,6 +124,7 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         asset_size,
         page_url,
         published_at,
+        rate_limit_reset: None,
     }
 }
 
@@ -167,6 +183,7 @@ fn error_info(id: String, error: String) -> ReleaseInfo {
         asset_size: None,
         page_url: None,
         published_at: None,
+        rate_limit_reset: None,
     }
 }
 

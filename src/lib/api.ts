@@ -23,6 +23,8 @@ export interface ReleaseInfo {
   assetSize: number | null;
   pageUrl: string | null;
   publishedAt: string | null;
+  /** Bij error "rate_limited": epoch-seconden waarop de limiet vrijgeeft. */
+  rateLimitReset?: number | null;
 }
 
 export interface DownloadProgress {

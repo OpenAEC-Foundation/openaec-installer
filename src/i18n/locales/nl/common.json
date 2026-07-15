@@ -71,6 +71,7 @@
   "errors": {
     "no_releases": "Geen releases gevonden",
     "rate_limited": "GitHub-limiet bereikt, probeer later opnieuw",
+    "rateLimitedUntil": "GitHub-limiet bereikt — weer beschikbaar om {{time}}",
     "network": "Netwerkfout bij ophalen releases",
     "noInstaller": "Geen Windows-installer in de laatste release",
     "installFailed": "Installatie starten mislukt"

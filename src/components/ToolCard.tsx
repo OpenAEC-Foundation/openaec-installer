@@ -63,12 +63,23 @@ export default function ToolCard({
       ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100))
       : null;
 
-  const releaseError =
-    tool.kind === "desktop" && release && !release.ok
-      ? t([`errors.${release.error}`, "errors.network"])
-      : tool.kind === "desktop" && release?.ok && !release.assetUrl
-        ? t("errors.noInstaller")
-        : null;
+  const releaseError = (() => {
+    if (tool.kind !== "desktop") return null;
+    if (release && !release.ok) {
+      // Bij de GitHub-limiet is "wanneer kan het weer" veel nuttiger dan
+      // "probeer later opnieuw".
+      if (release.error === "rate_limited" && release.rateLimitReset) {
+        return t("errors.rateLimitedUntil", {
+          time: new Intl.DateTimeFormat(i18n.language, { timeStyle: "short" }).format(
+            new Date(release.rateLimitReset * 1000),
+          ),
+        });
+      }
+      return t([`errors.${release.error}`, "errors.network"]);
+    }
+    if (release?.ok && !release.assetUrl) return t("errors.noInstaller");
+    return null;
+  })();
 
   const open = (url?: string) => {
     if (url) openUrl(url).catch(() => {});

@@ -23,11 +23,18 @@ import "./themes.css";
 import "./App.css";
 
 const RELEASE_CACHE_KEY = "releaseCache";
-const RELEASE_CACHE_TTL_MS = 15 * 60 * 1000;
+// Releases veranderen hooguit een paar keer per week, terwijl elke ronde 13
+// GitHub-aanroepen kost tegen een limiet van 60 per uur per IP. Een ruime cache
+// houdt de app bruikbaar (en meerdere gebruikers achter één kantoor-IP uit
+// elkaars vaarwater); met de knop Vernieuwen forceer je altijd een check.
+const RELEASE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 interface ReleaseCache {
+  /** Tijdstip van de laatste ronde die iets bruikbaars opleverde. */
   ts: number;
   data: ReleaseInfo[];
+  /** Epoch-ms waarop de GitHub-limiet vrijgeeft; tot dan heeft proberen geen zin. */
+  rateLimitReset?: number | null;
 }
 
 function App() {
@@ -71,19 +78,41 @@ function App() {
     refreshingRef.current = true;
     setRefreshing(true);
     try {
-      if (!force) {
-        const cache = await getSetting<ReleaseCache | null>(RELEASE_CACHE_KEY, null);
-        if (cache && Date.now() - cache.ts < RELEASE_CACHE_TTL_MS) {
-          setReleases(Object.fromEntries(cache.data.map((r) => [r.id, r])));
-          setLastRefresh(new Date(cache.ts));
-          return;
-        }
+      const cache = await getSetting<ReleaseCache | null>(RELEASE_CACHE_KEY, null);
+      // Toon altijd meteen wat we al weten, ook als we zo meteen verversen.
+      const known: Record<string, ReleaseInfo> = Object.fromEntries(
+        (cache?.data ?? []).map((r) => [r.id, r]),
+      );
+      if (cache?.data?.length) {
+        setReleases(known);
+        if (cache.ts) setLastRefresh(new Date(cache.ts));
       }
+
+      if (!force) {
+        // Vers genoeg? Dan geen aanroepen verspillen.
+        if (cache?.ts && Date.now() - cache.ts < RELEASE_CACHE_TTL_MS) return;
+        // Limiet nog actief? Dan heeft proberen toch geen zin.
+        if (cache?.rateLimitReset && Date.now() < cache.rateLimitReset) return;
+      }
+
       const data = await getLatestReleases();
-      const ts = Date.now();
-      setReleases(Object.fromEntries(data.map((r) => [r.id, r])));
-      setLastRefresh(new Date(ts));
-      await setSetting<ReleaseCache>(RELEASE_CACHE_KEY, { ts, data });
+      // Samenvoegen in plaats van vervangen: een mislukte ronde (bijv. de
+      // GitHub-limiet) mag eerder opgehaalde versie-info nooit wissen.
+      const merged = { ...known };
+      for (const r of data) {
+        if (r.ok || !merged[r.id]?.ok) merged[r.id] = r;
+      }
+      setReleases(merged);
+
+      const anyOk = data.some((r) => r.ok);
+      const resetSec = data.find((r) => r.rateLimitReset)?.rateLimitReset ?? null;
+      const ts = anyOk ? Date.now() : (cache?.ts ?? 0);
+      if (anyOk) setLastRefresh(new Date(ts));
+      await setSetting<ReleaseCache>(RELEASE_CACHE_KEY, {
+        ts,
+        data: Object.values(merged),
+        rateLimitReset: resetSec ? resetSec * 1000 : null,
+      });
     } catch {
       // invoke-fout — bestaande data laten staan
     } finally {

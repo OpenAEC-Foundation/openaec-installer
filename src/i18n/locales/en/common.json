@@ -71,6 +71,7 @@
   "errors": {
     "no_releases": "No releases found",
     "rate_limited": "GitHub rate limit reached, try again later",
+    "rateLimitedUntil": "GitHub rate limit reached — available again at {{time}}",
     "network": "Network error while fetching releases",
     "noInstaller": "No Windows installer in the latest release",
     "installFailed": "Failed to start the installation"
