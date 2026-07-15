@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { LANGUAGES, changeLanguage } from "../../i18n/config";
+import { compareVersions } from "../../lib/status";
 import { getSetting, setSetting } from "../../store";
 import Modal from "../Modal";
 import ThemedSelect from "../ThemedSelect";
@@ -27,6 +28,8 @@ interface SettingsDialogProps {
   onClose: () => void;
   theme: string;
   onThemeChange: (theme: string) => void;
+  /** Laatste beschikbare versie van de installer zelf (null = onbekend). */
+  latestVersion?: string | null;
 }
 
 export default function SettingsDialog({
@@ -34,6 +37,7 @@ export default function SettingsDialog({
   onClose,
   theme,
   onThemeChange,
+  latestVersion,
 }: SettingsDialogProps) {
   const { t } = useTranslation("settings");
   const { t: tCommon } = useTranslation("common");
@@ -139,7 +143,7 @@ export default function SettingsDialog({
           {activeTab === "appearance" && (
             <AppearanceTabContent theme={draftTheme} onThemeSelect={handleThemePreview} />
           )}
-          {activeTab === "about" && <AboutTabContent />}
+          {activeTab === "about" && <AboutTabContent latestVersion={latestVersion} />}
         </div>
       </div>
     </Modal>
@@ -264,7 +268,7 @@ function ThemeDropdown({
   );
 }
 
-function AboutTabContent() {
+function AboutTabContent({ latestVersion }: { latestVersion?: string | null }) {
   const { t } = useTranslation("settings");
   const [version, setVersion] = useState("");
 
@@ -275,11 +279,23 @@ function AboutTabContent() {
       .catch(() => setVersion(""));
   }, []);
 
+  // Statusregel: is dit de laatste versie? (De banner in het hoofdscherm biedt
+  // de daadwerkelijke bijwerk-actie aan.)
+  const updateStatus = (() => {
+    if (!version || !latestVersion) return null;
+    return compareVersions(version, latestVersion) < 0
+      ? t("about.updateAvailable", { version: latestVersion })
+      : t("about.upToDate");
+  })();
+
   return (
     <div className="settings-section">
       <h3>{t("about.appName")}</h3>
       <div style={{ fontSize: 11, lineHeight: 1.8 }}>
         <p><strong>{t("about.version")}:</strong> {version || "—"}</p>
+        {updateStatus && (
+          <p style={{ color: "var(--theme-accent)" }}>{updateStatus}</p>
+        )}
         <p><strong>{t("about.framework")}:</strong> Tauri + React + TypeScript</p>
         <p><strong>{t("about.license")}:</strong> CC BY-SA 4.0</p>
         <p style={{ marginTop: 8, color: "var(--theme-dialog-content-secondary)" }}>

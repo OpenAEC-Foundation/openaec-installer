@@ -5,7 +5,8 @@ import StatusBar from "./components/StatusBar";
 import SettingsDialog, { applyTheme } from "./components/settings/SettingsDialog";
 import ToolCard from "./components/ToolCard";
 import OpenAecLogo from "./components/OpenAecLogo";
-import { DESKTOP_TOOLS, WEB_TOOLS, type CatalogTool } from "./data/catalog";
+import SelfUpdateBanner from "./components/SelfUpdateBanner";
+import { DESKTOP_TOOLS, SELF_ID, WEB_TOOLS, type CatalogTool } from "./data/catalog";
 import {
   downloadAndRunInstaller,
   getInstalledTools,
@@ -16,7 +17,7 @@ import {
   type InstalledTool,
   type ReleaseInfo,
 } from "./lib/api";
-import { deriveStatus } from "./lib/status";
+import { compareVersions, deriveStatus } from "./lib/status";
 import { getSetting, setSetting } from "./store";
 import "./themes.css";
 import "./App.css";
@@ -37,6 +38,10 @@ function App() {
   // false = huidige indeling (Desktop-apps / Webtools); true = op status
   // (Al geïnstalleerd / Nog te installeren). Keuze wordt bewaard.
   const [groupByStatus, setGroupByStatus] = useState(false);
+  // Eigen versie, voor de zelf-update-check.
+  const [appVersion, setAppVersion] = useState("");
+  // Weggeklikte update-melding (per sessie; komt bij herstart weer terug).
+  const [selfUpdateDismissed, setSelfUpdateDismissed] = useState(false);
 
   const [installed, setInstalled] = useState<Record<string, InstalledTool>>({});
   const [releases, setReleases] = useState<Record<string, ReleaseInfo>>({});
@@ -104,6 +109,10 @@ function App() {
     getSetting("groupByStatus", false).then((saved) => {
       if (!groupTouchedRef.current) setGroupByStatus(saved);
     });
+    import("@tauri-apps/api/app")
+      .then(({ getVersion }) => getVersion())
+      .then(setAppVersion)
+      .catch(() => setAppVersion(""));
     import("@tauri-apps/api/window")
       .then(({ getCurrentWindow }) => getCurrentWindow().show())
       .catch(() => {});
@@ -196,6 +205,28 @@ function App() {
     () => desktopTools.filter((tool) => !installed[tool.id]),
     [desktopTools, installed],
   );
+
+  // ── Zelf-update: eigen versie vergelijken met de laatste release ──
+  const selfRelease = releases[SELF_ID];
+  const selfLatest = selfRelease?.ok ? selfRelease.version : null;
+  const selfUpdateAvailable =
+    !!appVersion && !!selfLatest && compareVersions(appVersion, selfLatest) < 0;
+
+  const handleSelfUpdate = useCallback(async () => {
+    if (!selfRelease?.assetUrl || !selfRelease.assetName) return;
+    setBusy((b) => ({ ...b, [SELF_ID]: true }));
+    setErrors(({ [SELF_ID]: _drop, ...rest }) => rest);
+    setNotes(({ [SELF_ID]: _drop, ...rest }) => rest);
+    try {
+      await downloadAndRunInstaller(SELF_ID, selfRelease.assetUrl, selfRelease.assetName);
+      setNotes((n) => ({ ...n, [SELF_ID]: t("selfUpdate.started") }));
+    } catch (e) {
+      setErrors((er) => ({ ...er, [SELF_ID]: `${t("errors.installFailed")}: ${String(e)}` }));
+    } finally {
+      setBusy(({ [SELF_ID]: _drop, ...rest }) => rest);
+      setProgress(({ [SELF_ID]: _drop, ...rest }) => rest);
+    }
+  }, [selfRelease, t]);
 
   const toggleGroupByStatus = useCallback((value: boolean) => {
     groupTouchedRef.current = true;
@@ -292,6 +323,21 @@ function App() {
       </header>
 
       <main className="app-main">
+        {selfUpdateAvailable && !selfUpdateDismissed && (
+          <SelfUpdateBanner
+            currentVersion={appVersion}
+            latestVersion={selfLatest!}
+            pageUrl={selfRelease?.pageUrl}
+            canInstall={!!selfRelease?.assetUrl}
+            busy={busy[SELF_ID]}
+            progress={progress[SELF_ID]}
+            error={errors[SELF_ID]}
+            note={notes[SELF_ID]}
+            onUpdate={handleSelfUpdate}
+            onDismiss={() => setSelfUpdateDismissed(true)}
+          />
+        )}
+
         {groupByStatus ? (
           <>
             {installedGroup.length > 0 && (
@@ -347,6 +393,7 @@ function App() {
         onClose={() => setSettingsOpen(false)}
         theme={theme}
         onThemeChange={setTheme}
+        latestVersion={selfLatest}
       />
     </>
   );

@@ -3,7 +3,7 @@
  */
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { DESKTOP_TOOLS } from "../data/catalog";
+import { DESKTOP_TOOLS, SELF_ID, SELF_REPO } from "../data/catalog";
 
 export interface InstalledTool {
   id: string;
@@ -46,6 +46,9 @@ export async function getLatestReleases(): Promise<ReleaseInfo[]> {
     const [owner, repo] = t.repo!.split("/");
     return { id: t.id, owner, repo };
   });
+  // De installer controleert in dezelfde ronde zijn eigen laatste versie.
+  const [selfOwner, selfName] = SELF_REPO.split("/");
+  repos.push({ id: SELF_ID, owner: selfOwner, repo: selfName });
   return invoke<ReleaseInfo[]>("get_latest_releases", { repos });
 }
 

@@ -26,6 +26,8 @@
     "framework": "Framework",
     "license": "License",
     "description": "Central hub for the OpenAEC Foundation's open-source construction software: install, update and launch all tools.",
-    "website": "open-aec.com"
+    "website": "open-aec.com",
+    "upToDate": "You're on the latest version.",
+    "updateAvailable": "New version available: v{{version}}"
   }
 }

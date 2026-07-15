@@ -294,3 +294,13 @@ export const CATALOG: CatalogTool[] = [
 
 export const DESKTOP_TOOLS = CATALOG.filter((t) => t.kind === "desktop");
 export const WEB_TOOLS = CATALOG.filter((t) => t.kind === "web");
+
+/**
+ * De installer zelf. Staat bewust niet in CATALOG (hij hoort niet als kaart in
+ * het overzicht), maar wordt wel meegenomen in de release-check zodat de app
+ * kan zien of er een nieuwere versie van zichzelf is en zich kan bijwerken.
+ * Onze eigen setup installeert per gebruiker → bijwerken vraagt geen
+ * beheerdersrechten.
+ */
+export const SELF_ID = "openaec-installer";
+export const SELF_REPO = "OpenAEC-Foundation/openaec-installer";

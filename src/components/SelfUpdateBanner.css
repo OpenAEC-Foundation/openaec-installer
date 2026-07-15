@@ -1,0 +1,137 @@
+/* ── Zelf-update melding ──
+   Alert-patroon uit DESIGN-SYSTEM.md: 16px 24px padding, radius 8px,
+   4px amber randlijn links, zachte amber tint als achtergrond (amber nooit
+   als vol vlak). */
+
+.self-update {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 20px;
+  margin-bottom: 22px;
+  border-radius: 8px;
+  border: 1px solid var(--theme-border-subtle);
+  border-left: 4px solid var(--theme-accent);
+  background: var(--theme-accent-soft);
+}
+
+.self-update-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  color: var(--theme-accent);
+  background: var(--theme-bg-lighter);
+  border: 1px solid var(--theme-border-subtle);
+}
+
+.self-update-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.self-update-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--theme-text);
+}
+
+.self-update-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--theme-text-secondary);
+}
+
+.self-update-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.self-update-link {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--theme-accent);
+  transition: background 0.15s ease;
+}
+
+.self-update-link:hover {
+  background: var(--theme-hover);
+}
+
+.self-update-dismiss {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--theme-text-muted);
+  transition: all 0.15s ease;
+}
+
+.self-update-dismiss:hover {
+  background: var(--theme-hover);
+  color: var(--theme-text);
+}
+
+/* ── Voortgang ── */
+.self-update-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  max-width: 420px;
+}
+
+.self-update-progress-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--theme-border-subtle);
+  overflow: hidden;
+}
+
+.self-update-progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--theme-accent);
+  transition: width 0.3s ease;
+  min-width: 4px;
+}
+
+.self-update-progress-fill.indeterminate {
+  width: 40%;
+  animation: indeterminate 1.2s ease-in-out infinite;
+}
+
+.self-update-progress-label {
+  font-family: var(--font-code);
+  font-size: 10.5px;
+  color: var(--theme-text-muted);
+}
+
+.self-update-error {
+  font-size: 11.5px;
+  color: var(--theme-danger-color);
+  margin-top: 2px;
+}
+
+.self-update-note {
+  font-size: 11.5px;
+  color: var(--theme-text-secondary);
+  margin-top: 2px;
+}

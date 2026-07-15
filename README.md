@@ -13,6 +13,7 @@ De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](htt
 - **Updatedetectie**: vergelijkt de geïnstalleerde versie met de laatste GitHub-release
 - **Eén klik installeren of bijwerken**: downloadt de officiële installer van GitHub Releases en start hem
 - **Starten** van geïnstalleerde tools en openen van webtools in de browser
+- **Werkt zichzelf bij**: de installer controleert ook zijn eigen versie en meldt het wanneer er een nieuwe versie is — bijwerken kan met één klik vanuit de app
 - Volledig in de [OpenAEC-huisstijl](https://github.com/OpenAEC-Foundation/OpenAEC-style-book), met vijf thema's (licht, Forge, OpenAEC, Blueprint, hoog contrast) en tweetalige interface (NL/EN)
 
 > Installatie- en updatedetectie werkt momenteel op Windows. De catalogus en websnelkoppelingen werken op alle platformen.

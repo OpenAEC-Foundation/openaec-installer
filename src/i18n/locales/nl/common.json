@@ -59,6 +59,15 @@
     "never": "nog niet vernieuwd"
   },
   "community": "Community",
+  "selfUpdate": {
+    "available": "Nieuwe versie beschikbaar",
+    "description": "Je gebruikt v{{current}} — v{{latest}} van OpenAEC Installer staat klaar.",
+    "update": "Bijwerken",
+    "notes": "Wat is nieuw",
+    "dismiss": "Later",
+    "started": "De installer is gestart — volg de stappen. OpenAEC Installer wordt tijdens het bijwerken afgesloten; daarna kun je hem weer starten.",
+    "noInstaller": "Geen Windows-installer in de laatste release — werk handmatig bij via GitHub."
+  },
   "errors": {
     "no_releases": "Geen releases gevonden",
     "rate_limited": "GitHub-limiet bereikt, probeer later opnieuw",

@@ -59,6 +59,15 @@
     "never": "not refreshed yet"
   },
   "community": "Community",
+  "selfUpdate": {
+    "available": "New version available",
+    "description": "You're on v{{current}} — v{{latest}} of OpenAEC Installer is ready.",
+    "update": "Update",
+    "notes": "What's new",
+    "dismiss": "Later",
+    "started": "The installer has started — follow its steps. OpenAEC Installer closes during the update; you can reopen it afterwards.",
+    "noInstaller": "No Windows installer in the latest release — update manually via GitHub."
+  },
   "errors": {
     "no_releases": "No releases found",
     "rate_limited": "GitHub rate limit reached, try again later",

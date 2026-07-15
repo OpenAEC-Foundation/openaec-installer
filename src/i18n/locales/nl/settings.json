@@ -26,6 +26,8 @@
     "framework": "Framework",
     "license": "Licentie",
     "description": "Centrale hub voor de open source bouwsoftware van de OpenAEC Foundation: installeren, bijwerken en starten van alle tools.",
-    "website": "open-aec.com"
+    "website": "open-aec.com",
+    "upToDate": "Je gebruikt de laatste versie.",
+    "updateAvailable": "Nieuwe versie beschikbaar: v{{version}}"
   }
 }
