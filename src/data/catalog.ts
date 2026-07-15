@@ -53,6 +53,19 @@ export interface CatalogTool {
 export const CATALOG: CatalogTool[] = [
   // ─── Desktop-tools (Windows-installers via GitHub Releases) ───
   {
+    id: "open-3d-studio",
+    name: "Open 3D Studio",
+    kind: "desktop",
+    category: "bim",
+    repo: "OpenAEC-Foundation/open-3d-studio",
+    registryName: "Open 3D Studio",
+    exeName: "open-3d-studio.exe",
+    description: {
+      nl: "Open source 3D-modelleerstudio met IFC als native output. Teken parametrische componenten op geladen IFC- en DXF-modellen, met sheets, aantallen en STL/PDF-export.",
+      en: "Open-source 3D modelling studio with IFC as native output. Draw parametric components on loaded IFC and DXF models, with sheets, quantities and STL/PDF export.",
+    },
+  },
+  {
     id: "open-calc-studio",
     name: "Open Calc Studio",
     preview: "/previews/open-calc-studio.jpg",
