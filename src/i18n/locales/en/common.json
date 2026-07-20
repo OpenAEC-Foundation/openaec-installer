@@ -59,6 +59,14 @@
     "never": "not refreshed yet"
   },
   "community": "Community",
+  "tabs": {
+    "catalog": "Catalog",
+    "close": "Close tab",
+    "reload": "Reload",
+    "openHere": "Open web version in a tab",
+    "openExternal": "Open in browser",
+    "loading": "loading..."
+  },
   "selfUpdate": {
     "available": "New version available",
     "description": "You're on v{{current}} — v{{latest}} of OpenAEC Installer is ready.",
@@ -66,16 +74,18 @@
     "notes": "What's new",
     "dismiss": "Later",
     "started": "The installer has started — follow its steps. OpenAEC Installer closes during the update; you can reopen it afterwards.",
-    "noInstaller": "No Windows installer in the latest release — update manually via GitHub."
+    "restartToApply": "The new version has been installed — close OpenAEC Installer and start it again to use the update.",
+    "noInstaller": "No installer for this operating system in the latest release — update manually via GitHub."
   },
   "errors": {
     "no_releases": "No releases found",
     "rate_limited": "GitHub rate limit reached, try again later",
     "rateLimitedUntil": "GitHub rate limit reached — available again at {{time}}",
     "network": "Network error while fetching releases",
-    "noInstaller": "No Windows installer in the latest release",
+    "noInstaller": "No installer for this operating system in the latest release",
     "installFailed": "Failed to start the installation"
   },
   "installerStarted": "The installer has started — follow its steps. The status will update automatically afterwards.",
+  "installedDone": "Installed — you can launch the tool now.",
   "noResults": "No tools found for “{{query}}”."
 }

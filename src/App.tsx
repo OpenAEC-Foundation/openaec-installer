@@ -6,6 +6,8 @@ import SettingsDialog, { applyTheme } from "./components/settings/SettingsDialog
 import ToolCard from "./components/ToolCard";
 import OpenAecLogo from "./components/OpenAecLogo";
 import SelfUpdateBanner from "./components/SelfUpdateBanner";
+import TabBar from "./components/TabBar";
+import WebToolView from "./components/WebToolView";
 import { DESKTOP_TOOLS, SELF_ID, WEB_TOOLS, type CatalogTool } from "./data/catalog";
 import {
   downloadAndRunInstaller,
@@ -18,11 +20,24 @@ import {
   type ReleaseInfo,
 } from "./lib/api";
 import { compareVersions, deriveStatus } from "./lib/status";
+import {
+  CATALOG_TAB,
+  EMPTY_TABS,
+  closeTab,
+  openTab,
+  restoreTabs,
+  toolForTab,
+  type TabState,
+} from "./lib/tabs";
 import { getSetting, setSetting } from "./store";
 import "./themes.css";
 import "./App.css";
 
-const RELEASE_CACHE_KEY = "releaseCache";
+// ".v2" sinds het gekozen asset platform-afhankelijk is: een cache van een
+// oudere versie kan nog Windows-installers bevatten, wat op Linux een
+// "AppImage verwacht"-fout bij het installeren zou geven.
+const RELEASE_CACHE_KEY = "releaseCache.v2";
+const TABS_KEY = "openTabs";
 // Releases veranderen hooguit een paar keer per week, terwijl elke ronde 13
 // GitHub-aanroepen kost tegen een limiet van 60 per uur per IP. Een ruime cache
 // houdt de app bruikbaar (en meerdere gebruikers achter één kantoor-IP uit
@@ -49,6 +64,8 @@ function App() {
   const [appVersion, setAppVersion] = useState("");
   // Weggeklikte update-melding (per sessie; komt bij herstart weer terug).
   const [selfUpdateDismissed, setSelfUpdateDismissed] = useState(false);
+  // Geopende webtool-tabs (browserachtig; blijven bewaard tussen sessies).
+  const [tabs, setTabs] = useState<TabState>(EMPTY_TABS);
 
   const [installed, setInstalled] = useState<Record<string, InstalledTool>>({});
   const [releases, setReleases] = useState<Record<string, ReleaseInfo>>({});
@@ -63,6 +80,8 @@ function App() {
   // Voorkomt dat de trage opstart-load van groupByStatus een klik overschrijft
   // die de gebruiker doet vóór die load klaar is (race bij opstart).
   const groupTouchedRef = useRef(false);
+  // Idem voor de tabs: een klik vóór de opstart-load mag niet overschreven worden.
+  const tabsTouchedRef = useRef(false);
 
   const scanInstalled = useCallback(async () => {
     try {
@@ -138,6 +157,9 @@ function App() {
     getSetting("groupByStatus", false).then((saved) => {
       if (!groupTouchedRef.current) setGroupByStatus(saved);
     });
+    getSetting<Partial<TabState> | null>(TABS_KEY, null).then((saved) => {
+      if (!tabsTouchedRef.current) setTabs(restoreTabs(saved));
+    });
     import("@tauri-apps/api/app")
       .then(({ getVersion }) => getVersion())
       .then(setAppVersion)
@@ -175,8 +197,19 @@ function App() {
       setErrors(({ [tool.id]: _drop, ...rest }) => rest);
       setNotes(({ [tool.id]: _drop, ...rest }) => rest);
       try {
-        await downloadAndRunInstaller(tool.id, release.assetUrl, release.assetName);
-        setNotes((n) => ({ ...n, [tool.id]: t("installerStarted") }));
+        const outcome = await downloadAndRunInstaller(
+          tool.id,
+          release.assetUrl,
+          release.assetName,
+          tool.name,
+        );
+        // Op Linux is de tool direct geïnstalleerd (geen setup-UI): andere
+        // melding, en meteen opnieuw scannen zodat de status verspringt.
+        setNotes((n) => ({
+          ...n,
+          [tool.id]: t(outcome.mode === "installed" ? "installedDone" : "installerStarted"),
+        }));
+        if (outcome.mode === "installed") void scanInstalled();
       } catch (e) {
         setErrors((er) => ({
           ...er,
@@ -187,7 +220,7 @@ function App() {
         setProgress(({ [tool.id]: _drop, ...rest }) => rest);
       }
     },
-    [releases, t],
+    [releases, t, scanInstalled],
   );
 
   const handleLaunch = useCallback(
@@ -202,6 +235,35 @@ function App() {
     },
     [installed],
   );
+
+  // ── Tabbladen ──
+  const updateTabs = useCallback((next: TabState) => {
+    tabsTouchedRef.current = true;
+    setTabs(next);
+    void setSetting(TABS_KEY, next);
+  }, []);
+
+  const handleOpenTab = useCallback(
+    (tool: CatalogTool) => {
+      if (!tool.webUrl) return;
+      setTabs((prev) => {
+        const next = openTab(prev, tool.id);
+        tabsTouchedRef.current = true;
+        void setSetting(TABS_KEY, next);
+        return next;
+      });
+    },
+    [],
+  );
+
+  const handleCloseTab = useCallback((id: string) => {
+    setTabs((prev) => {
+      const next = closeTab(prev, id);
+      tabsTouchedRef.current = true;
+      void setSetting(TABS_KEY, next);
+      return next;
+    });
+  }, []);
 
   // Zoeken over naam, omschrijving en categorie.
   const lang = i18n.language?.startsWith("en") ? "en" : "nl";
@@ -247,8 +309,18 @@ function App() {
     setErrors(({ [SELF_ID]: _drop, ...rest }) => rest);
     setNotes(({ [SELF_ID]: _drop, ...rest }) => rest);
     try {
-      await downloadAndRunInstaller(SELF_ID, selfRelease.assetUrl, selfRelease.assetName);
-      setNotes((n) => ({ ...n, [SELF_ID]: t("selfUpdate.started") }));
+      const outcome = await downloadAndRunInstaller(
+        SELF_ID,
+        selfRelease.assetUrl,
+        selfRelease.assetName,
+      );
+      // Op Linux is de eigen AppImage al vervangen — alleen nog herstarten.
+      setNotes((n) => ({
+        ...n,
+        [SELF_ID]: t(
+          outcome.mode === "selfReplaced" ? "selfUpdate.restartToApply" : "selfUpdate.started",
+        ),
+      }));
     } catch (e) {
       setErrors((er) => ({ ...er, [SELF_ID]: `${t("errors.installFailed")}: ${String(e)}` }));
     } finally {
@@ -284,6 +356,7 @@ function App() {
       note={notes[tool.id]}
       onInstall={handleInstall}
       onLaunch={handleLaunch}
+      onOpenTab={handleOpenTab}
     />
   );
 
@@ -291,6 +364,14 @@ function App() {
     <>
       <TitleBar onSettingsClick={() => setSettingsOpen(true)} />
 
+      <TabBar
+        open={tabs.open}
+        active={tabs.active}
+        onSelect={(id) => updateTabs({ ...tabs, active: id })}
+        onClose={handleCloseTab}
+      />
+
+      <div className="catalog-view" hidden={tabs.active !== CATALOG_TAB}>
       <header className="app-header">
         <div className="app-brand">
           <OpenAecLogo size={44} />
@@ -416,6 +497,14 @@ function App() {
         lastRefresh={lastRefresh}
         refreshing={refreshing}
       />
+      </div>
+
+      {/* Open tabs blijven gemount zodat hun staat bewaard blijft bij wisselen. */}
+      {tabs.open.map((id) => {
+        const tool = toolForTab(id);
+        if (!tool?.webUrl) return null;
+        return <WebToolView key={id} tool={tool} hidden={tabs.active !== id} />;
+      })}
 
       <SettingsDialog
         open={settingsOpen}

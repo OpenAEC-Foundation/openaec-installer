@@ -59,6 +59,14 @@
     "never": "nog niet vernieuwd"
   },
   "community": "Community",
+  "tabs": {
+    "catalog": "Catalogus",
+    "close": "Tabblad sluiten",
+    "reload": "Herladen",
+    "openHere": "Webversie in tabblad openen",
+    "openExternal": "Openen in browser",
+    "loading": "laden..."
+  },
   "selfUpdate": {
     "available": "Nieuwe versie beschikbaar",
     "description": "Je gebruikt v{{current}} — v{{latest}} van OpenAEC Installer staat klaar.",
@@ -66,16 +74,18 @@
     "notes": "Wat is nieuw",
     "dismiss": "Later",
     "started": "De installer is gestart — volg de stappen. OpenAEC Installer wordt tijdens het bijwerken afgesloten; daarna kun je hem weer starten.",
-    "noInstaller": "Geen Windows-installer in de laatste release — werk handmatig bij via GitHub."
+    "restartToApply": "De nieuwe versie is geïnstalleerd — sluit OpenAEC Installer af en start hem opnieuw om de update te gebruiken.",
+    "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release — werk handmatig bij via GitHub."
   },
   "errors": {
     "no_releases": "Geen releases gevonden",
     "rate_limited": "GitHub-limiet bereikt, probeer later opnieuw",
     "rateLimitedUntil": "GitHub-limiet bereikt — weer beschikbaar om {{time}}",
     "network": "Netwerkfout bij ophalen releases",
-    "noInstaller": "Geen Windows-installer in de laatste release",
+    "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release",
     "installFailed": "Installatie starten mislukt"
   },
   "installerStarted": "De installer is gestart — doorloop de stappen. De status wordt daarna automatisch bijgewerkt.",
+  "installedDone": "Geïnstalleerd — je kunt de tool nu starten.",
   "noResults": "Geen tools gevonden voor “{{query}}”."
 }
