@@ -1,8 +1,23 @@
-//! Installer-assets downloaden (met voortgang-events) en starten,
+//! Installer-assets downloaden (met voortgang-events) en installeren,
 //! en geïnstalleerde tools opstarten.
+//!
+//! Windows: de gedownloade setup wordt gestart en de gebruiker doorloopt de
+//! setup-UI. Linux: de AppImage wordt direct geïnstalleerd (zie `linux.rs`);
+//! er is geen setup-UI. Het verschil wordt via `InstallOutcome.mode` aan de
+//! frontend doorgegeven zodat die de juiste melding toont.
 
 use serde::Serialize;
 use tauri::Emitter;
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstallOutcome {
+    pub path: String,
+    /// "ranInstaller" — setup-UI gestart (Windows);
+    /// "installed" — direct geïnstalleerd, klaar voor gebruik (Linux);
+    /// "selfReplaced" — eigen AppImage vervangen, herstart nodig (Linux).
+    pub mode: &'static str,
+}
 
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,14 +28,15 @@ struct DownloadProgress {
     done: bool,
 }
 
-/// Download het asset naar %TEMP%\openaec-installer\ en start daarna de
-/// installer. De gebruiker doorloopt zelf de setup-UI van de tool.
+/// Download het asset naar de tempmap en installeer het daarna op de manier
+/// die bij het platform past.
 pub async fn download_and_run(
     app: tauri::AppHandle,
     id: String,
     url: String,
     file_name: String,
-) -> Result<String, String> {
+    display_name: Option<String>,
+) -> Result<InstallOutcome, String> {
     // Alleen GitHub release-assets toestaan.
     if !url.starts_with("https://github.com/") {
         return Err("Alleen downloads vanaf github.com zijn toegestaan.".into());
@@ -85,27 +101,35 @@ pub async fn download_and_run(
         },
     );
 
-    run_installer(&target)?;
-    Ok(target.to_string_lossy().into_owned())
+    let mode = run_installer(&id, display_name.as_deref(), &target)?;
+    Ok(InstallOutcome {
+        path: target.to_string_lossy().into_owned(),
+        mode,
+    })
 }
 
 #[cfg(windows)]
-fn run_installer(path: &std::path::Path) -> Result<(), String> {
+fn run_installer(
+    _id: &str,
+    _display_name: Option<&str>,
+    path: &std::path::Path,
+) -> Result<&'static str, String> {
     let is_msi = path
         .extension()
         .map(|e| e.eq_ignore_ascii_case("msi"))
         .unwrap_or(false);
     if is_msi {
         // msiexec vraagt zelf om elevatie voor een perMachine-installatie.
-        shell_execute("msiexec.exe", Some(&format!("/i \"{}\"", path.display())))
+        shell_execute("msiexec.exe", Some(&format!("/i \"{}\"", path.display())))?;
     } else {
         // Direct starten via CreateProcess (std::process::Command) faalt met
         // "os error 740" (ERROR_ELEVATION_REQUIRED) zodra de installer
         // beheerdersrechten vereist — CreateProcess kan niet eleveren.
         // ShellExecuteW honoreert het uitvoerbaar-manifest en toont zo nodig
         // de UAC-prompt (net als dubbelklikken in Verkenner).
-        shell_execute(&path.to_string_lossy(), None)
+        shell_execute(&path.to_string_lossy(), None)?;
     }
+    Ok("ranInstaller")
 }
 
 /// Start een bestand via de Windows-shell (ShellExecuteW). Met een leeg werkwoord
@@ -148,9 +172,36 @@ fn shell_execute(file: &str, params: Option<&str>) -> Result<(), String> {
     }
 }
 
-#[cfg(not(windows))]
-fn run_installer(_path: &std::path::Path) -> Result<(), String> {
-    Err("Installeren wordt momenteel alleen op Windows ondersteund.".into())
+#[cfg(target_os = "linux")]
+fn run_installer(
+    id: &str,
+    display_name: Option<&str>,
+    path: &std::path::Path,
+) -> Result<&'static str, String> {
+    let is_appimage = path
+        .extension()
+        .map(|e| e.eq_ignore_ascii_case("appimage"))
+        .unwrap_or(false);
+    if !is_appimage {
+        return Err("Geen ondersteund installatiebestand voor Linux (AppImage verwacht).".into());
+    }
+    if id == "openaec-installer" {
+        // Zelf-update: vervang de draaiende AppImage; herstart daarna.
+        crate::linux::self_update(path)?;
+        Ok("selfReplaced")
+    } else {
+        crate::linux::install_appimage(id, display_name.unwrap_or(id), path)?;
+        Ok("installed")
+    }
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
+fn run_installer(
+    _id: &str,
+    _display_name: Option<&str>,
+    _path: &std::path::Path,
+) -> Result<&'static str, String> {
+    Err("Installeren wordt op dit platform nog niet ondersteund.".into())
 }
 
 /// Start een geïnstalleerde tool.
@@ -173,7 +224,12 @@ pub fn launch(exe_path: &str) -> Result<(), String> {
     Ok(())
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
+pub fn launch(exe_path: &str) -> Result<(), String> {
+    crate::linux::launch(exe_path)
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
 pub fn launch(_exe_path: &str) -> Result<(), String> {
-    Err("Starten wordt momenteel alleen op Windows ondersteund.".into())
+    Err("Starten wordt op dit platform nog niet ondersteund.".into())
 }

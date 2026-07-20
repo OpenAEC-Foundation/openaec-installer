@@ -1,10 +1,11 @@
 /**
  * Catalogus van OpenAEC Foundation tools.
  *
- * - `desktop`-tools hebben Windows-installers op GitHub Releases; de app
- *   detecteert de geïnstalleerde versie via het Windows-register
- *   (`registryName` = DisplayName in de Uninstall-sleutel, `exeName` = fallback
- *   om de exe te vinden als het register geen pad geeft).
+ * - `desktop`-tools hebben installers op GitHub Releases (Windows-setup en
+ *   AppImage); de app detecteert de geïnstalleerde versie op Windows via het
+ *   register (`registryName` = DisplayName in de Uninstall-sleutel, `exeName` =
+ *   fallback om de exe te vinden als het register geen pad geeft) en op Linux
+ *   via de eigen beheerde AppImage-map.
  * - `web`-tools draaien in de browser en worden als snelkoppeling geopend.
  *
  * Omschrijvingen komen van https://open-aec.com/.

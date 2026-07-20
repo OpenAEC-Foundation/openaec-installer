@@ -9,14 +9,15 @@ De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](htt
 ## Functies
 
 - **Catalogus** van alle OpenAEC-tools met omschrijving en categorie — desktop-apps én webtools
-- **Installatiedetectie**: ziet via het Windows-register welke tools al geïnstalleerd zijn en welke versie
+- **Installatiedetectie**: ziet welke tools al geïnstalleerd zijn en welke versie (Windows: via het register; Linux: via de beheerde AppImage-map)
 - **Updatedetectie**: vergelijkt de geïnstalleerde versie met de laatste GitHub-release
 - **Eén klik installeren of bijwerken**: downloadt de officiële installer van GitHub Releases en start hem
-- **Starten** van geïnstalleerde tools en openen van webtools in de browser
+- **Starten** van geïnstalleerde tools
+- **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de installer zelf; open tabs worden onthouden en behouden hun staat bij wisselen. Openen in de externe browser blijft mogelijk
 - **Werkt zichzelf bij**: de installer controleert ook zijn eigen versie en meldt het wanneer er een nieuwe versie is — bijwerken kan met één klik vanuit de app
 - Volledig in de [OpenAEC-huisstijl](https://github.com/OpenAEC-Foundation/OpenAEC-style-book), met vijf thema's (licht, Forge, OpenAEC, Blueprint, hoog contrast) en tweetalige interface (NL/EN)
 
-> Installatie- en updatedetectie werkt momenteel op Windows. De catalogus en websnelkoppelingen werken op alle platformen.
+> Installeren, bijwerken en starten werkt op Windows (via de officiële installers) en Linux (via AppImages, zonder beheerdersrechten — inclusief menu-snelkoppeling). De catalogus en websnelkoppelingen werken op alle platformen; macOS-installatie volgt nog.
 
 ## Downloaden
 
@@ -37,6 +38,8 @@ Vereisten: [Node.js](https://nodejs.org/) 20+, [Rust](https://rustup.rs/) (stabl
 npm install
 npm run tauri dev     # ontwikkelmodus
 npm run tauri build   # productie-build + installers
+npm test              # frontend-tests (vitest)
+cd src-tauri && cargo test   # backend-tests
 ```
 
 ### Een tool toevoegen aan de catalogus
@@ -46,7 +49,7 @@ Voeg een entry toe aan [`src/data/catalog.ts`](src/data/catalog.ts):
 - `kind: "desktop"` — met `repo` (GitHub `owner/naam`), `registryName` (DisplayName in de Windows Uninstall-registersleutel, meestal gelijk aan de productnaam) en `exeName` als fallback
 - `kind: "web"` — met alleen een `webUrl`
 
-De laatste release en het juiste Windows-installer-asset worden automatisch via de GitHub API opgehaald.
+De laatste release en het juiste installer-asset voor het platform (Windows: `-setup.exe`/`.msi`, Linux: `.AppImage`) worden automatisch via de GitHub API opgehaald.
 
 ## Release maken
 
