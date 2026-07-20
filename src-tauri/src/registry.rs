@@ -1,9 +1,12 @@
-//! Detectie van geïnstalleerde tools via de Windows Uninstall-registersleutels.
+//! Detectie van geïnstalleerde tools.
 //!
-//! NSIS-installaties (Tauri `x64-setup.exe`) registreren onder
+//! Windows: via de Uninstall-registersleutels. NSIS-installaties (Tauri
+//! `x64-setup.exe`) registreren onder
 //! `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\{ProductName}` met
 //! DisplayIcon = pad naar de exe. MSI-installaties registreren onder HKLM,
 //! vaak zonder InstallLocation — daarvoor zoeken we op bekende paden.
+//!
+//! Linux: via de beheerde AppImage-map (zie `linux.rs`).
 
 use serde::{Deserialize, Serialize};
 
@@ -156,7 +159,12 @@ fn resolve_exe(
     None
 }
 
-#[cfg(not(windows))]
+#[cfg(target_os = "linux")]
+pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
+    crate::linux::scan(queries)
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
 pub fn scan(_queries: &[ToolQuery]) -> Vec<InstalledTool> {
     Vec::new()
 }

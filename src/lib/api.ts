@@ -27,6 +27,16 @@ export interface ReleaseInfo {
   rateLimitReset?: number | null;
 }
 
+export interface InstallOutcome {
+  path: string;
+  /**
+   * ranInstaller — setup-UI gestart (Windows);
+   * installed — direct geïnstalleerd, klaar voor gebruik (Linux);
+   * selfReplaced — eigen AppImage vervangen, herstart nodig (Linux).
+   */
+  mode: "ranInstaller" | "installed" | "selfReplaced";
+}
+
 export interface DownloadProgress {
   id: string;
   downloaded: number;
@@ -58,8 +68,14 @@ export async function downloadAndRunInstaller(
   id: string,
   url: string,
   fileName: string,
-): Promise<string> {
-  return invoke<string>("download_and_run_installer", { id, url, fileName });
+  displayName?: string,
+): Promise<InstallOutcome> {
+  return invoke<InstallOutcome>("download_and_run_installer", {
+    id,
+    url,
+    fileName,
+    displayName: displayName ?? null,
+  });
 }
 
 export async function launchTool(exePath: string): Promise<void> {

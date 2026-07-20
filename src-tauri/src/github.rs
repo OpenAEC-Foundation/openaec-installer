@@ -1,9 +1,10 @@
 //! Laatste releases ophalen via de GitHub API (ongeauthenticeerd, 60 req/uur —
 //! de frontend cachet het resultaat).
 //!
-//! De versie wordt uit de naam van het Windows-installer-asset geparst in
-//! plaats van uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1)
-//! wijkt de tag af van de daadwerkelijke bestandsversie.
+//! De versie wordt uit de naam van het installer-asset geparst in plaats van
+//! uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1) wijkt de tag
+//! af van de daadwerkelijke bestandsversie. Welk asset gekozen wordt hangt af
+//! van het platform: Windows-installers op Windows, AppImages op Linux.
 
 use serde::{Deserialize, Serialize};
 
@@ -94,7 +95,7 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         .iter()
         .filter_map(|a| {
             let name = a["name"].as_str()?;
-            let score = score_windows_asset(name)?;
+            let score = score_asset(name)?;
             Some((score, name.to_string(), a))
         })
         .max_by_key(|(score, _, _)| *score);
@@ -126,6 +127,39 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         published_at,
         rate_limit_reset: None,
     }
+}
+
+/// Kies het juiste asset voor het huidige platform. `cfg!` in plaats van
+/// `#[cfg]` zodat alle scorers op elk platform meecompileren en getest worden.
+fn score_asset(name: &str) -> Option<u32> {
+    if cfg!(target_os = "linux") {
+        score_linux_asset(name)
+    } else if cfg!(target_os = "macos") {
+        // macOS-installatie is nog niet geïmplementeerd; geen asset kiezen
+        // betekent dat de app netjes "geen installer" toont.
+        None
+    } else {
+        score_windows_asset(name)
+    }
+}
+
+/// Voorkeursvolgorde voor Linux: alleen AppImages — die kan de app zelf
+/// beheren (plaatsen, uitvoerbaar maken, starten) zonder beheerdersrechten.
+/// .deb vergt root en dpkg en valt daarom af; None = geen bruikbaar asset.
+fn score_linux_asset(name: &str) -> Option<u32> {
+    let n = name.to_ascii_lowercase();
+    if !n.ends_with(".appimage") {
+        return None;
+    }
+    // Alleen x86-64; ARM-builds zouden op een gewone desktop niet starten.
+    if ["aarch64", "arm64", "armv7", "armhf", "i386", "i686"]
+        .iter()
+        .any(|a| n.contains(a))
+    {
+        return None;
+    }
+    let x64 = n.contains("x64") || n.contains("x86_64") || n.contains("amd64");
+    Some(if x64 { 100 } else { 90 })
 }
 
 /// Voorkeursvolgorde voor Windows-installers; None = geen installer-asset.
@@ -160,7 +194,9 @@ fn score_windows_asset(name: &str) -> Option<u32> {
 
 /// Zoek een versienummer (minimaal `x.y`) in een assetnaam,
 /// bijv. "Open.Frame.Studio_0.5.2_x64-setup.exe" → "0.5.2".
-fn extract_version(name: &str) -> Option<String> {
+/// Ook gebruikt door de Linux-detectie om de versie uit een
+/// geïnstalleerde AppImage-bestandsnaam te halen.
+pub(crate) fn extract_version(name: &str) -> Option<String> {
     name.split(['_', '-'])
         .map(|t| t.trim_start_matches('v').trim_start_matches('V'))
         .find(|t| {
@@ -218,5 +254,18 @@ mod tests {
         assert!(user > system && system > msi && msi.is_some());
         assert_eq!(score_windows_asset("Open.PDF.Studio_1.67.0_x64-setup.exe.sig"), None);
         assert_eq!(score_windows_asset("Open.2D.Studio_0.35.0_amd64.AppImage"), None);
+    }
+
+    #[test]
+    fn linux_picks_only_x86_64_appimages() {
+        // AppImage wint; Windows-installers en .deb (root vereist) vallen af.
+        assert!(score_linux_asset("Open.2D.Studio_0.35.0_amd64.AppImage").is_some());
+        assert!(score_linux_asset("OpenAEC.Installer_0.1.6_x86_64.AppImage").is_some());
+        assert_eq!(score_linux_asset("Open.2D.Studio_0.35.0_amd64.deb"), None);
+        assert_eq!(score_linux_asset("Open.PDF.Studio_1.67.0_x64-setup.exe"), None);
+        assert_eq!(score_linux_asset("Open.2D.Studio_0.35.0_amd64.AppImage.sig"), None);
+        // ARM- en 32-bits-builds starten niet op een x86-64-desktop.
+        assert_eq!(score_linux_asset("Open.2D.Studio_0.35.0_aarch64.AppImage"), None);
+        assert_eq!(score_linux_asset("Open.2D.Studio_0.35.0_i386.AppImage"), None);
     }
 }

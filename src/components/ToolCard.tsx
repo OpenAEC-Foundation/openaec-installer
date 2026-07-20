@@ -18,6 +18,8 @@ interface ToolCardProps {
   note?: string;
   onInstall?: (tool: CatalogTool) => void;
   onLaunch?: (tool: CatalogTool) => void;
+  /** Open de webversie van de tool in een tabblad binnen de installer. */
+  onOpenTab?: (tool: CatalogTool) => void;
 }
 
 function statusBadge(status: ToolStatus): { className: string; labelKey: string } {
@@ -45,6 +47,7 @@ export default function ToolCard({
   note,
   onInstall,
   onLaunch,
+  onOpenTab,
 }: ToolCardProps) {
   const { t, i18n } = useTranslation();
   const [previewFailed, setPreviewFailed] = useState(false);
@@ -57,7 +60,9 @@ export default function ToolCard({
     !!release?.assetUrl &&
     (status === "not_installed" || status === "update_available");
   const canLaunch = !!installed?.exePath;
-  const downloading = !!progress && !progress.done;
+  // Balk zichtbaar houden tot de hele installatie-aanroep afrondt (busy zakt):
+  // anders knippert de kaart rond het einde (balk weg → lege regel → melding).
+  const downloading = !!progress && (!progress.done || !!busy);
   const pct =
     progress && progress.total
       ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100))
@@ -92,14 +97,19 @@ export default function ToolCard({
   // Snelkoppeling op de preview: de tool bekijken of gebruiken — bewust nooit
   // installeren (dat blijft een expliciete knop, zodat een klik geen ongewenste
   // download start). Geïnstalleerd → starten; anders → web-demo/productpagina.
-  const openTarget =
-    tool.webUrl ?? tool.siteUrl ?? (tool.repo ? `https://github.com/${tool.repo}` : undefined);
+  const externalTarget =
+    tool.siteUrl ?? (tool.repo ? `https://github.com/${tool.repo}` : undefined);
   const shortcut = (() => {
     if (tool.kind !== "web" && canLaunch) {
       return { kind: "launch" as const, label: t("actions.launch"), run: () => onLaunch?.(tool) };
     }
-    if (openTarget) {
-      return { kind: "open" as const, label: t("actions.open"), run: () => open(openTarget) };
+    // Een webversie opent in een tabblad binnen de installer; alleen zonder
+    // webversie valt de snelkoppeling terug op de externe productpagina.
+    if (tool.webUrl) {
+      return { kind: "open" as const, label: t("actions.open"), run: () => onOpenTab?.(tool) };
+    }
+    if (externalTarget) {
+      return { kind: "open" as const, label: t("actions.open"), run: () => open(externalTarget) };
     }
     return null;
   })();
@@ -191,7 +201,9 @@ export default function ToolCard({
             />
           </div>
           <span className="tool-progress-label">
-            {t("actions.downloading")} {pct !== null ? `${pct}%` : ""}
+            {progress?.done
+              ? t("actions.starting")
+              : `${t("actions.downloading")} ${pct !== null ? `${pct}%` : ""}`}
           </span>
         </div>
       )}
@@ -204,8 +216,8 @@ export default function ToolCard({
 
       <div className="tool-actions">
         {tool.kind === "web" ? (
-          <button className="btn btn-primary" onClick={() => open(tool.webUrl)}>
-            {t("actions.openWeb")}
+          <button className="btn btn-primary" onClick={() => onOpenTab?.(tool)}>
+            {t("actions.open")}
           </button>
         ) : (
           <>
@@ -246,12 +258,42 @@ export default function ToolCard({
               </svg>
             </button>
           )}
-          {tool.kind === "desktop" && (tool.webUrl || tool.siteUrl) && (
+          {/* Desktop-tools: de webversie in een tabblad. Bij web-tools doet de
+              primaire knop dit al, dus daar zou het icoon dubbelop zijn. */}
+          {tool.kind === "desktop" && tool.webUrl && (
+            <button
+              className="icon-btn"
+              title={t("tabs.openHere")}
+              aria-label={t("tabs.openHere")}
+              onClick={() => onOpenTab?.(tool)}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="8" y1="4" x2="8" y2="9" />
+              </svg>
+            </button>
+          )}
+          {tool.webUrl && (
+            <button
+              className="icon-btn"
+              title={t("tabs.openExternal")}
+              aria-label={t("tabs.openExternal")}
+              onClick={() => open(tool.webUrl)}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </button>
+          )}
+          {tool.kind === "desktop" && !tool.webUrl && tool.siteUrl && (
             <button
               className="icon-btn"
               title={t("actions.website")}
               aria-label={t("actions.website")}
-              onClick={() => open(tool.webUrl ?? tool.siteUrl)}
+              onClick={() => open(tool.siteUrl)}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
