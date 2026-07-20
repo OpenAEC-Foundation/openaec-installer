@@ -1,7 +1,10 @@
 # OpenAEC Installer
 
+[![Laatste release](https://img.shields.io/github/v/release/OpenAEC-Foundation/openaec-installer?color=D97706&label=release)](https://github.com/OpenAEC-Foundation/openaec-installer/releases/latest)
 [![Build and Release](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/release.yml/badge.svg)](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/release.yml)
 [![CI](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/ci.yml)
+[![Downloads](https://img.shields.io/github/downloads/OpenAEC-Foundation/openaec-installer/total?color=D97706)](https://github.com/OpenAEC-Foundation/openaec-installer/releases)
+[![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-D97706)](#downloaden)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/license-CC%20BY--SA%204.0-D97706)](LICENSE)
 
 De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](https://open-aec.com/): één plek om alle tools te ontdekken, te installeren, bij te werken en te starten.
