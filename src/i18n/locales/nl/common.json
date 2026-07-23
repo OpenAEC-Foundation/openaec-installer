@@ -50,7 +50,8 @@
     "documenten": "Documenten",
     "ai": "AI",
     "energie": "Energie",
-    "veld": "Veld"
+    "veld": "Veld",
+    "gis": "Geo/GIS"
   },
   "statusbar": {
     "installed": "geïnstalleerd",

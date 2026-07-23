@@ -23,7 +23,8 @@ export type Category =
   | "documenten"
   | "ai"
   | "energie"
-  | "veld";
+  | "veld"
+  | "gis";
 
 export interface CatalogTool {
   id: string;
@@ -229,6 +230,19 @@ export const CATALOG: CatalogTool[] = [
       en: "Local speech-to-text and meeting notes — 100% on your own machine.",
     },
   },
+  {
+    id: "open-stl-3dmap-studio",
+    name: "Open STL-3DMap Studio",
+    kind: "desktop",
+    category: "gis",
+    repo: "OpenAEC-Foundation/Open-STL-3DMap-Studio",
+    registryName: "Open STL-3DMap Studio",
+    exeName: "Open STL-3DMap Studio.exe",
+    description: {
+      nl: "Maak 3D-printbare meerkleuren stadskaarten van Nederland op basis van 3DBAG en BGT.",
+      en: "Create 3D-printable multi-colour city maps of the Netherlands from 3DBAG and BGT data.",
+    },
+  },
 
   // ─── Webtools (browser-snelkoppelingen) ───
   {
@@ -289,6 +303,31 @@ export const CATALOG: CatalogTool[] = [
     description: {
       nl: "Digitalisering van historische bouwliteratuur.",
       en: "Digitisation of historical construction literature.",
+    },
+  },
+  {
+    id: "open-bim-validator",
+    name: "Open BIM Validator Studio",
+    preview: "/previews/open-bim-validator.jpg",
+    kind: "web",
+    category: "bim",
+    repo: "OpenAEC-Foundation/OpenAEC-BIM-validator",
+    webUrl: "https://open-aec.com/bim-validator/",
+    description: {
+      nl: "Valideer IFC-modellen tegen standaarden zoals IDS, NL-BIM Basis ILS en de RVB BIM Norm.",
+      en: "Validate IFC models against standards such as IDS, NL-BIM Basis ILS and the RVB BIM Norm.",
+    },
+  },
+  {
+    id: "pile-plan-studio",
+    name: "Pile Plan Studio",
+    kind: "web",
+    category: "constructief",
+    repo: "OpenAEC-Foundation/pile-plan-studio",
+    webUrl: "https://pile-plan-studio.open-aec.com/",
+    description: {
+      nl: "Funderingspalenplannen opstellen en beheren, met positionering en technische uitvoer.",
+      en: "Create and manage foundation pile plans, with positioning and technical output.",
     },
   },
 ];
