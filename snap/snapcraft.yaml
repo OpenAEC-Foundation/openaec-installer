@@ -1,4 +1,4 @@
-name: openaec-installer
+name: open-aec-installer
 base: core22
 # Versie wordt in CI overschreven met het release-versienummer (zie .github/workflows/snap.yml).
 version: '0.0.0'
@@ -17,7 +17,10 @@ grade: stable
 confinement: strict
 
 apps:
-  openaec-installer:
+  open-aec-installer:
+    # De echte binary/desktop-bestandsnamen in de .deb blijven `openaec-installer`
+    # (Tauri's productName-afgeleide pad) — dat is losstaand van de snapnaam
+    # hierboven, die moet matchen met wat op snapcraft.io geregistreerd is.
     command: usr/bin/openaec-installer
     # De gnome-extensie wired GTK3 + WebKitGTK uit het GNOME-platform-snap en voegt
     # zelf de desktop/wayland/x11/opengl/gsettings-plugs toe (auto-connected).

@@ -156,7 +156,7 @@ jobs:
 
       # Live publiceren naar de Snap Store: alleen op een echte release én pas
       # zodra het store-credentials-secret bestaat (eigenaar-stap) — én pas
-      # zodra de naam `openaec-installer` op snapcraft.io geregistreerd is.
+      # zodra de naam `open-aec-installer` op snapcraft.io geregistreerd is.
       - name: Publish to Snap Store
         if: github.event_name == 'workflow_run' && env.SNAPCRAFT_STORE_CREDENTIALS != ''
         uses: snapcore/action-publish@v1
