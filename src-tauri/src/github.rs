@@ -268,4 +268,13 @@ mod tests {
         assert_eq!(score_linux_asset("Open.2D.Studio_0.35.0_aarch64.AppImage"), None);
         assert_eq!(score_linux_asset("Open.2D.Studio_0.35.0_i386.AppImage"), None);
     }
+
+    #[test]
+    fn handles_appimage_names_with_spaces() {
+        // Tauri leidt de bestandsnaam af van productName, dus een tool met
+        // spaties in zijn naam levert een asset met spaties op.
+        let name = "Open 3D Studio_0.8.0_amd64.AppImage";
+        assert!(score_linux_asset(name).is_some());
+        assert_eq!(extract_version(name).as_deref(), Some("0.8.0"));
+    }
 }

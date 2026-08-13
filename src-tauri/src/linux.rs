@@ -46,6 +46,14 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
     let Some(root) = apps_dir() else {
         return Vec::new();
     };
+    scan_in(&root, queries)
+}
+
+/// Zelfde scan, maar met een expliciete map. De tests gebruiken deze variant
+/// met een eigen tijdelijke map: de omgevingsvariabele die `apps_dir()` leest
+/// is procesbreed, en Rust draait tests in threads binnen één proces, dus
+/// tests die die variabele zetten zouden elkaar overschrijven.
+fn scan_in(root: &Path, queries: &[ToolQuery]) -> Vec<InstalledTool> {
     queries
         .iter()
         .filter_map(|q| {
@@ -101,9 +109,18 @@ fn make_executable(path: &Path) -> Result<(), String> {
 /// Plaats een gedownloade AppImage in de beheerde map en maak een
 /// menu-snelkoppeling. Oude versies van dezelfde tool worden opgeruimd.
 pub fn install_appimage(id: &str, display_name: &str, downloaded: &Path) -> Result<(), String> {
-    let dir = apps_dir()
-        .ok_or("thuismap niet gevonden")?
-        .join(id);
+    let data = data_home().ok_or("thuismap niet gevonden")?;
+    install_appimage_in(&data, id, display_name, downloaded)
+}
+
+/// Zelfde installatie, maar met een expliciete datamap — zie `scan_in`.
+fn install_appimage_in(
+    data_home: &Path,
+    id: &str,
+    display_name: &str,
+    downloaded: &Path,
+) -> Result<(), String> {
+    let dir = data_home.join("openaec-installer").join("apps").join(id);
     std::fs::create_dir_all(&dir).map_err(|e| format!("appmap: {e}"))?;
 
     for old in appimages_in(&dir) {
@@ -117,15 +134,20 @@ pub fn install_appimage(id: &str, display_name: &str, downloaded: &Path) -> Resu
 
     // Snelkoppeling is nuttig maar niet essentieel — een fout hier mag de
     // installatie niet laten mislukken.
-    let _ = write_desktop_entry(id, display_name, &target);
+    let _ = write_desktop_entry(data_home, id, display_name, &target);
     Ok(())
 }
 
 /// Schrijf `~/.local/share/applications/openaec-<id>.desktop`, zodat de tool
 /// ook in het applicatiemenu verschijnt. Wordt bij elke (her)installatie
 /// overschreven zodat het pad naar de nieuwste versie wijst.
-fn write_desktop_entry(id: &str, display_name: &str, appimage: &Path) -> Result<(), String> {
-    let apps = data_home().ok_or("thuismap niet gevonden")?.join("applications");
+fn write_desktop_entry(
+    data_home: &Path,
+    id: &str,
+    display_name: &str,
+    appimage: &Path,
+) -> Result<(), String> {
+    let apps = data_home.join("applications");
     std::fs::create_dir_all(&apps).map_err(|e| e.to_string())?;
     let entry = format!(
         "[Desktop Entry]\nType=Application\nName={}\nExec=\"{}\"\nTerminal=false\nCategories=Office;Engineering;\nComment=Geïnstalleerd door OpenAEC Installer\n",
@@ -197,24 +219,62 @@ mod tests {
         assert!(version_key("2026.7.10".into()) > version_key("2026.7.9".into()));
     }
 
-    #[test]
-    fn install_scan_and_update_roundtrip() {
-        // Eigen HOME zodat de test nooit in de echte gebruikersmap schrijft.
-        let tmp = std::env::temp_dir().join(format!("openaec-test-{}", std::process::id()));
+    /// Eigen tijdelijke datamap per test, zodat parallel draaiende tests
+    /// elkaar niet in de weg zitten.
+    fn temp_home(naam: &str) -> PathBuf {
+        let tmp = std::env::temp_dir().join(format!("openaec-test-{}-{naam}", std::process::id()));
         let _ = std::fs::remove_dir_all(&tmp);
         std::fs::create_dir_all(&tmp).unwrap();
-        std::env::set_var("XDG_DATA_HOME", &tmp);
+        tmp
+    }
+
+    fn apps_root(home: &Path) -> PathBuf {
+        home.join("openaec-installer").join("apps")
+    }
+
+    #[test]
+    fn handles_appimage_names_with_spaces() {
+        // Een productName met spaties levert een asset met spaties op. Dat mag
+        // niet stuklopen op het pad in de menu-snelkoppeling.
+        let tmp = temp_home("spaces");
+
+        let download = tmp.join("Open 3D Studio_0.8.0_amd64.AppImage");
+        std::fs::write(&download, b"fake").unwrap();
+        install_appimage_in(&tmp, "open-3d-studio", "Open 3D Studio", &download).unwrap();
+
+        let found = scan_in(&apps_root(&tmp), &[ToolQuery {
+            id: "open-3d-studio".into(),
+            display_name: "Open 3D Studio".into(),
+            exe_name: None,
+        }]);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].version.as_deref(), Some("0.8.0"));
+
+        // Het pad in de snelkoppeling staat tussen aanhalingstekens, anders
+        // breekt de spatie het Exec-veld op in losse argumenten.
+        let entry =
+            std::fs::read_to_string(tmp.join("applications/openaec-open-3d-studio.desktop")).unwrap();
+        let exec = entry.lines().find(|l| l.starts_with("Exec=")).unwrap();
+        assert!(exec.contains("\"") && exec.contains("Open 3D Studio_0.8.0"), "{exec}");
+
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    #[test]
+    fn install_scan_and_update_roundtrip() {
+        // Eigen datamap zodat de test nooit in de echte gebruikersmap schrijft.
+        let tmp = temp_home("roundtrip");
 
         let download = tmp.join("Open.2D.Studio_0.35.0_amd64.AppImage");
         std::fs::write(&download, b"fake").unwrap();
-        install_appimage("open-2d-studio", "Open 2D Studio", &download).unwrap();
+        install_appimage_in(&tmp, "open-2d-studio", "Open 2D Studio", &download).unwrap();
 
         let queries = vec![ToolQuery {
             id: "open-2d-studio".into(),
             display_name: "Open 2D Studio".into(),
             exe_name: None,
         }];
-        let found = scan(&queries);
+        let found = scan_in(&apps_root(&tmp), &queries);
         assert_eq!(found.len(), 1);
         assert_eq!(found[0].version.as_deref(), Some("0.35.0"));
         let exe = found[0].exe_path.clone().unwrap();
@@ -223,8 +283,8 @@ mod tests {
         // Update: nieuwe versie vervangt de oude, ook in de detectie.
         let newer = tmp.join("Open.2D.Studio_0.36.0_amd64.AppImage");
         std::fs::write(&newer, b"fake2").unwrap();
-        install_appimage("open-2d-studio", "Open 2D Studio", &newer).unwrap();
-        let found = scan(&queries);
+        install_appimage_in(&tmp, "open-2d-studio", "Open 2D Studio", &newer).unwrap();
+        let found = scan_in(&apps_root(&tmp), &queries);
         assert_eq!(found[0].version.as_deref(), Some("0.36.0"));
         assert!(!Path::new(&exe).exists(), "oude versie is opgeruimd");
 
