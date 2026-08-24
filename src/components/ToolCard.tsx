@@ -182,11 +182,20 @@ export default function ToolCard({
               v{installed.version}
             </span>
           )}
-          {installed?.version && latestVersion && <span className="tool-versions-arrow">→</span>}
-          {latestVersion && (
-            <span title={t("versions.latest")} className={status === "update_available" ? "latest-highlight" : ""}>
-              v{latestVersion}
-            </span>
+          {/* De pijl naar de laatste versie alleen tonen als er echt een update
+              is; is de geinstalleerde versie al de actuele (of nieuwer), dan zou
+              "→ zelfde versie" ten onrechte suggereren dat het niet actueel is. */}
+          {status === "update_available" && latestVersion && (
+            <>
+              <span className="tool-versions-arrow">→</span>
+              <span title={t("versions.latest")} className="latest-highlight">
+                v{latestVersion}
+              </span>
+            </>
+          )}
+          {/* Niet geinstalleerd: toon de beschikbare (laatste) versie. */}
+          {!installed?.version && latestVersion && (
+            <span title={t("versions.latest")}>v{latestVersion}</span>
           )}
           {!installed?.version && !latestVersion && <span>—</span>}
         </div>
