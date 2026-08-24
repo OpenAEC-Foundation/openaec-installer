@@ -13,6 +13,7 @@ import {
   downloadAndRunInstaller,
   getInstalledTools,
   getLatestReleases,
+  getSelfRelease,
   launchTool,
   onDownloadProgress,
   type DownloadProgress,
@@ -64,6 +65,10 @@ function App() {
   const [appVersion, setAppVersion] = useState("");
   // Weggeklikte update-melding (per sessie; komt bij herstart weer terug).
   const [selfUpdateDismissed, setSelfUpdateDismissed] = useState(false);
+  // Verse zelf-versie-check bij opstart (los van de tool-cache). Krijgt
+  // voorrang op de gecachete waarde zodat een nieuwe installer-versie meteen
+  // wordt gemeld.
+  const [selfReleaseFresh, setSelfReleaseFresh] = useState<ReleaseInfo | null>(null);
   // Geopende webtool-tabs (browserachtig; blijven bewaard tussen sessies).
   const [tabs, setTabs] = useState<TabState>(EMPTY_TABS);
 
@@ -166,6 +171,14 @@ function App() {
       .catch(() => setAppVersion(""));
     import("@tauri-apps/api/window")
       .then(({ getCurrentWindow }) => getCurrentWindow().show())
+      .catch(() => {});
+    // Altijd bij opstart de eigen versie checken (1 call), los van de 6-uurs
+    // tool-cache. Zo verschijnt de update-melding meteen bij een nieuwe
+    // installer-versie, zonder de rate limit met de hele toollijst te belasten.
+    getSelfRelease()
+      .then((self) => {
+        if (self?.ok) setSelfReleaseFresh(self);
+      })
       .catch(() => {});
     refresh(false);
   }, [refresh]);
@@ -298,7 +311,8 @@ function App() {
   );
 
   // ── Zelf-update: eigen versie vergelijken met de laatste release ──
-  const selfRelease = releases[SELF_ID];
+  // Verse opstart-check heeft voorrang op de gecachete waarde.
+  const selfRelease = selfReleaseFresh ?? releases[SELF_ID];
   const selfLatest = selfRelease?.ok ? selfRelease.version : null;
   const selfUpdateAvailable =
     !!appVersion && !!selfLatest && compareVersions(appVersion, selfLatest) < 0;

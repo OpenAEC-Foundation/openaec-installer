@@ -64,6 +64,20 @@ export async function getLatestReleases(): Promise<ReleaseInfo[]> {
   return invoke<ReleaseInfo[]>("get_latest_releases", { repos });
 }
 
+/**
+ * Alleen de laatste release van de installer zelf ophalen (1 API-call).
+ * Wordt bij elke opstart gebruikt — los van de cache voor de tools — zodat een
+ * nieuwe versie van de installer meteen wordt opgemerkt zonder de rate limit te
+ * belasten met de volledige toollijst.
+ */
+export async function getSelfRelease(): Promise<ReleaseInfo | null> {
+  const [owner, repo] = SELF_REPO.split("/");
+  const list = await invoke<ReleaseInfo[]>("get_latest_releases", {
+    repos: [{ id: SELF_ID, owner, repo }],
+  });
+  return list[0] ?? null;
+}
+
 export async function downloadAndRunInstaller(
   id: string,
   url: string,
