@@ -75,7 +75,9 @@ export const CATALOG: CatalogTool[] = [
     category: "calculatie",
     repo: "OpenAEC-Foundation/open-calc-studio",
     registryName: "Open Calc Studio",
-    exeName: "open-calc-studio.exe",
+    // Deze tool zet mainBinaryName in tauri.conf.json, waardoor de binary niet
+    // de Cargo-naam (open-calc-studio) krijgt maar de productnaam.
+    exeName: "Open Calc Studio.exe",
     webUrl: "https://open-calc-studio.open-aec.com/",
     description: {
       nl: "Open source calculatie en begroting voor de bouwsector, met AI-assistent.",
