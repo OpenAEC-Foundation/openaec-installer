@@ -50,13 +50,23 @@ export interface CatalogTool {
   description: { nl: string; en: string };
   /** Community-project buiten de OpenAEC-Foundation org. */
   community?: boolean;
+  /**
+   * Tijdelijk uit de app gehouden: de tool verdwijnt uit het overzicht, uit de
+   * registerscan en uit de release-check. De entry blijft bewust staan zodat de
+   * onderhoudsronde de repo niet als "nieuwe tool" opnieuw toevoegt; weghalen
+   * van deze vlag zet de tool in één keer weer terug.
+   */
+  hidden?: boolean;
 }
 
-export const CATALOG: CatalogTool[] = [
+/** Alle entries, inclusief verborgen. Gebruik CATALOG tenzij je bewust ook de verborgen tools nodig hebt. */
+export const ALL_TOOLS: CatalogTool[] = [
   // ─── Desktop-tools (Windows-installers via GitHub Releases) ───
   {
     id: "open-3d-studio",
     name: "Open 3D Studio",
+    // Op verzoek tot nader bericht uit de installer gehouden (24-08-2026).
+    hidden: true,
     kind: "desktop",
     category: "bim",
     repo: "OpenAEC-Foundation/open-3d-studio",
@@ -339,6 +349,9 @@ export const CATALOG: CatalogTool[] = [
     },
   },
 ];
+
+/** De zichtbare catalogus: alles wat niet tijdelijk verborgen is. */
+export const CATALOG: CatalogTool[] = ALL_TOOLS.filter((t) => !t.hidden);
 
 export const DESKTOP_TOOLS = CATALOG.filter((t) => t.kind === "desktop");
 export const WEB_TOOLS = CATALOG.filter((t) => t.kind === "web");
