@@ -27,6 +27,16 @@ export interface ReleaseInfo {
   rateLimitReset?: number | null;
 }
 
+export interface InstallOutcome {
+  path: string;
+  /**
+   * ranInstaller — setup-UI gestart (Windows);
+   * installed — direct geïnstalleerd, klaar voor gebruik (Linux);
+   * selfReplaced — eigen AppImage vervangen, herstart nodig (Linux).
+   */
+  mode: "ranInstaller" | "installed" | "selfReplaced";
+}
+
 export interface DownloadProgress {
   id: string;
   downloaded: number;
@@ -54,12 +64,32 @@ export async function getLatestReleases(): Promise<ReleaseInfo[]> {
   return invoke<ReleaseInfo[]>("get_latest_releases", { repos });
 }
 
+/**
+ * Alleen de laatste release van de installer zelf ophalen (1 API-call).
+ * Wordt bij elke opstart gebruikt — los van de cache voor de tools — zodat een
+ * nieuwe versie van de installer meteen wordt opgemerkt zonder de rate limit te
+ * belasten met de volledige toollijst.
+ */
+export async function getSelfRelease(): Promise<ReleaseInfo | null> {
+  const [owner, repo] = SELF_REPO.split("/");
+  const list = await invoke<ReleaseInfo[]>("get_latest_releases", {
+    repos: [{ id: SELF_ID, owner, repo }],
+  });
+  return list[0] ?? null;
+}
+
 export async function downloadAndRunInstaller(
   id: string,
   url: string,
   fileName: string,
-): Promise<string> {
-  return invoke<string>("download_and_run_installer", { id, url, fileName });
+  displayName?: string,
+): Promise<InstallOutcome> {
+  return invoke<InstallOutcome>("download_and_run_installer", {
+    id,
+    url,
+    fileName,
+    displayName: displayName ?? null,
+  });
 }
 
 export async function launchTool(exePath: string): Promise<void> {

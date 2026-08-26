@@ -1,0 +1,52 @@
+name: open-aec-installer
+base: core22
+# Versie wordt in CI overschreven met het release-versienummer (zie .github/workflows/snap.yml).
+version: '0.0.0'
+title: OpenAEC Installer
+summary: Central hub to install, update, and launch OpenAEC Foundation tools
+description: |
+  OpenAEC Installer is the central hub for the OpenAEC Foundation family of
+  open-source construction applications (Open Planner Studio, Open Calc
+  Studio, Open PDF Studio, Open Geotechniek Studio, and others): install,
+  update, and launch them from one place.
+
+  OpenAEC Installer is free and open source, part of the OpenAEC Foundation
+  family of applications, and built with Tauri for a small, native footprint.
+
+grade: stable
+confinement: strict
+
+apps:
+  open-aec-installer:
+    # De echte binary/desktop-bestandsnamen in de .deb blijven `openaec-installer`
+    # (Tauri's productName-afgeleide pad) — dat is losstaand van de snapnaam
+    # hierboven, die moet matchen met wat op snapcraft.io geregistreerd is.
+    command: usr/bin/openaec-installer
+    # De gnome-extensie wired GTK3 + WebKitGTK uit het GNOME-platform-snap en voegt
+    # zelf de desktop/wayland/x11/opengl/gsettings-plugs toe (auto-connected).
+    extensions: [gnome]
+    desktop: usr/share/applications/openaec-installer.desktop
+    plugs:
+      # Alleen de plugs die de gnome-extensie niet al levert:
+      - home            # andere OpenAEC-tools installeren/bijwerken in de home-map
+      - removable-media
+      - network         # installers/updates downloaden
+      - browser-support # WebKit-rendering/sandbox
+
+parts:
+  openaec-installer:
+    plugin: nil
+    # De CI-stap kopieert de gepubliceerde release-deb naar de project-root als
+    # `openaec-installer.deb`; we herverpakken die i.p.v. opnieuw te bouwen.
+    override-build: |
+      set -eu
+      dpkg-deb -x "${CRAFT_PROJECT_DIR}/openaec-installer.deb" "${CRAFT_PART_INSTALL}"
+      # De binary heet al `openaec-installer` (geen spaties, geen rename nodig);
+      # alleen het .desktop-bestand heeft een spatienaam. snapd herschrijft de
+      # Exec=-regel van een geïnstalleerd desktop-bestand zelf, dus die hoeft
+      # niet aangepast te worden.
+      mv "${CRAFT_PART_INSTALL}/usr/share/applications/OpenAEC Installer.desktop" \
+         "${CRAFT_PART_INSTALL}/usr/share/applications/openaec-installer.desktop"
+    # stage-packages bewust leeg: GTK3 + WebKitGTK komen uit de gnome-runtime.
+    # Ontbreekt er bij de verificatie-run toch een lib, dan voegen we 'm hier toe
+    # (itereren via de workflow_dispatch-route, niet gokken).

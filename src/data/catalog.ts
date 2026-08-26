@@ -1,10 +1,11 @@
 /**
  * Catalogus van OpenAEC Foundation tools.
  *
- * - `desktop`-tools hebben Windows-installers op GitHub Releases; de app
- *   detecteert de geïnstalleerde versie via het Windows-register
- *   (`registryName` = DisplayName in de Uninstall-sleutel, `exeName` = fallback
- *   om de exe te vinden als het register geen pad geeft).
+ * - `desktop`-tools hebben installers op GitHub Releases (Windows-setup en
+ *   AppImage); de app detecteert de geïnstalleerde versie op Windows via het
+ *   register (`registryName` = DisplayName in de Uninstall-sleutel, `exeName` =
+ *   fallback om de exe te vinden als het register geen pad geeft) en op Linux
+ *   via de eigen beheerde AppImage-map.
  * - `web`-tools draaien in de browser en worden als snelkoppeling geopend.
  *
  * Omschrijvingen komen van https://open-aec.com/.
@@ -22,7 +23,8 @@ export type Category =
   | "documenten"
   | "ai"
   | "energie"
-  | "veld";
+  | "veld"
+  | "gis";
 
 export interface CatalogTool {
   id: string;
@@ -48,13 +50,23 @@ export interface CatalogTool {
   description: { nl: string; en: string };
   /** Community-project buiten de OpenAEC-Foundation org. */
   community?: boolean;
+  /**
+   * Tijdelijk uit de app gehouden: de tool verdwijnt uit het overzicht, uit de
+   * registerscan en uit de release-check. De entry blijft bewust staan zodat de
+   * onderhoudsronde de repo niet als "nieuwe tool" opnieuw toevoegt; weghalen
+   * van deze vlag zet de tool in één keer weer terug.
+   */
+  hidden?: boolean;
 }
 
-export const CATALOG: CatalogTool[] = [
+/** Alle entries, inclusief verborgen. Gebruik CATALOG tenzij je bewust ook de verborgen tools nodig hebt. */
+export const ALL_TOOLS: CatalogTool[] = [
   // ─── Desktop-tools (Windows-installers via GitHub Releases) ───
   {
     id: "open-3d-studio",
     name: "Open 3D Studio",
+    // Op verzoek tot nader bericht uit de installer gehouden (24-08-2026).
+    hidden: true,
     kind: "desktop",
     category: "bim",
     repo: "OpenAEC-Foundation/open-3d-studio",
@@ -73,7 +85,9 @@ export const CATALOG: CatalogTool[] = [
     category: "calculatie",
     repo: "OpenAEC-Foundation/open-calc-studio",
     registryName: "Open Calc Studio",
-    exeName: "open-calc-studio.exe",
+    // Deze tool zet mainBinaryName in tauri.conf.json, waardoor de binary niet
+    // de Cargo-naam (open-calc-studio) krijgt maar de productnaam.
+    exeName: "Open Calc Studio.exe",
     webUrl: "https://open-calc-studio.open-aec.com/",
     description: {
       nl: "Open source calculatie en begroting voor de bouwsector, met AI-assistent.",
@@ -228,6 +242,19 @@ export const CATALOG: CatalogTool[] = [
       en: "Local speech-to-text and meeting notes — 100% on your own machine.",
     },
   },
+  {
+    id: "open-stl-3dmap-studio",
+    name: "Open STL-3DMap Studio",
+    kind: "desktop",
+    category: "gis",
+    repo: "OpenAEC-Foundation/Open-STL-3DMap-Studio",
+    registryName: "Open STL-3DMap Studio",
+    exeName: "Open STL-3DMap Studio.exe",
+    description: {
+      nl: "Maak 3D-printbare meerkleuren stadskaarten van Nederland op basis van 3DBAG en BGT.",
+      en: "Create 3D-printable multi-colour city maps of the Netherlands from 3DBAG and BGT data.",
+    },
+  },
 
   // ─── Webtools (browser-snelkoppelingen) ───
   {
@@ -246,8 +273,11 @@ export const CATALOG: CatalogTool[] = [
     id: "open-field-studio",
     name: "Open Field Studio",
     preview: "/previews/open-field-studio.jpg",
-    kind: "web",
+    kind: "desktop",
     category: "veld",
+    repo: "OpenAEC-Foundation/Open-Field-Studio",
+    registryName: "Open Field Studio",
+    exeName: "open-field-studio.exe",
     webUrl: "https://open-field-studio.open-aec.com/",
     description: {
       nl: "Inspecties, opleveringen en kwaliteitsborging met checklists.",
@@ -270,8 +300,11 @@ export const CATALOG: CatalogTool[] = [
     id: "open-pointcloud-studio",
     name: "Open Pointcloud Studio",
     preview: "/previews/open-pointcloud-studio.jpg",
-    kind: "web",
+    kind: "desktop",
     category: "bim",
+    repo: "OpenAEC-Foundation/open-pointcloud-studio",
+    registryName: "Open Pointcloud Studio",
+    exeName: "open-pointcloud-studio.exe",
     webUrl: "https://open-pointcloud-studio.open-aec.com/",
     description: {
       nl: "Pointcloud-viewer voor renovatie en analyse.",
@@ -290,7 +323,35 @@ export const CATALOG: CatalogTool[] = [
       en: "Digitisation of historical construction literature.",
     },
   },
+  {
+    id: "open-bim-validator",
+    name: "Open BIM Validator Studio",
+    preview: "/previews/open-bim-validator.jpg",
+    kind: "web",
+    category: "bim",
+    repo: "OpenAEC-Foundation/OpenAEC-BIM-validator",
+    webUrl: "https://open-aec.com/bim-validator/",
+    description: {
+      nl: "Valideer IFC-modellen tegen standaarden zoals IDS, NL-BIM Basis ILS en de RVB BIM Norm.",
+      en: "Validate IFC models against standards such as IDS, NL-BIM Basis ILS and the RVB BIM Norm.",
+    },
+  },
+  {
+    id: "pile-plan-studio",
+    name: "Pile Plan Studio",
+    kind: "web",
+    category: "constructief",
+    repo: "OpenAEC-Foundation/pile-plan-studio",
+    webUrl: "https://pile-plan-studio.open-aec.com/",
+    description: {
+      nl: "Funderingspalenplannen opstellen en beheren, met positionering en technische uitvoer.",
+      en: "Create and manage foundation pile plans, with positioning and technical output.",
+    },
+  },
 ];
+
+/** De zichtbare catalogus: alles wat niet tijdelijk verborgen is. */
+export const CATALOG: CatalogTool[] = ALL_TOOLS.filter((t) => !t.hidden);
 
 export const DESKTOP_TOOLS = CATALOG.filter((t) => t.kind === "desktop");
 export const WEB_TOOLS = CATALOG.filter((t) => t.kind === "web");

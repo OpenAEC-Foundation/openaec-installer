@@ -1,0 +1,66 @@
+/* ── Webtool in een tabblad ── */
+
+.webtool-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--theme-content-bg);
+}
+
+.webtool-view[hidden] {
+  display: none;
+}
+
+.webtool-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--theme-border);
+  background: var(--theme-bg);
+  flex-shrink: 0;
+}
+
+.webtool-btn {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--theme-text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.webtool-btn:hover {
+  background: var(--theme-hover);
+  color: var(--theme-accent);
+}
+
+.webtool-url {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-code);
+  font-size: 11px;
+  color: var(--theme-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.webtool-loading {
+  font-family: var(--font-code);
+  font-size: 10.5px;
+  color: var(--theme-accent);
+  flex-shrink: 0;
+}
+
+.webtool-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: var(--theme-content-bg);
+}

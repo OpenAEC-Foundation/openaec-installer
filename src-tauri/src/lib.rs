@@ -1,8 +1,10 @@
 mod github;
 mod installer;
+#[cfg(target_os = "linux")]
+mod linux;
 mod registry;
 
-/// Scan het Windows-register op geïnstalleerde OpenAEC-tools.
+/// Scan op geïnstalleerde OpenAEC-tools (Windows-register / Linux-appmap).
 #[tauri::command]
 fn get_installed_tools(queries: Vec<registry::ToolQuery>) -> Vec<registry::InstalledTool> {
     registry::scan(&queries)
@@ -14,15 +16,17 @@ async fn get_latest_releases(repos: Vec<github::RepoRef>) -> Vec<github::Release
     github::fetch_all(repos).await
 }
 
-/// Download een installer-asset naar temp en start hem.
+/// Download een installer-asset naar temp en installeer hem op de manier die
+/// bij het platform past (Windows: setup starten; Linux: AppImage plaatsen).
 #[tauri::command]
 async fn download_and_run_installer(
     app: tauri::AppHandle,
     id: String,
     url: String,
     file_name: String,
-) -> Result<String, String> {
-    installer::download_and_run(app, id, url, file_name).await
+    display_name: Option<String>,
+) -> Result<installer::InstallOutcome, String> {
+    installer::download_and_run(app, id, url, file_name, display_name).await
 }
 
 /// Start een geïnstalleerde tool.
