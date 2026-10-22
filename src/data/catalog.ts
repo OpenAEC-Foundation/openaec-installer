@@ -47,6 +47,11 @@ export interface CatalogTool {
    * het categorie-icoon.
    */
   preview?: string;
+  /**
+   * Eigen logo van de tool, pad onder /logos/. Vervangt het categorie-icoon in de
+   * kaartkop en de tabbalk; zonder logo blijft het categorie-icoon staan.
+   */
+  logo?: string;
   description: { nl: string; en: string };
   /** Community-project buiten de OpenAEC-Foundation org. */
   community?: boolean;
@@ -92,22 +97,6 @@ export const ALL_TOOLS: CatalogTool[] = [
     description: {
       nl: "Open source calculatie en begroting voor de bouwsector, met AI-assistent.",
       en: "Open-source cost estimation and budgeting for construction, with AI assistant.",
-    },
-  },
-  {
-    id: "open-energy-studio",
-    name: "Open Energy Studio",
-    preview: "/previews/open-energy-studio.jpg",
-    kind: "desktop",
-    category: "energie",
-    repo: "OpenAEC-Foundation/open-energy-studio",
-    registryName: "Open Energy Studio",
-    exeName: "open-energy-studio.exe",
-    webUrl: "https://open-energy-studio.open-aec.com/",
-    siteUrl: "https://open-aec.com/open-energy-studio/",
-    description: {
-      nl: "Energieprestatie volgens NTA 8800: BENG, energielabel en TOjuli voor woningen en utiliteit.",
-      en: "Energy performance under NTA 8800: BENG, energy label and TOjuli for homes and non-residential buildings.",
     },
   },
   {
@@ -273,6 +262,20 @@ export const ALL_TOOLS: CatalogTool[] = [
   },
 
   // ─── Webtools (browser-snelkoppelingen) ───
+  {
+    id: "open-energy-studio",
+    name: "Open Energy Studio",
+    preview: "/previews/open-energy-studio.jpg",
+    logo: "/logos/open-energy-studio.png",
+    kind: "web",
+    category: "energie",
+    webUrl: "https://open-energy-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-energy-studio/",
+    description: {
+      nl: "Energieprestatie volgens NTA 8800: BENG, energielabel en TOjuli voor woningen en utiliteit.",
+      en: "Energy performance under NTA 8800: BENG, energy label and TOjuli for homes and non-residential buildings.",
+    },
+  },
   {
     id: "open-heatloss-studio",
     name: "Open Heatloss Studio",

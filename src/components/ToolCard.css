@@ -110,6 +110,13 @@
   color: var(--theme-accent);
 }
 
+/* Eigen logo van een tool in plaats van het categorie-icoon. */
+.tool-icon-logo img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
 .tool-card-titles {
   flex: 1;
   min-width: 0;

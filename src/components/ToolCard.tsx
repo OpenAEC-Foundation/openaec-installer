@@ -157,8 +157,12 @@ export default function ToolCard({
       </button>
 
       <div className="tool-card-head">
-        <div className="tool-icon">
-          <CategoryIcon category={tool.category} size={22} />
+        <div className={tool.logo ? "tool-icon tool-icon-logo" : "tool-icon"}>
+          {tool.logo ? (
+            <img src={tool.logo} alt="" width={30} height={30} />
+          ) : (
+            <CategoryIcon category={tool.category} size={22} />
+          )}
         </div>
         <div className="tool-card-titles">
           <h3 className="tool-name">{tool.name}</h3>
