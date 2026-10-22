@@ -95,6 +95,22 @@ export const ALL_TOOLS: CatalogTool[] = [
     },
   },
   {
+    id: "open-energy-studio",
+    name: "Open Energy Studio",
+    preview: "/previews/open-energy-studio.jpg",
+    kind: "desktop",
+    category: "energie",
+    repo: "OpenAEC-Foundation/open-energy-studio",
+    registryName: "Open Energy Studio",
+    exeName: "open-energy-studio.exe",
+    webUrl: "https://open-energy-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-energy-studio/",
+    description: {
+      nl: "Energieprestatie volgens NTA 8800: BENG, energielabel en TOjuli voor woningen en utiliteit.",
+      en: "Energy performance under NTA 8800: BENG, energy label and TOjuli for homes and non-residential buildings.",
+    },
+  },
+  {
     id: "open-pdf-studio",
     name: "Open PDF Studio",
     preview: "/previews/open-pdf-studio.jpg",
@@ -282,18 +298,6 @@ export const ALL_TOOLS: CatalogTool[] = [
     description: {
       nl: "Inspecties, opleveringen en kwaliteitsborging met checklists.",
       en: "Inspections, handovers and quality assurance with checklists.",
-    },
-  },
-  {
-    id: "open-energy-studio",
-    name: "Open Energy Studio",
-    preview: "/previews/open-energy-studio.jpg",
-    kind: "web",
-    category: "energie",
-    webUrl: "https://open-energy-studio.open-aec.com/",
-    description: {
-      nl: "Energieanalyse en gebouwprestaties.",
-      en: "Energy analysis and building performance.",
     },
   },
   {
