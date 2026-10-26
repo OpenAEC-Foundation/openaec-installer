@@ -2,7 +2,7 @@
  * Statusmodel per tool: afgeleid uit register-scan + laatste GitHub-release.
  */
 import type { CatalogTool } from "../data/catalog";
-import type { InstalledTool, ReleaseInfo } from "./api";
+import type { InstalledTool, ReleaseInfo, ReleaseVariant } from "./api";
 
 export type ToolStatus =
   | "not_installed"
@@ -47,4 +47,34 @@ export function deriveStatus(
   return compareVersions(installed.version, latest) < 0
     ? "update_available"
     : "installed_latest";
+}
+
+/**
+ * De setup voor een update: dezelfde soort als de bestaande installatie, zodat
+ * de tool er niet twee keer op komt te staan.
+ *
+ * - MSI-installatie → de MSI.
+ * - NSIS per gebruiker → een aparte per-gebruiker-setup als die er is, anders de
+ *   gewone NSIS-setup (dan is dat de enige).
+ * - NSIS voor de hele pc → de gewone NSIS-setup, nooit de per-gebruiker-setup.
+ * - AppImage → de AppImage.
+ *
+ * `null` als de release geen passende setup heeft.
+ */
+export function pickUpdateVariant(
+  release: ReleaseInfo | undefined,
+  installed: InstalledTool | undefined,
+): ReleaseVariant | null {
+  const variants = release?.variants ?? [];
+  const find = (kind: ReleaseVariant["kind"]) => variants.find((v) => v.kind === kind) ?? null;
+  switch (installed?.kind) {
+    case "msi":
+      return find("msi");
+    case "appimage":
+      return find("appimage");
+    case "nsis":
+      return installed.scope === "user" ? (find("nsisUser") ?? find("nsis")) : find("nsis");
+    default:
+      return null;
+  }
 }

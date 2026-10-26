@@ -63,6 +63,18 @@ Levert de release van een tool een ondertekende `latest.json` (Tauri: `bundle.cr
 - controleert de handtekening tijdens het downloaden en start niets als die ontbreekt of niet klopt;
 - pakt een `.nsis.zip` (het oudere updateformaat) na de controle uit tot de setup.
 
+### Bijwerken
+
+Een tool die al geïnstalleerd is, wordt stil bijgewerkt (Windows):
+
+- **Dezelfde soort setup** als de bestaande installatie. De registerscan geeft per tool de soort (`nsis` of `msi`) en het bereik (`user` voor HKCU, `machine` voor HKLM). Een MSI-installatie krijgt de MSI; een installatie per gebruiker krijgt de `…_user-setup.exe` als die er is, anders de gewone NSIS-setup; een systeembrede installatie krijgt nooit de per-gebruiker-setup. Is er geen passende setup, dan meldt de kaart dat en gebeurt er niets, want anders zou de tool er twee keer op komen te staan.
+- **Eerst downloaden en controleren**, terwijl de tool gewoon openblijft.
+- **Wachten tot de tool dicht is.** Draait hij, dan vraagt de kaart om hem te sluiten (met Annuleren). De installer sluit hem niet zelf: een stille Tauri-setup zou hem anders geforceerd afsluiten en dan gaat open werk verloren.
+- **Stil installeren**: NSIS met `/S /UPDATE`, MSI met `msiexec /i … /passive /norestart`. Een systeembrede installatie vraagt nog steeds om beheerdersrechten. De exitcode bepaalt of het gelukt is; MSI-code 3010 betekent dat Windows opnieuw moet opstarten.
+- **Opnieuw starten**: stond de tool open, dan start de installer hem daarna weer.
+
+Op Linux wordt de AppImage vervangen zoals bij installeren; een draaiende AppImage mag dat. Een nieuwe installatie doorloopt op Windows nog steeds de gewone setup.
+
 Zet een sleutel alleen als `latest.json` dezelfde soort setup aanbiedt als de API-route. Open PDF Studio ondertekent bijvoorbeeld alleen zijn systeembrede setup, terwijl de installer de per-gebruiker-setup kiest.
 
 Controle tegen de echte release van Open Planner Studio (ongeveer 17 MB): `cd src-tauri && cargo test --lib -- --ignored`.

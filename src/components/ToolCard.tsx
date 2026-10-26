@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { CatalogTool } from "../data/catalog";
-import type { DownloadProgress, InstalledTool, ReleaseInfo } from "../lib/api";
+import type { DownloadProgress, InstalledTool, ReleaseInfo, UpdatePhase } from "../lib/api";
 import type { ToolStatus } from "../lib/status";
 import CategoryIcon from "./CategoryIcon";
 import "./ToolCard.css";
@@ -16,7 +16,11 @@ interface ToolCardProps {
   busy?: boolean;
   error?: string;
   note?: string;
+  /** Fase van een lopende update: wachten tot de tool dicht is, of stil installeren. */
+  phase?: UpdatePhase["phase"];
   onInstall?: (tool: CatalogTool) => void;
+  /** Stop het wachten tot de tool gesloten is. */
+  onCancel?: (tool: CatalogTool) => void;
   onLaunch?: (tool: CatalogTool) => void;
   /** Open de webversie van de tool in een tabblad binnen de installer. */
   onOpenTab?: (tool: CatalogTool) => void;
@@ -45,7 +49,9 @@ export default function ToolCard({
   busy,
   error,
   note,
+  phase,
   onInstall,
+  onCancel,
   onLaunch,
   onOpenTab,
 }: ToolCardProps) {
@@ -62,7 +68,10 @@ export default function ToolCard({
   const canLaunch = !!installed?.exePath;
   // Balk zichtbaar houden tot de hele installatie-aanroep afrondt (busy zakt):
   // anders knippert de kaart rond het einde (balk weg → lege regel → melding).
-  const downloading = !!progress && (!progress.done || !!busy);
+  // Wacht de update tot de gebruiker de tool sluit, dan staat die vraag in
+  // beeld in plaats van de voortgangsbalk.
+  const waiting = phase === "waiting";
+  const downloading = !waiting && !!progress && (!progress.done || !!busy);
   const pct =
     progress && progress.total
       ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100))
@@ -215,14 +224,15 @@ export default function ToolCard({
           </div>
           <span className="tool-progress-label">
             {progress?.done
-              ? t("actions.starting")
+              ? t(phase === "installing" ? "actions.updating" : "actions.starting")
               : `${t("actions.downloading")} ${pct !== null ? `${pct}%` : ""}`}
           </span>
         </div>
       )}
 
+      {waiting && <p className="tool-note">{t("update.waiting", { name: tool.name })}</p>}
       {error && <p className="tool-error">{error}</p>}
-      {!error && !downloading && note && <p className="tool-note">{note}</p>}
+      {!error && !downloading && !waiting && note && <p className="tool-note">{note}</p>}
       {!error && !downloading && !note && releaseError && (
         <p className="tool-hint">{releaseError}</p>
       )}
@@ -234,14 +244,19 @@ export default function ToolCard({
           </button>
         ) : (
           <>
-            {canInstall && (
+            {waiting && (
+              <button className="btn btn-secondary" onClick={() => onCancel?.(tool)}>
+                {t("actions.cancel")}
+              </button>
+            )}
+            {canInstall && !waiting && (
               <button
                 className="btn btn-primary"
                 disabled={busy}
                 onClick={() => onInstall?.(tool)}
               >
                 {busy
-                  ? t("actions.downloading")
+                  ? t(phase === "installing" ? "actions.updating" : "actions.downloading")
                   : status === "update_available"
                     ? t("actions.update")
                     : t("actions.install")}

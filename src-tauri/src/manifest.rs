@@ -58,9 +58,31 @@ pub fn pick(manifest: &Manifest) -> Option<&PlatformEntry> {
     })
 }
 
-/// De NSIS-route gaat voor; de MSI-route (`windows-x86_64-msi`) volgt pas als
-/// de installer weet hoe een tool geïnstalleerd is. Op Linux eerst de kale
-/// AppImage: `linux-x86_64` is bij oudere bouwstraten een `.AppImage.tar.gz`.
+/// Alle soorten setup in dit bestand, voor een update in dezelfde soort als de
+/// bestaande installatie: "nsis" en "msi" op Windows, "appimage" op Linux.
+/// `latest.json` kent geen aparte per-gebruiker-setup; een tool met een sleutel
+/// hoort er daarom ook geen naast zijn gewone NSIS-setup te hebben.
+pub fn variants(manifest: &Manifest) -> Vec<(&'static str, &PlatformEntry)> {
+    let mut out = Vec::new();
+    if let Some(entry) = pick(manifest) {
+        out.push((if cfg!(target_os = "linux") { "appimage" } else { "nsis" }, entry));
+    }
+    if cfg!(windows) {
+        if let Some(msi) = manifest
+            .platforms
+            .get("windows-x86_64-msi")
+            .filter(|e| file_name(&e.url).to_ascii_lowercase().ends_with(".msi"))
+        {
+            out.push(("msi", msi));
+        }
+    }
+    out
+}
+
+/// De NSIS-route gaat voor: dat is wat een nieuwe installatie krijgt. De
+/// MSI-route staat in `variants`, voor wie met de MSI installeerde. Op Linux
+/// eerst de kale AppImage: `linux-x86_64` is bij oudere bouwstraten een
+/// `.AppImage.tar.gz`.
 fn platform_keys() -> &'static [&'static str] {
     if cfg!(target_os = "linux") {
         &["linux-x86_64-appimage", "linux-x86_64"]
@@ -114,6 +136,23 @@ mod tests {
             assert_eq!(picked, "Open.Planner.Studio_2026.43.0_amd64.AppImage");
         } else if cfg!(windows) {
             assert_eq!(picked, "Open.Planner.Studio_2026.43.0_x64-setup.nsis.zip");
+        }
+    }
+
+    #[test]
+    fn lists_the_nsis_and_msi_routes() {
+        let m: Manifest = serde_json::from_str(PLANNER).unwrap();
+        let kinds: Vec<_> = variants(&m).into_iter().map(|(k, e)| (k, file_name(&e.url))).collect();
+        if cfg!(windows) {
+            assert_eq!(
+                kinds,
+                vec![
+                    ("nsis", "Open.Planner.Studio_2026.43.0_x64-setup.nsis.zip"),
+                    ("msi", "Open.Planner.Studio_2026.43.0_x64_en-US.msi"),
+                ]
+            );
+        } else if cfg!(target_os = "linux") {
+            assert_eq!(kinds, vec![("appimage", "Open.Planner.Studio_2026.43.0_amd64.AppImage")]);
         }
     }
 

@@ -10,6 +10,18 @@ export interface InstalledTool {
   displayName: string;
   version: string | null;
   exePath: string | null;
+  /** "user" (per gebruiker) of "machine" (voor de hele pc). */
+  scope?: "user" | "machine" | null;
+  /** Met welk soort setup de tool erop kwam; een update gebruikt dezelfde soort. */
+  kind?: "nsis" | "msi" | "appimage" | null;
+}
+
+/** Eén soort setup in een release. */
+export interface ReleaseVariant {
+  kind: "nsis" | "nsisUser" | "msi" | "appimage";
+  assetName: string;
+  assetUrl: string;
+  signature: string | null;
 }
 
 export interface ReleaseInfo {
@@ -29,6 +41,8 @@ export interface ReleaseInfo {
   signature?: string | null;
   /** "manifest" via latest.json, "api" via de GitHub API. */
   source?: "manifest" | "api" | null;
+  /** Alle soorten setup in de release, voor een update in dezelfde soort. */
+  variants?: ReleaseVariant[];
 }
 
 export interface InstallOutcome {
@@ -39,6 +53,21 @@ export interface InstallOutcome {
    * selfReplaced — eigen AppImage vervangen, herstart nodig (Linux).
    */
   mode: "ranInstaller" | "installed" | "selfReplaced";
+}
+
+export interface UpdateOutcome {
+  /** updated — stil bijgewerkt (Windows); installed — AppImage vervangen (Linux). */
+  mode: "updated" | "installed" | "selfReplaced";
+  /** De tool stond open en is na het bijwerken weer gestart. */
+  relaunched: boolean;
+  /** Windows moet opnieuw opstarten om het af te ronden (MSI). */
+  restartRequired: boolean;
+}
+
+export interface UpdatePhase {
+  id: string;
+  /** waiting — wacht tot de gebruiker de tool sluit; installing — setup draait stil. */
+  phase: "waiting" | "installing";
 }
 
 export interface DownloadProgress {
@@ -98,6 +127,38 @@ export async function downloadAndRunInstaller(
     signature: verify?.signature ?? null,
     pubkey: verify?.pubkey ?? null,
   });
+}
+
+/**
+ * Werk een geïnstalleerde tool stil bij met dezelfde soort setup. Staat de tool
+ * open, dan wacht de backend tot de gebruiker hem sluit (fase "waiting") en
+ * start hem na het bijwerken weer.
+ */
+export async function updateTool(args: {
+  id: string;
+  variant: ReleaseVariant;
+  displayName: string;
+  pubkey?: string | null;
+  exePath?: string | null;
+}): Promise<UpdateOutcome> {
+  return invoke<UpdateOutcome>("update_tool", {
+    id: args.id,
+    url: args.variant.assetUrl,
+    fileName: args.variant.assetName,
+    displayName: args.displayName,
+    signature: args.variant.signature,
+    pubkey: args.pubkey ?? null,
+    kind: args.variant.kind,
+    exePath: args.exePath ?? null,
+  });
+}
+
+export async function cancelUpdate(id: string): Promise<void> {
+  return invoke("cancel_update", { id });
+}
+
+export function onUpdatePhase(handler: (p: UpdatePhase) => void): Promise<UnlistenFn> {
+  return listen<UpdatePhase>("update-phase", (e) => handler(e.payload));
 }
 
 export async function launchTool(exePath: string): Promise<void> {

@@ -34,6 +34,31 @@ async fn download_and_run_installer(
     installer::download_and_run(app, id, url, file_name, display_name, signature, pubkey).await
 }
 
+/// Werk een geïnstalleerde tool stil bij met dezelfde soort setup (`kind`),
+/// na het sluiten door de gebruiker, en start hem daarna opnieuw als hij
+/// openstond. Fasen gaan als `update-phase`-events naar de frontend.
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+async fn update_tool(
+    app: tauri::AppHandle,
+    id: String,
+    url: String,
+    file_name: String,
+    display_name: Option<String>,
+    signature: Option<String>,
+    pubkey: Option<String>,
+    kind: String,
+    exe_path: Option<String>,
+) -> Result<installer::UpdateOutcome, String> {
+    installer::update(app, id, url, file_name, display_name, signature, pubkey, kind, exe_path).await
+}
+
+/// Stop het wachten tot een tool gesloten is.
+#[tauri::command]
+fn cancel_update(id: String) {
+    installer::cancel(&id)
+}
+
 /// Start een geïnstalleerde tool.
 #[tauri::command]
 fn launch_tool(exe_path: String) -> Result<(), String> {
@@ -49,6 +74,8 @@ pub fn run() {
             get_installed_tools,
             get_latest_releases,
             download_and_run_installer,
+            update_tool,
+            cancel_update,
             launch_tool,
         ])
         .run(tauri::generate_context!())

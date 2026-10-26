@@ -34,7 +34,9 @@
     "github": "Broncode op GitHub",
     "website": "Website",
     "downloading": "Downloaden...",
-    "starting": "Installer starten..."
+    "starting": "Installer starten...",
+    "cancel": "Annuleren",
+    "updating": "Bijwerken..."
   },
   "versions": {
     "installed": "geïnstalleerd",
@@ -84,9 +86,17 @@
     "rateLimitedUntil": "GitHub-limiet bereikt — weer beschikbaar om {{time}}",
     "network": "Netwerkfout bij ophalen releases",
     "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release",
-    "installFailed": "Installatie starten mislukt"
+    "installFailed": "Installatie starten mislukt",
+    "updateFailed": "Bijwerken mislukt"
   },
   "installerStarted": "De installer is gestart — doorloop de stappen. De status wordt daarna automatisch bijgewerkt.",
   "installedDone": "Geïnstalleerd — je kunt de tool nu starten.",
-  "noResults": "Geen tools gevonden voor “{{query}}”."
+  "noResults": "Geen tools gevonden voor “{{query}}”.",
+  "update": {
+    "waiting": "Sluit {{name}} om bij te werken. De installer sluit de app niet zelf, zodat er geen werk verloren gaat.",
+    "done": "Bijgewerkt naar v{{version}}.",
+    "doneRelaunched": "Bijgewerkt naar v{{version}} en opnieuw gestart.",
+    "restartRequired": "Bijgewerkt naar v{{version}}. Start Windows opnieuw op om het af te ronden.",
+    "noMatchingSetup": "De laatste release heeft geen setup die past bij deze installatie ({{kind}}). Werk bij via de releasepagina op GitHub."
+  }
 }

@@ -10,17 +10,21 @@ import TabBar from "./components/TabBar";
 import WebToolView from "./components/WebToolView";
 import { DESKTOP_TOOLS, SELF_ID, WEB_TOOLS, type CatalogTool } from "./data/catalog";
 import {
+  cancelUpdate,
   downloadAndRunInstaller,
   getInstalledTools,
   getLatestReleases,
   getSelfRelease,
   launchTool,
   onDownloadProgress,
+  onUpdatePhase,
+  updateTool,
   type DownloadProgress,
   type InstalledTool,
   type ReleaseInfo,
+  type UpdatePhase,
 } from "./lib/api";
-import { compareVersions, deriveStatus } from "./lib/status";
+import { compareVersions, deriveStatus, pickUpdateVariant } from "./lib/status";
 import {
   CATALOG_TAB,
   EMPTY_TABS,
@@ -38,8 +42,9 @@ import "./App.css";
 // oudere versie kan nog Windows-installers bevatten, wat op Linux een
 // "AppImage verwacht"-fout bij het installeren zou geven. ".v3" sinds releases
 // een handtekening meedragen: zonder die handtekening weigert een tool met
-// sleutel te installeren.
-const RELEASE_CACHE_KEY = "releaseCache.v3";
+// sleutel te installeren. ".v4" sinds releases alle soorten setup meegeven
+// (`variants`); zonder die lijst kan een update de juiste soort niet kiezen.
+const RELEASE_CACHE_KEY = "releaseCache.v4";
 const TABS_KEY = "openTabs";
 // Releases veranderen hooguit een paar keer per week, terwijl elke ronde 13
 // GitHub-aanroepen kost tegen een limiet van 60 per uur per IP. Een ruime cache
@@ -83,6 +88,7 @@ function App() {
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [phases, setPhases] = useState<Record<string, UpdatePhase["phase"]>>({});
   const refreshingRef = useRef(false);
   // Voorkomt dat de trage opstart-load van groupByStatus een klik overschrijft
   // die de gebruiker doet vóór die load klaar is (race bij opstart).
@@ -193,6 +199,17 @@ function App() {
     return () => window.removeEventListener("focus", onFocus);
   }, [scanInstalled]);
 
+  // Fasen van een stille update: wachten op sluiten, dan installeren.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    onUpdatePhase((p) => {
+      setPhases((prev) => ({ ...prev, [p.id]: p.phase }));
+    }).then((fn) => {
+      unlisten = fn;
+    });
+    return () => unlisten?.();
+  }, []);
+
   // Download-voortgang uit de backend.
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -204,10 +221,68 @@ function App() {
     return () => unlisten?.();
   }, []);
 
+  // Bijwerken: stil, met dezelfde soort setup als de bestaande installatie.
+  // Staat de tool open, dan wacht de backend tot de gebruiker hem sluit.
+  const handleUpdate = useCallback(
+    async (tool: CatalogTool) => {
+      const release = releases[tool.id];
+      const current = installed[tool.id];
+      setErrors(({ [tool.id]: _drop, ...rest }) => rest);
+      setNotes(({ [tool.id]: _drop, ...rest }) => rest);
+      const variant = pickUpdateVariant(release, current);
+      if (!variant) {
+        const kind = [current?.kind, current?.scope].filter(Boolean).join(", ");
+        setErrors((er) => ({ ...er, [tool.id]: t("update.noMatchingSetup", { kind }) }));
+        return;
+      }
+      setBusy((b) => ({ ...b, [tool.id]: true }));
+      try {
+        const outcome = await updateTool({
+          id: tool.id,
+          variant,
+          displayName: tool.name,
+          pubkey: tool.pubkey,
+          exePath: current?.exePath,
+        });
+        const version = release?.version ?? "";
+        const key =
+          outcome.mode !== "updated"
+            ? "installedDone"
+            : outcome.restartRequired
+              ? "update.restartRequired"
+              : outcome.relaunched
+                ? "update.doneRelaunched"
+                : "update.done";
+        setNotes((n) => ({ ...n, [tool.id]: t(key, { version }) }));
+        void scanInstalled();
+      } catch (e) {
+        setErrors((er) => ({
+          ...er,
+          [tool.id]: `${t("errors.updateFailed")}: ${String(e)}`,
+        }));
+      } finally {
+        setBusy(({ [tool.id]: _drop, ...rest }) => rest);
+        setProgress(({ [tool.id]: _drop, ...rest }) => rest);
+        setPhases(({ [tool.id]: _drop, ...rest }) => rest);
+      }
+    },
+    [releases, installed, t, scanInstalled],
+  );
+
+  const handleCancelUpdate = useCallback((tool: CatalogTool) => {
+    void cancelUpdate(tool.id);
+  }, []);
+
   const handleInstall = useCallback(
     async (tool: CatalogTool) => {
       const release = releases[tool.id];
       if (!release?.assetUrl || !release.assetName) return;
+      // Een geïnstalleerde tool met een bekende installatiesoort wordt stil
+      // bijgewerkt; een nieuwe installatie doorloopt gewoon de setup.
+      const current = installed[tool.id];
+      if (current?.kind && deriveStatus(tool, current, release) === "update_available") {
+        return handleUpdate(tool);
+      }
       setBusy((b) => ({ ...b, [tool.id]: true }));
       setErrors(({ [tool.id]: _drop, ...rest }) => rest);
       setNotes(({ [tool.id]: _drop, ...rest }) => rest);
@@ -236,7 +311,7 @@ function App() {
         setProgress(({ [tool.id]: _drop, ...rest }) => rest);
       }
     },
-    [releases, t, scanInstalled],
+    [releases, installed, t, scanInstalled, handleUpdate],
   );
 
   const handleLaunch = useCallback(
@@ -371,7 +446,9 @@ function App() {
       busy={busy[tool.id]}
       error={errors[tool.id]}
       note={notes[tool.id]}
+      phase={phases[tool.id]}
       onInstall={handleInstall}
+      onCancel={handleCancelUpdate}
       onLaunch={handleLaunch}
       onOpenTab={handleOpenTab}
     />
