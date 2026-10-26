@@ -13,7 +13,7 @@ De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](htt
 
 - **Catalogus** van alle OpenAEC-tools met omschrijving en categorie — desktop-apps én webtools
 - **Installatiedetectie**: ziet welke tools al geïnstalleerd zijn en welke versie (Windows: via het register; Linux: via de beheerde AppImage-map)
-- **Updatedetectie**: vergelijkt de geïnstalleerde versie met de laatste GitHub-release
+- **Updatedetectie**: vergelijkt de geïnstalleerde versie met de laatste GitHub-release; tools met een publieke sleutel worden via hun `latest.json` gecontroleerd en alleen geïnstalleerd als de handtekening klopt
 - **Eén klik installeren of bijwerken**: downloadt de officiële installer van GitHub Releases en start hem
 - **Starten** van geïnstalleerde tools
 - **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de installer zelf; open tabs worden onthouden en behouden hun staat bij wisselen. Openen in de externe browser blijft mogelijk
@@ -53,6 +53,19 @@ Voeg een entry toe aan [`src/data/catalog.ts`](src/data/catalog.ts):
 - `kind: "web"` — met alleen een `webUrl`
 
 De laatste release en het juiste installer-asset voor het platform (Windows: `-setup.exe`/`.msi`, Linux: `.AppImage`) worden automatisch via de GitHub API opgehaald.
+
+### Ondertekende updates
+
+Levert de release van een tool een ondertekende `latest.json` (Tauri: `bundle.createUpdaterArtifacts` plus de secrets `TAURI_SIGNING_PRIVATE_KEY(_PASSWORD)`), zet dan zijn publieke sleutel als `pubkey` in de catalogus. Die is gelijk aan `plugins.updater.pubkey` in de `tauri.conf.json` van de tool. De installer:
+
+- leest eerst `releases/latest/download/latest.json`; dat is een gewone download en telt niet mee voor de API-limiet van 60 per uur;
+- valt terug op de GitHub API als die ontbreekt of geen bruikbaar bestand voor het platform heeft, en haalt dan de `.sig` naast het asset op;
+- controleert de handtekening tijdens het downloaden en start niets als die ontbreekt of niet klopt;
+- pakt een `.nsis.zip` (het oudere updateformaat) na de controle uit tot de setup.
+
+Zet een sleutel alleen als `latest.json` dezelfde soort setup aanbiedt als de API-route. Open PDF Studio ondertekent bijvoorbeeld alleen zijn systeembrede setup, terwijl de installer de per-gebruiker-setup kiest.
+
+Controle tegen de echte release van Open Planner Studio (ongeveer 17 MB): `cd src-tauri && cargo test --lib -- --ignored`.
 
 ## Release maken
 

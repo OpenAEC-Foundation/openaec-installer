@@ -1,10 +1,17 @@
-//! Laatste releases ophalen via de GitHub API (ongeauthenticeerd, 60 req/uur —
-//! de frontend cachet het resultaat).
+//! Laatste releases ophalen.
 //!
-//! De versie wordt uit de naam van het installer-asset geparst in plaats van
-//! uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1) wijkt de tag
-//! af van de daadwerkelijke bestandsversie. Welk asset gekozen wordt hangt af
-//! van het platform: Windows-installers op Windows, AppImages op Linux.
+//! Tools met een publieke sleutel in de catalogus lezen eerst de `latest.json`
+//! van hun release (zie `manifest.rs`): geen API-limiet, de versie staat er
+//! expliciet in en elk bestand heeft een handtekening. Zonder sleutel, of als
+//! de release geen bruikbare `latest.json` heeft, valt het terug op de GitHub
+//! API (ongeauthenticeerd, 60 req/uur — de frontend cachet het resultaat).
+//!
+//! Op de API-route wordt de versie uit de naam van het installer-asset geparst
+//! in plaats van uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1)
+//! wijkt de tag af van de daadwerkelijke bestandsversie. Welk asset gekozen
+//! wordt hangt af van het platform: Windows-installers op Windows, AppImages op
+//! Linux. Heeft een tool met sleutel daar een `.sig` naast het asset, dan gaat
+//! die handtekening mee, zodat ook de terugvalroute gecontroleerd installeert.
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +23,9 @@ pub struct RepoRef {
     pub id: String,
     pub owner: String,
     pub repo: String,
+    /// Publieke minisign-sleutel van de tool (base64, zoals in tauri.conf.json).
+    #[serde(default)]
+    pub pubkey: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -36,6 +46,10 @@ pub struct ReleaseInfo {
     /// (epoch-seconden, uit de x-ratelimit-reset header). Hiermee kan de app
     /// tonen wanneer het weer kan en tot dan onnodige pogingen overslaan.
     pub rate_limit_reset: Option<u64>,
+    /// Handtekening van het asset (base64), als de release er een levert.
+    pub signature: Option<String>,
+    /// "manifest" (via latest.json) of "api" (via de GitHub API).
+    pub source: Option<&'static str>,
 }
 
 pub async fn fetch_all(repos: Vec<RepoRef>) -> Vec<ReleaseInfo> {
@@ -54,6 +68,42 @@ pub async fn fetch_all(repos: Vec<RepoRef>) -> Vec<ReleaseInfo> {
 }
 
 async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
+    if repo.pubkey.is_some() {
+        if let Ok(Some(manifest)) = crate::manifest::fetch(&client, &repo.owner, &repo.repo).await {
+            if let Some(entry) = crate::manifest::pick(&manifest) {
+                return from_manifest(&repo, &manifest, entry);
+            }
+        }
+    }
+    fetch_api(client, repo).await
+}
+
+fn from_manifest(
+    repo: &RepoRef,
+    manifest: &crate::manifest::Manifest,
+    entry: &crate::manifest::PlatformEntry,
+) -> ReleaseInfo {
+    ReleaseInfo {
+        id: repo.id.clone(),
+        ok: true,
+        error: None,
+        tag: None,
+        version: Some(manifest.version.trim_start_matches('v').to_string()),
+        asset_name: Some(crate::manifest::file_name(&entry.url).to_string()),
+        asset_url: Some(entry.url.clone()),
+        asset_size: None,
+        page_url: Some(format!(
+            "https://github.com/{}/{}/releases/latest",
+            repo.owner, repo.repo
+        )),
+        published_at: manifest.pub_date.clone(),
+        rate_limit_reset: None,
+        signature: Some(entry.signature.clone()),
+        source: Some("manifest"),
+    }
+}
+
+async fn fetch_api(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
     let url = format!(
         "https://api.github.com/repos/{}/{}/releases/latest",
         repo.owner, repo.repo
@@ -114,6 +164,15 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         .and_then(extract_version)
         .or_else(|| tag.as_deref().map(|t| t.trim_start_matches('v').to_string()));
 
+    // Alleen voor tools met een sleutel: zonder sleutel valt er niets te controleren.
+    let signature = match (&repo.pubkey, asset_name.as_deref()) {
+        (Some(_), Some(name)) => match signature_url(&assets, name) {
+            Some(sig_url) => fetch_signature(&client, &sig_url).await,
+            None => None,
+        },
+        _ => None,
+    };
+
     ReleaseInfo {
         id: repo.id,
         ok: true,
@@ -126,7 +185,28 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         page_url,
         published_at,
         rate_limit_reset: None,
+        signature,
+        source: Some("api"),
     }
+}
+
+/// De download-URL van `<asset>.sig` op dezelfde release, als die er is.
+fn signature_url(assets: &[serde_json::Value], asset_name: &str) -> Option<String> {
+    let wanted = format!("{asset_name}.sig");
+    assets
+        .iter()
+        .find(|a| a["name"].as_str() == Some(wanted.as_str()))
+        .and_then(|a| a["browser_download_url"].as_str())
+        .map(str::to_string)
+}
+
+/// Een `.sig` is een gewone download (geen API-aanroep). Mislukt het ophalen,
+/// dan blijft de handtekening leeg en weigert de installatie later netjes.
+async fn fetch_signature(client: &reqwest::Client, url: &str) -> Option<String> {
+    let resp = client.get(url).send().await.ok()?.error_for_status().ok()?;
+    let text = resp.text().await.ok()?;
+    let text = text.trim();
+    (!text.is_empty()).then(|| text.to_string())
 }
 
 /// Kies het juiste asset voor het huidige platform. `cfg!` in plaats van
@@ -220,6 +300,8 @@ fn error_info(id: String, error: String) -> ReleaseInfo {
         page_url: None,
         published_at: None,
         rate_limit_reset: None,
+        signature: None,
+        source: None,
     }
 }
 
@@ -254,6 +336,23 @@ mod tests {
         assert!(user > system && system > msi && msi.is_some());
         assert_eq!(score_windows_asset("Open.PDF.Studio_1.67.0_x64-setup.exe.sig"), None);
         assert_eq!(score_windows_asset("Open.2D.Studio_0.35.0_amd64.AppImage"), None);
+    }
+
+    #[test]
+    fn finds_the_signature_next_to_the_asset() {
+        let assets: Vec<serde_json::Value> = serde_json::from_str(
+            r#"[
+                { "name": "App_1.0.0_x64-setup.exe", "browser_download_url": "https://github.com/a/b/releases/download/v1.0.0/App_1.0.0_x64-setup.exe" },
+                { "name": "App_1.0.0_x64-setup.exe.sig", "browser_download_url": "https://github.com/a/b/releases/download/v1.0.0/App_1.0.0_x64-setup.exe.sig" },
+                { "name": "App_1.0.0_x64_user-setup.exe", "browser_download_url": "https://github.com/a/b/releases/download/v1.0.0/App_1.0.0_x64_user-setup.exe" }
+            ]"#,
+        )
+        .unwrap();
+        assert_eq!(
+            signature_url(&assets, "App_1.0.0_x64-setup.exe").as_deref(),
+            Some("https://github.com/a/b/releases/download/v1.0.0/App_1.0.0_x64-setup.exe.sig")
+        );
+        assert_eq!(signature_url(&assets, "App_1.0.0_x64_user-setup.exe"), None);
     }
 
     #[test]

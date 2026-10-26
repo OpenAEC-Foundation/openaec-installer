@@ -25,6 +25,10 @@ export interface ReleaseInfo {
   publishedAt: string | null;
   /** Bij error "rate_limited": epoch-seconden waarop de limiet vrijgeeft. */
   rateLimitReset?: number | null;
+  /** Handtekening van het asset (base64), als de release er een levert. */
+  signature?: string | null;
+  /** "manifest" via latest.json, "api" via de GitHub API. */
+  source?: "manifest" | "api" | null;
 }
 
 export interface InstallOutcome {
@@ -56,11 +60,11 @@ export async function getInstalledTools(): Promise<InstalledTool[]> {
 export async function getLatestReleases(): Promise<ReleaseInfo[]> {
   const repos = DESKTOP_TOOLS.filter((t) => t.repo).map((t) => {
     const [owner, repo] = t.repo!.split("/");
-    return { id: t.id, owner, repo };
+    return { id: t.id, owner, repo, pubkey: t.pubkey ?? null };
   });
   // De installer controleert in dezelfde ronde zijn eigen laatste versie.
   const [selfOwner, selfName] = SELF_REPO.split("/");
-  repos.push({ id: SELF_ID, owner: selfOwner, repo: selfName });
+  repos.push({ id: SELF_ID, owner: selfOwner, repo: selfName, pubkey: null });
   return invoke<ReleaseInfo[]>("get_latest_releases", { repos });
 }
 
@@ -83,12 +87,16 @@ export async function downloadAndRunInstaller(
   url: string,
   fileName: string,
   displayName?: string,
+  verify?: { signature?: string | null; pubkey?: string | null },
 ): Promise<InstallOutcome> {
   return invoke<InstallOutcome>("download_and_run_installer", {
     id,
     url,
     fileName,
     displayName: displayName ?? null,
+    // Met een sleutel weigert de backend te installeren zonder kloppende handtekening.
+    signature: verify?.signature ?? null,
+    pubkey: verify?.pubkey ?? null,
   });
 }
 

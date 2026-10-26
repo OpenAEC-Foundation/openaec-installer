@@ -2,7 +2,9 @@ mod github;
 mod installer;
 #[cfg(target_os = "linux")]
 mod linux;
+mod manifest;
 mod registry;
+mod signature;
 
 /// Scan op geïnstalleerde OpenAEC-tools (Windows-register / Linux-appmap).
 #[tauri::command]
@@ -18,6 +20,7 @@ async fn get_latest_releases(repos: Vec<github::RepoRef>) -> Vec<github::Release
 
 /// Download een installer-asset naar temp en installeer hem op de manier die
 /// bij het platform past (Windows: setup starten; Linux: AppImage plaatsen).
+/// Met `pubkey` moet `signature` kloppen, anders wordt er niets geïnstalleerd.
 #[tauri::command]
 async fn download_and_run_installer(
     app: tauri::AppHandle,
@@ -25,8 +28,10 @@ async fn download_and_run_installer(
     url: String,
     file_name: String,
     display_name: Option<String>,
+    signature: Option<String>,
+    pubkey: Option<String>,
 ) -> Result<installer::InstallOutcome, String> {
-    installer::download_and_run(app, id, url, file_name, display_name).await
+    installer::download_and_run(app, id, url, file_name, display_name, signature, pubkey).await
 }
 
 /// Start een geïnstalleerde tool.

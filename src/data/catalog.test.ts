@@ -26,3 +26,21 @@ describe("verborgen tools", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+describe("publieke sleutels", () => {
+  it("zijn base64 van een minisign-sleutelbestand, zoals in tauri.conf.json", () => {
+    for (const tool of ALL_TOOLS.filter((t) => t.pubkey)) {
+      const lines = atob(tool.pubkey!).trim().split("\n");
+      expect(lines, tool.id).toHaveLength(2);
+      expect(lines[0], tool.id).toMatch(/^untrusted comment: minisign public key: [0-9A-F]{16}$/);
+      expect(lines[1], tool.id).toMatch(/^RW[A-Za-z0-9+/]{54}$/);
+    }
+  });
+
+  it("horen alleen bij desktop-tools met een repo", () => {
+    for (const tool of ALL_TOOLS.filter((t) => t.pubkey)) {
+      expect(tool.kind, tool.id).toBe("desktop");
+      expect(tool.repo, tool.id).toBeTruthy();
+    }
+  });
+});

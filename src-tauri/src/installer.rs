@@ -5,6 +5,12 @@
 //! setup-UI. Linux: de AppImage wordt direct geïnstalleerd (zie `linux.rs`);
 //! er is geen setup-UI. Het verschil wordt via `InstallOutcome.mode` aan de
 //! frontend doorgegeven zodat die de juiste melding toont.
+//!
+//! Heeft de tool een publieke sleutel in de catalogus, dan loopt de controle
+//! van de handtekening mee met het downloaden (zie `signature.rs`). Ontbreekt
+//! de handtekening of klopt hij niet, dan wordt er niets gestart. Een
+//! `.nsis.zip` (het oudere updateformaat van Tauri) wordt na die controle
+//! uitgepakt tot de setup die erin zit.
 
 use serde::Serialize;
 use tauri::Emitter;
@@ -36,6 +42,8 @@ pub async fn download_and_run(
     url: String,
     file_name: String,
     display_name: Option<String>,
+    signature: Option<String>,
+    pubkey: Option<String>,
 ) -> Result<InstallOutcome, String> {
     // Alleen GitHub release-assets toestaan.
     if !url.starts_with("https://github.com/") {
@@ -45,6 +53,15 @@ pub async fn download_and_run(
     if file_name.contains('/') || file_name.contains('\\') || file_name.contains("..") {
         return Err("Ongeldige bestandsnaam.".into());
     }
+    // Een tool met sleutel installeert alleen met een kloppende handtekening.
+    let check = match (pubkey.as_deref(), signature.as_deref()) {
+        (Some(key), Some(sig)) => Some(crate::signature::Check::new(key, sig)?),
+        (Some(_), None) => {
+            return Err("Deze release heeft geen handtekening; er is niets gedownload of geïnstalleerd.".into())
+        }
+        (None, _) => None,
+    };
+    let mut verifier = check.as_ref().map(|c| c.verifier()).transpose()?;
 
     let dir = std::env::temp_dir().join("openaec-installer");
     std::fs::create_dir_all(&dir).map_err(|e| format!("tempmap: {e}"))?;
@@ -74,6 +91,9 @@ pub async fn download_and_run(
     while let Some(chunk) = stream.next().await {
         let chunk = chunk.map_err(|e| format!("download: {e}"))?;
         file.write_all(&chunk).map_err(|e| format!("bestand: {e}"))?;
+        if let Some(v) = verifier.as_mut() {
+            v.update(&chunk);
+        }
         downloaded += chunk.len() as u64;
         // Niet elke chunk een event — throttle op 512 kB.
         if downloaded - last_emit >= 512 * 1024 {
@@ -101,11 +121,62 @@ pub async fn download_and_run(
         },
     );
 
+    if let Some(mut v) = verifier {
+        if v.finalize().is_err() {
+            let _ = std::fs::remove_file(&target);
+            return Err("De handtekening klopt niet; het bestand is verwijderd en er is niets geïnstalleerd.".into());
+        }
+    }
+
+    let target = if file_name.to_ascii_lowercase().ends_with(".nsis.zip") {
+        unpack_setup(&target, &dir)?
+    } else {
+        target
+    };
+
     let mode = run_installer(&id, display_name.as_deref(), &target)?;
     Ok(InstallOutcome {
         path: target.to_string_lossy().into_owned(),
         mode,
     })
+}
+
+/// Haal de setup uit een `.nsis.zip`: precies één `.exe` in de hoofdmap.
+#[cfg(windows)]
+fn unpack_setup(
+    zip_path: &std::path::Path,
+    dir: &std::path::Path,
+) -> Result<std::path::PathBuf, String> {
+    let file = std::fs::File::open(zip_path).map_err(|e| format!("uitpakken: {e}"))?;
+    let mut archive = zip::ZipArchive::new(file).map_err(|e| format!("uitpakken: {e}"))?;
+    let names = archive
+        .file_names()
+        .map(|n| n.map(|n| n.into_owned()))
+        .collect::<Result<Vec<String>, _>>()
+        .map_err(|e| format!("uitpakken: {e}"))?;
+    let setups: Vec<String> = names
+        .into_iter()
+        .filter(|n| n.to_ascii_lowercase().ends_with(".exe"))
+        .collect();
+    let [name] = setups.as_slice() else {
+        return Err("uitpakken: verwacht precies één setup in het zip-bestand".into());
+    };
+    if name.contains('/') || name.contains('\\') || name.contains("..") {
+        return Err("uitpakken: ongeldige bestandsnaam in het zip-bestand".into());
+    }
+    let out = dir.join(name);
+    let mut entry = archive.by_name(name).map_err(|e| format!("uitpakken: {e}"))?;
+    let mut dest = std::fs::File::create(&out).map_err(|e| format!("uitpakken: {e}"))?;
+    std::io::copy(&mut entry, &mut dest).map_err(|e| format!("uitpakken: {e}"))?;
+    Ok(out)
+}
+
+#[cfg(not(windows))]
+fn unpack_setup(
+    _zip_path: &std::path::Path,
+    _dir: &std::path::Path,
+) -> Result<std::path::PathBuf, String> {
+    Err("Een .nsis.zip is alleen voor Windows.".into())
 }
 
 #[cfg(windows)]
@@ -232,4 +303,49 @@ pub fn launch(exe_path: &str) -> Result<(), String> {
 #[cfg(not(any(windows, target_os = "linux")))]
 pub fn launch(_exe_path: &str) -> Result<(), String> {
     Err("Starten wordt op dit platform nog niet ondersteund.".into())
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::*;
+    use std::io::Write;
+
+    fn zip_with(dir: &std::path::Path, entries: &[(&str, &[u8])]) -> std::path::PathBuf {
+        let path = dir.join("test.nsis.zip");
+        let mut zip = zip::ZipWriter::new(std::fs::File::create(&path).unwrap());
+        for (name, data) in entries {
+            zip.start_file(*name, zip::write::SimpleFileOptions::default()).unwrap();
+            zip.write_all(data).unwrap();
+        }
+        zip.finish().unwrap();
+        path
+    }
+
+    fn temp_dir(name: &str) -> std::path::PathBuf {
+        let dir = std::env::temp_dir().join(format!("openaec-installer-test-{name}-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    #[test]
+    fn unpacks_the_single_setup() {
+        let dir = temp_dir("ok");
+        let zip = zip_with(&dir, &[("Open Planner Studio_2026.43.0_x64-setup.exe", b"MZ setup")]);
+        let out = unpack_setup(&zip, &dir).unwrap();
+        assert_eq!(out.file_name().unwrap(), "Open Planner Studio_2026.43.0_x64-setup.exe");
+        assert_eq!(std::fs::read(&out).unwrap(), b"MZ setup");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn refuses_zero_two_or_nested_setups() {
+        let dir = temp_dir("bad");
+        let none = zip_with(&dir, &[("readme.txt", b"x")]);
+        assert!(unpack_setup(&none, &dir).is_err());
+        let two = zip_with(&dir, &[("a-setup.exe", b"a"), ("b-setup.exe", b"b")]);
+        assert!(unpack_setup(&two, &dir).is_err());
+        let nested = zip_with(&dir, &[("../evil-setup.exe", b"x")]);
+        assert!(unpack_setup(&nested, &dir).is_err());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }

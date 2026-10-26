@@ -36,8 +36,10 @@ import "./App.css";
 
 // ".v2" sinds het gekozen asset platform-afhankelijk is: een cache van een
 // oudere versie kan nog Windows-installers bevatten, wat op Linux een
-// "AppImage verwacht"-fout bij het installeren zou geven.
-const RELEASE_CACHE_KEY = "releaseCache.v2";
+// "AppImage verwacht"-fout bij het installeren zou geven. ".v3" sinds releases
+// een handtekening meedragen: zonder die handtekening weigert een tool met
+// sleutel te installeren.
+const RELEASE_CACHE_KEY = "releaseCache.v3";
 const TABS_KEY = "openTabs";
 // Releases veranderen hooguit een paar keer per week, terwijl elke ronde 13
 // GitHub-aanroepen kost tegen een limiet van 60 per uur per IP. Een ruime cache
@@ -215,6 +217,7 @@ function App() {
           release.assetUrl,
           release.assetName,
           tool.name,
+          { signature: release.signature, pubkey: tool.pubkey },
         );
         // Op Linux is de tool direct geïnstalleerd (geen setup-UI): andere
         // melding, en meteen opnieuw scannen zodat de status verspringt.
