@@ -1,8 +1,5 @@
 name: Onderteken gecontroleerde Linux-pakketten
 on:
-  push:
-    branches: [codex/ecosystem-signature-audit-20261029]
-    paths: ['tools/signature-audit/unsigned-linux.json', 'tools/signature-audit/linux_sign.py', '.github/workflows/ecosystem-linux-signing.yml']
   workflow_dispatch:
 permissions:
   contents: read

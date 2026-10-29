@@ -21,7 +21,8 @@ def sign(a):
  signature=pathlib.Path(str(path)+'.asc')
  gpg(['--yes','--pinentry-mode','loopback','--passphrase-fd','0','--local-user',fingerprint,'--armor','--detach-sign','--output',str(signature),str(path)],input=(os.environ.get('OPENAEC_GPG_PASSPHRASE','')+'\n').encode())
  verification=gpg(['--status-fd','1','--verify',str(signature),str(path)]).stdout.decode()
- if '[GNUPG:] VALIDSIG '+fingerprint not in verification:raise RuntimeError('Onverwachte ondertekenaar: '+a['name'])
+ valid=any(line.startswith('[GNUPG:] VALIDSIG ') and fingerprint in line.split()[2:] for line in verification.splitlines())
+ if not valid:raise RuntimeError('Onverwachte ondertekenaar: '+a['name'])
  result=a|{'status':'OpenPGP: geldig ondertekend met bestaande organisatiesleutel','fingerprint':fingerprint,'signature_path':str(signature),'signature_sha256':hashlib.file_digest(open(signature,'rb'),'sha256').hexdigest(),'verification_output':verification}
  path.unlink()
  print(a['repo'],a['tag'],a['name'],result['status'],flush=True)
