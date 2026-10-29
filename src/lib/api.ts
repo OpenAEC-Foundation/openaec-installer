@@ -13,12 +13,13 @@ export interface InstalledTool {
   /** "user" (per gebruiker) of "machine" (voor de hele pc). */
   scope?: "user" | "machine" | null;
   /** Met welk soort setup de tool erop kwam; een update gebruikt dezelfde soort. */
-  kind?: "nsis" | "msi" | "appimage" | null;
+  kind?: "nsis" | "msi" | "inno" | "appimage" | null;
 }
 
 /** Eén soort setup in een release. */
 export interface ReleaseVariant {
-  kind: "nsis" | "nsisUser" | "msi" | "appimage";
+  /** "inno" en "innoUser" zet de installer zelf, voor een Inno Setup-installatie. */
+  kind: "nsis" | "nsisUser" | "msi" | "appimage" | "inno" | "innoUser";
   assetName: string;
   assetUrl: string;
   signature: string | null;

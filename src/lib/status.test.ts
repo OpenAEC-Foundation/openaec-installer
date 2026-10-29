@@ -62,6 +62,13 @@ describe("setup voor een update", () => {
     expect(pickUpdateVariant(planner, installed("nsis", "user"))?.kind).toBe("nsis");
   });
 
+  it("draait een Inno Setup-installatie met de vlaggen van Inno, in dezelfde modus", () => {
+    const pointcloud = { ...pdf, variants: [variant("nsis", "open-pointcloud-studio_2026.44.1_x64-setup.exe")] };
+    expect(pickUpdateVariant(pointcloud, installed("inno", "user"))).toMatchObject({ kind: "innoUser", assetName: "open-pointcloud-studio_2026.44.1_x64-setup.exe" });
+    expect(pickUpdateVariant(pointcloud, installed("inno", "machine"))?.kind).toBe("inno");
+    expect(pickUpdateVariant({ ...pdf, variants: [] }, installed("inno", "user"))).toBeNull();
+  });
+
   it("kiest niets zonder bekende installatiesoort of zonder varianten", () => {
     expect(pickUpdateVariant(pdf, installed(null, null))).toBeNull();
     expect(pickUpdateVariant({ ...pdf, variants: undefined }, installed("nsis", "user"))).toBeNull();
