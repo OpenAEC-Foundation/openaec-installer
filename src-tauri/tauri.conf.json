@@ -14,8 +14,8 @@
     "windows": [
       {
         "title": "OpenAEC Installer",
-        "width": 1180,
-        "height": 780,
+        "width": 1280,
+        "height": 800,
         "minWidth": 860,
         "minHeight": 560,
         "resizable": true,

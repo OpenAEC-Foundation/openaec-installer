@@ -1,7 +1,7 @@
 {
   "appName": "OpenAEC Installer",
   "subtitle": "Open-source software for construction — install, update and launch",
-  "search": "Search for a tool...",
+  "search": "Search a tool",
   "refresh": "Refresh",
   "refreshing": "Refreshing...",
   "ok": "OK",
@@ -12,7 +12,6 @@
   "minimize": "Minimize",
   "maximize": "Maximize",
   "restore": "Restore",
-  "groupByStatus": "Group by status",
   "sections": {
     "desktop": "Desktop apps",
     "web": "Web tools",
@@ -36,11 +35,14 @@
     "downloading": "Downloading...",
     "starting": "Starting installer...",
     "cancel": "Cancel",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "launchCurrent": "Launch current version"
   },
   "versions": {
     "installed": "installed",
-    "latest": "latest"
+    "latest": "latest",
+    "available": "v{{version}} available",
+    "webtool": "web tool"
   },
   "categories": {
     "calculatie": "Estimating",
@@ -99,5 +101,54 @@
     "restartRequired": "Updated to v{{version}}. Restart Windows to finish.",
     "noMatchingSetup": "The latest release has no setup that matches this installation ({{kind}}). Update via the release page on GitHub.",
     "alreadyCurrent": "Already up to date (v{{version}})."
+  },
+  "hero": {
+    "label": "OpenAEC Installer",
+    "title": "All construction software,",
+    "titleAccent": "one place.",
+    "lead": "Discover, install, update and launch the open source tools of the OpenAEC Foundation.",
+    "updateAll": "Update all ({{count}})",
+    "allCurrent": "Everything is up to date",
+    "check": "Check for updates",
+    "checking": "Checking…",
+    "tools": "Tools",
+    "installed": "Installed",
+    "updates": "Updates",
+    "web": "Web tools",
+    "newVersion": "New version",
+    "featured": "Featured",
+    "show": "Show {{name}}"
+  },
+  "filters": {
+    "label": "Filter",
+    "all": "All",
+    "installed": "Installed",
+    "updates": "Updates",
+    "A": "Architecture",
+    "E": "Engineering",
+    "C": "Construction",
+    "I": "Infra & Civil"
+  },
+  "catalog": {
+    "desktopLabel": "Desktop apps · {{count}}",
+    "desktopTitle": "Install and launch on your computer",
+    "desktopText": "Windows installers and AppImages from GitHub Releases. The installer knows which version you have.",
+    "webLabel": "Web tools · {{count}}",
+    "webTitle": "Right in your browser",
+    "webText": "No installation needed. They open in the installer or in your own browser.",
+    "noDesktop": "No desktop apps for this filter.",
+    "noWeb": "No web tools for this filter.",
+    "divider": "Web tools"
+  },
+  "stage": {
+    "alpha": "Alpha",
+    "beta": "Beta",
+    "development": "In development"
+  },
+  "chips": {
+    "busy": "Busy",
+    "update": "Update",
+    "web": "Web",
+    "installed": "Installed"
   }
 }

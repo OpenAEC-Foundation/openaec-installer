@@ -1,0 +1,221 @@
+/* Donker vlak van installervoorstel E. Het vlak, de glazen kaart en de knoppen
+   komen uit openaec-components.css (.oa-dark-band, .oa-glass-card,
+   .oa-site-button); hier alleen de opbouw. Binnen het vlak gelden de kleuren van
+   het thema Donker, zodat de knoppen en chips erin kloppen. */
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 40px 44px 40px 48px;
+  /* Het donkere thema binnen het vlak, behalve bij High contrast. */
+  --oa-text: #EDEBE8;
+  --oa-text-secondary: #B8B5B0;
+  --oa-border: rgba(255, 255, 255, 0.12);
+  --oa-raised: #3A3A44;
+  --oa-frame: #2A2A32;
+  --oa-hover: rgba(255, 255, 255, 0.08);
+  --oa-accent-text: #F59E0B;
+  --oa-c-shine: rgba(255, 255, 255, 0.08);
+  --oa-c-shadow: rgba(0, 0, 0, 0.44);
+  --oa-c-chip: rgba(255, 255, 255, 0.06);
+  color: var(--oa-text);
+}
+
+[data-oa-theme^="high-contrast"] .hero {
+  --oa-text: inherit;
+  --oa-text-secondary: inherit;
+  --oa-border: inherit;
+  --oa-raised: inherit;
+  --oa-frame: inherit;
+  --oa-hover: inherit;
+  --oa-accent-text: inherit;
+}
+
+.hero-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Sectielabel van open-aec.com: mono hoofdletters op een amber tint, rond, met
+   een amber stip. Ook gebruikt boven de secties van de catalogus. */
+.site-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--oa-accent) 15%, transparent);
+  color: var(--oa-accent-text);
+  font: 12px / 1.2 var(--oa-font-mono);
+  letter-spacing: var(--oa-letter-spacing-mono-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--oa-accent);
+}
+
+[data-oa-theme^="high-contrast"] .site-label {
+  background: var(--oa-panel);
+  border: 1px solid var(--oa-accent);
+}
+
+.hero-title {
+  margin: 0;
+  font: 700 40px / 1.12 var(--oa-font-heading);
+  letter-spacing: var(--oa-letter-spacing-heading);
+  color: #fff;
+}
+
+[data-oa-theme^="high-contrast"] .hero-title {
+  color: var(--oa-text);
+}
+
+.hero-title-accent {
+  color: var(--oa-accent-text);
+}
+
+.hero-lead {
+  margin: 0;
+  max-width: 520px;
+  font: 16px / 1.5 var(--oa-font-body);
+  color: var(--oa-text-secondary);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.hero-actions .oa-site-button--glass:disabled {
+  background: var(--oa-c-glass);
+  border-color: var(--oa-c-glass-border);
+  color: var(--oa-text-secondary);
+}
+
+.hero-actions .oa-site-button--glass .oa-icon {
+  --icon-accent: currentColor;
+}
+
+.hero-spin {
+  display: inline-flex;
+  animation: hero-spin 1s linear infinite;
+}
+
+@keyframes hero-spin {
+  to { transform: rotate(360deg); }
+}
+
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin: 4px 0 0;
+  font: 12px / 1.2 var(--oa-font-mono);
+  letter-spacing: var(--oa-letter-spacing-mono-label);
+  text-transform: uppercase;
+}
+
+.hero-stats div {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 6px;
+}
+
+.hero-stats dt {
+  color: var(--oa-text-secondary);
+}
+
+.hero-stats dd {
+  margin: 0;
+  color: var(--oa-text);
+}
+
+/* Rechts: de uitgelichte tool. */
+.hero-spot {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 0 1 460px;
+  min-width: 340px;
+  padding: 16px;
+}
+
+.hero-spot-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hero-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.hero-dots button {
+  width: 22px;
+  height: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+}
+
+.hero-dots button.active {
+  background: var(--oa-accent);
+}
+
+.hero-shot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 640 / 304;
+  object-fit: cover;
+  border-radius: 8px;
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
+}
+
+.hero-shot-empty {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--oa-accent) 14%, transparent), transparent);
+}
+
+.hero-spot-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-spot-name {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-spot-name b {
+  font: 700 18px / 1.25 var(--oa-font-heading);
+  color: var(--oa-text);
+}
+
+/* Smal venster: alleen de tekst, zonder uitgelichte tool. */
+@media (max-width: 1040px) {
+  .hero-spot {
+    display: none;
+  }
+}

@@ -4,10 +4,16 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import type { CatalogTool } from "../data/catalog";
 import type { DownloadProgress, InstalledTool, ReleaseInfo, UpdatePhase } from "../lib/api";
 import type { ToolStatus } from "../lib/status";
-import CategoryIcon from "./CategoryIcon";
+import B2Icon, { GitHubMark } from "./B2Icon";
 import "./ToolCard.css";
 
-interface ToolCardProps {
+/**
+ * Een tool als websitetegel van installervoorstel E (OpenAEC-Blueprint#13 en
+ * #16, `ui04 -- installer` in de galerij): schermafbeelding die in de tegel
+ * vervaagt, logo of categorie-icoon naast de naam, discipline- en statuschips,
+ * omschrijving, versie in mono, de hoofdknop en ronde knoppen.
+ */
+export interface ToolCardProps {
   tool: CatalogTool;
   status: ToolStatus;
   installed?: InstalledTool;
@@ -26,56 +32,137 @@ interface ToolCardProps {
   onOpenTab?: (tool: CatalogTool) => void;
 }
 
-function statusBadge(status: ToolStatus): { className: string; labelKey: string } {
-  switch (status) {
-    case "installed_latest":
-    case "installed_unknown":
-      return { className: "badge badge-success", labelKey: "status.installed" };
-    case "update_available":
-      return { className: "badge badge-update", labelKey: "status.updateAvailable" };
-    case "web_only":
-      return { className: "badge badge-info", labelKey: "status.web" };
-    default:
-      return { className: "badge badge-muted", labelKey: "status.notInstalled" };
-  }
+const open = (url?: string) => {
+  if (url) openUrl(url).catch(() => {});
+};
+
+/** Het eigen logo van de tool in een amberkleurige tegel, anders het categorie-icoon. */
+export function ToolLogo({ tool, size }: { tool: CatalogTool; size: number }) {
+  return (
+    <span className="oa-icon-tile oa-icon-tile--amber tool-logo" style={{ width: size, height: size }}>
+      {tool.logo ? <img src={tool.logo} alt="" /> : <B2Icon id={`tools.category-${tool.category}`} size={Math.round(size * 0.55)} />}
+    </span>
+  );
 }
 
-export default function ToolCard({
+/** Versie in mono: geïnstalleerd, een pijl en de nieuwe versie in het accent. */
+export function VersionLine({ tool, status, installed, release }: Pick<ToolCardProps, "tool" | "status" | "installed" | "release">) {
+  const { t } = useTranslation();
+  const latest = release?.ok ? release.version : null;
+  if (tool.kind === "web") {
+    return (
+      <span className="version-line">
+        <B2Icon id="link.open-external" size={12} />
+        {t("versions.webtool")}
+      </span>
+    );
+  }
+  if (installed?.version) {
+    return (
+      <span className="version-line">
+        <span className="version-check">
+          <B2Icon id="status.success" size={12} />
+        </span>
+        <span title={t("versions.installed")}>v{installed.version}</span>
+        {/* De pijl alleen bij een echte update: "→ zelfde versie" zou ten onrechte
+            suggereren dat de geïnstalleerde versie niet actueel is. */}
+        {status === "update_available" && latest && (
+          <>
+            <span>→</span>
+            <span className="version-latest" title={t("versions.latest")}>v{latest}</span>
+          </>
+        )}
+      </span>
+    );
+  }
+  return <span className="version-line">{latest ? t("versions.available", { version: latest }) : "—"}</span>;
+}
+
+/**
+ * De hoofdknop van een tool: openen, installeren, bijwerken of starten; tijdens
+ * het downloaden de voortgang. Ook gebruikt in het uitgelichte vak bovenaan.
+ */
+export function PrimaryAction({
   tool,
   status,
   installed,
   release,
   progress,
   busy,
-  error,
-  note,
   phase,
   onInstall,
   onCancel,
   onLaunch,
   onOpenTab,
 }: ToolCardProps) {
+  const { t } = useTranslation();
+  const waiting = phase === "waiting";
+  // Balk zichtbaar houden tot de hele installatie-aanroep afrondt (busy zakt):
+  // anders knippert de kaart rond het einde (balk weg → lege regel → melding).
+  const downloading = !waiting && !!progress && (!progress.done || !!busy);
+  const pct = progress && progress.total ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100)) : null;
+
+  if (downloading) {
+    return (
+      <div className="tool-progress" role="progressbar" aria-valuenow={pct ?? undefined}>
+        <div className="oa-progress">
+          <span className={pct === null ? "indeterminate" : undefined} style={pct !== null ? { width: `${pct}%` } : undefined} />
+        </div>
+        <span className="tool-progress-label">
+          {progress?.done
+            ? t(phase === "installing" ? "actions.updating" : "actions.starting")
+            : `${t("actions.downloading")} ${pct !== null ? `${pct}%` : ""}`}
+        </span>
+      </div>
+    );
+  }
+  if (tool.kind === "web") {
+    return (
+      <button className="oa-site-button oa-site-button--primary oa-site-button--small" onClick={() => onOpenTab?.(tool)}>
+        <B2Icon id="software.open-webtab" />
+        {t("actions.open")}
+      </button>
+    );
+  }
+  if (waiting) {
+    return (
+      <button className="oa-site-button oa-site-button--small" onClick={() => onCancel?.(tool)}>
+        {t("actions.cancel")}
+      </button>
+    );
+  }
+  const canInstall = !!release?.assetUrl && (status === "not_installed" || status === "update_available");
+  if (canInstall) {
+    const update = status === "update_available";
+    return (
+      <button className="oa-site-button oa-site-button--primary oa-site-button--small" disabled={busy} onClick={() => onInstall?.(tool)}>
+        <B2Icon id={update ? "software.update" : "software.install"} />
+        {busy
+          ? t(phase === "installing" ? "actions.updating" : "actions.downloading")
+          : t(update ? "actions.update" : "actions.install")}
+      </button>
+    );
+  }
+  if (installed?.exePath) {
+    return (
+      <button className="oa-site-button oa-site-button--primary oa-site-button--small" onClick={() => onLaunch?.(tool)}>
+        <B2Icon id="software.launch" />
+        {t("actions.launch")}
+      </button>
+    );
+  }
+  return null;
+}
+
+export default function ToolCard(props: ToolCardProps) {
+  const { tool, status, installed, release, progress, busy, error, note, phase, onLaunch, onOpenTab } = props;
   const { t, i18n } = useTranslation();
   const [previewFailed, setPreviewFailed] = useState(false);
   const lang = i18n.language?.startsWith("en") ? "en" : "nl";
-  const badge = statusBadge(status);
-
-  const latestVersion = release?.ok ? release.version : null;
-  const canInstall =
-    tool.kind === "desktop" &&
-    !!release?.assetUrl &&
-    (status === "not_installed" || status === "update_available");
-  const canLaunch = !!installed?.exePath;
-  // Balk zichtbaar houden tot de hele installatie-aanroep afrondt (busy zakt):
-  // anders knippert de kaart rond het einde (balk weg → lege regel → melding).
-  // Wacht de update tot de gebruiker de tool sluit, dan staat die vraag in
-  // beeld in plaats van de voortgangsbalk.
+  const update = status === "update_available";
   const waiting = phase === "waiting";
   const downloading = !waiting && !!progress && (!progress.done || !!busy);
-  const pct =
-    progress && progress.total
-      ? Math.min(100, Math.round((progress.downloaded / progress.total) * 100))
-      : null;
+  const canLaunch = tool.kind === "desktop" && !!installed?.exePath;
 
   const releaseError = (() => {
     if (tool.kind !== "desktop") return null;
@@ -84,9 +171,7 @@ export default function ToolCard({
       // "probeer later opnieuw".
       if (release.error === "rate_limited" && release.rateLimitReset) {
         return t("errors.rateLimitedUntil", {
-          time: new Intl.DateTimeFormat(i18n.language, { timeStyle: "short" }).format(
-            new Date(release.rateLimitReset * 1000),
-          ),
+          time: new Intl.DateTimeFormat(i18n.language, { timeStyle: "short" }).format(new Date(release.rateLimitReset * 1000)),
         });
       }
       return t([`errors.${release.error}`, "errors.network"]);
@@ -95,242 +180,106 @@ export default function ToolCard({
     return null;
   })();
 
-  const open = (url?: string) => {
-    if (url) openUrl(url).catch(() => {});
-  };
+  // Snelkoppeling op de schermafbeelding: de tool bekijken of gebruiken, bewust
+  // nooit installeren (dat blijft een expliciete knop, zodat een klik geen
+  // ongewenste download start). Geïnstalleerd → starten; anders de webversie
+  // in een tabblad, of de productpagina.
+  const externalTarget = tool.siteUrl ?? (tool.repo ? `https://github.com/${tool.repo}` : undefined);
+  const shortcut = canLaunch
+    ? { label: t("actions.launch"), run: () => onLaunch?.(tool) }
+    : tool.webUrl
+      ? { label: t("actions.open"), run: () => onOpenTab?.(tool) }
+      : externalTarget
+        ? { label: t("actions.open"), run: () => open(externalTarget) }
+        : null;
 
-  // Lokaal gebundelde previewafbeelding (screenshot van open-aec.com);
-  // valt terug op het categorie-icoon als er geen afbeelding is of laden faalt.
-  const previewUrl = tool.preview ?? null;
-
-  // Snelkoppeling op de preview: de tool bekijken of gebruiken — bewust nooit
-  // installeren (dat blijft een expliciete knop, zodat een klik geen ongewenste
-  // download start). Geïnstalleerd → starten; anders → web-demo/productpagina.
-  const externalTarget =
-    tool.siteUrl ?? (tool.repo ? `https://github.com/${tool.repo}` : undefined);
-  const shortcut = (() => {
-    if (tool.kind !== "web" && canLaunch) {
-      return { kind: "launch" as const, label: t("actions.launch"), run: () => onLaunch?.(tool) };
-    }
-    // Een webversie opent in een tabblad binnen de installer; alleen zonder
-    // webversie valt de snelkoppeling terug op de externe productpagina.
-    if (tool.webUrl) {
-      return { kind: "open" as const, label: t("actions.open"), run: () => onOpenTab?.(tool) };
-    }
-    if (externalTarget) {
-      return { kind: "open" as const, label: t("actions.open"), run: () => open(externalTarget) };
-    }
+  const chip = (() => {
+    if (downloading || busy) return { tone: "info", label: t("chips.busy") };
+    if (update) return { tone: "warning", label: t("chips.update") };
+    if (tool.kind === "web") return { tone: "info", label: t("chips.web") };
+    if (installed) return { tone: "success", label: t("chips.installed") };
     return null;
   })();
 
   return (
-    <article className={`tool-card${status === "update_available" ? " update" : ""}`}>
+    <article className={`oa-site-card tool-card${update ? " oa-site-card--featured" : ""}`}>
       <button
         type="button"
         className="tool-preview"
         onClick={() => shortcut?.run()}
         disabled={!shortcut}
         title={shortcut?.label}
-        aria-label={shortcut ? `${tool.name} — ${shortcut.label}` : tool.name}
+        aria-label={shortcut ? `${tool.name}: ${shortcut.label}` : tool.name}
       >
-        <div className="tool-preview-fallback">
-          <CategoryIcon category={tool.category} size={46} />
-        </div>
-        {previewUrl && !previewFailed && (
-          <img
-            className="tool-preview-img"
-            src={previewUrl}
-            loading="lazy"
-            alt=""
-            onError={() => setPreviewFailed(true)}
-          />
-        )}
-        {shortcut && (
-          <div className="tool-preview-overlay">
-            <span className="tool-preview-action">
-              {shortcut.kind === "launch" ? (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <polygon points="6 3 20 12 6 21 6 3" />
-                </svg>
-              ) : (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-              )}
-              {shortcut.label}
+        {tool.preview && !previewFailed ? (
+          <img className="oa-preview-image" src={tool.preview} loading="lazy" alt="" onError={() => setPreviewFailed(true)} />
+        ) : (
+          <span className="tool-preview-empty">
+            <span className="oa-icon-tile oa-icon-tile--amber" style={{ width: 64, height: 64 }}>
+              <B2Icon id={`tools.category-${tool.category}`} size={36} />
             </span>
-          </div>
+          </span>
         )}
       </button>
 
-      <div className="tool-card-head">
-        <div className={tool.logo ? "tool-icon tool-icon-logo" : "tool-icon"}>
-          {tool.logo ? (
-            <img src={tool.logo} alt="" width={30} height={30} />
-          ) : (
-            <CategoryIcon category={tool.category} size={22} />
-          )}
-        </div>
-        <div className="tool-card-titles">
+      <div className="tool-head">
+        <ToolLogo tool={tool} size={44} />
+        <div className="tool-titles">
           <h3 className="tool-name">{tool.name}</h3>
-          <div className="tool-meta">
-            <span className="tool-category">{t(`categories.${tool.category}`)}</span>
-            {tool.community && <span className="tool-community">{t("community")}</span>}
+          <div className="tool-chips">
+            {[...(tool.disciplines ?? "")].map((letter) => (
+              <span key={letter} className="oa-chip" title={t(`filters.${letter}`)}>
+                {letter}
+              </span>
+            ))}
+            {chip && <span className={`oa-chip oa-chip--${chip.tone}`}>{chip.label}</span>}
+            {tool.stage && <span className={`oa-chip${tool.stage === "beta" ? " oa-chip--warning" : ""}`}>{t(`stage.${tool.stage}`)}</span>}
+            {tool.community && <span className="oa-chip">{t("community")}</span>}
           </div>
         </div>
-        <span className={badge.className}>{t(badge.labelKey)}</span>
       </div>
 
       <p className="tool-desc">{tool.description[lang]}</p>
 
-      {tool.kind === "desktop" && (
-        <div className="tool-versions">
-          {installed?.version && (
-            <span title={t("versions.installed")}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              v{installed.version}
-            </span>
-          )}
-          {/* De pijl naar de laatste versie alleen tonen als er echt een update
-              is; is de geinstalleerde versie al de actuele (of nieuwer), dan zou
-              "→ zelfde versie" ten onrechte suggereren dat het niet actueel is. */}
-          {status === "update_available" && latestVersion && (
-            <>
-              <span className="tool-versions-arrow">→</span>
-              <span title={t("versions.latest")} className="latest-highlight">
-                v{latestVersion}
-              </span>
-            </>
-          )}
-          {/* Niet geinstalleerd: toon de beschikbare (laatste) versie. */}
-          {!installed?.version && latestVersion && (
-            <span title={t("versions.latest")}>v{latestVersion}</span>
-          )}
-          {!installed?.version && !latestVersion && <span>—</span>}
-        </div>
-      )}
-
-      {downloading && (
-        <div className="tool-progress" role="progressbar" aria-valuenow={pct ?? undefined}>
-          <div className="tool-progress-track">
-            <div
-              className={`tool-progress-fill${pct === null ? " indeterminate" : ""}`}
-              style={pct !== null ? { width: `${pct}%` } : undefined}
-            />
-          </div>
-          <span className="tool-progress-label">
-            {progress?.done
-              ? t(phase === "installing" ? "actions.updating" : "actions.starting")
-              : `${t("actions.downloading")} ${pct !== null ? `${pct}%` : ""}`}
-          </span>
-        </div>
-      )}
+      <div className="oa-meta tool-meta">
+        <VersionLine tool={tool} status={status} installed={installed} release={release} />
+      </div>
 
       {waiting && <p className="tool-note">{t("update.waiting", { name: tool.name })}</p>}
       {error && <p className="tool-error">{error}</p>}
       {!error && !downloading && !waiting && note && <p className="tool-note">{note}</p>}
-      {!error && !downloading && !note && releaseError && (
-        <p className="tool-hint">{releaseError}</p>
-      )}
+      {!error && !downloading && !note && releaseError && <p className="tool-hint">{releaseError}</p>}
 
-      <div className="tool-actions">
-        {tool.kind === "web" ? (
-          <button className="btn btn-primary" onClick={() => onOpenTab?.(tool)}>
-            {t("actions.open")}
+      <div className="oa-card-actions tool-actions">
+        <PrimaryAction {...props} />
+        <span className="tool-actions-gap" />
+        {update && canLaunch && !downloading && (
+          <button className="oa-round-icon" title={t("actions.launchCurrent")} aria-label={t("actions.launchCurrent")} onClick={() => onLaunch?.(tool)}>
+            <B2Icon id="software.launch" />
           </button>
-        ) : (
-          <>
-            {waiting && (
-              <button className="btn btn-secondary" onClick={() => onCancel?.(tool)}>
-                {t("actions.cancel")}
-              </button>
-            )}
-            {canInstall && !waiting && (
-              <button
-                className="btn btn-primary"
-                disabled={busy}
-                onClick={() => onInstall?.(tool)}
-              >
-                {busy
-                  ? t(phase === "installing" ? "actions.updating" : "actions.downloading")
-                  : status === "update_available"
-                    ? t("actions.update")
-                    : t("actions.install")}
-              </button>
-            )}
-            {canLaunch && (
-              <button
-                className={`btn ${canInstall ? "btn-secondary" : "btn-primary"}`}
-                onClick={() => onLaunch?.(tool)}
-              >
-                {t("actions.launch")}
-              </button>
-            )}
-          </>
         )}
-
-        <div className="tool-links">
-          {tool.repo && (
-            <button
-              className="icon-btn"
-              title={t("actions.github")}
-              aria-label={t("actions.github")}
-              onClick={() => open(`https://github.com/${tool.repo}`)}
-            >
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
-              </svg>
-            </button>
-          )}
-          {/* Desktop-tools: de webversie in een tabblad. Bij web-tools doet de
-              primaire knop dit al, dus daar zou het icoon dubbelop zijn. */}
-          {tool.kind === "desktop" && tool.webUrl && (
-            <button
-              className="icon-btn"
-              title={t("tabs.openHere")}
-              aria-label={t("tabs.openHere")}
-              onClick={() => onOpenTab?.(tool)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="4" width="18" height="16" rx="2" />
-                <line x1="3" y1="9" x2="21" y2="9" />
-                <line x1="8" y1="4" x2="8" y2="9" />
-              </svg>
-            </button>
-          )}
-          {tool.webUrl && (
-            <button
-              className="icon-btn"
-              title={t("tabs.openExternal")}
-              aria-label={t("tabs.openExternal")}
-              onClick={() => open(tool.webUrl)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-            </button>
-          )}
-          {tool.kind === "desktop" && !tool.webUrl && tool.siteUrl && (
-            <button
-              className="icon-btn"
-              title={t("actions.website")}
-              aria-label={t("actions.website")}
-              onClick={() => open(tool.siteUrl)}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-            </button>
-          )}
-        </div>
+        {tool.repo && (
+          <button className="oa-round-icon" title={t("actions.github")} aria-label={t("actions.github")} onClick={() => open(`https://github.com/${tool.repo}`)}>
+            <GitHubMark />
+          </button>
+        )}
+        {/* Desktop-tools: de webversie in een tabblad. Bij webtools doet de
+            hoofdknop dit al, dus daar zou het icoon dubbelop zijn. */}
+        {tool.kind === "desktop" && tool.webUrl && (
+          <button className="oa-round-icon" title={t("tabs.openHere")} aria-label={t("tabs.openHere")} onClick={() => onOpenTab?.(tool)}>
+            <B2Icon id="software.open-webtab" />
+          </button>
+        )}
+        {tool.webUrl && (
+          <button className="oa-round-icon" title={t("tabs.openExternal")} aria-label={t("tabs.openExternal")} onClick={() => open(tool.webUrl)}>
+            <B2Icon id="link.open-external" />
+          </button>
+        )}
+        {tool.kind === "desktop" && !tool.webUrl && tool.siteUrl && (
+          <button className="oa-round-icon" title={t("actions.website")} aria-label={t("actions.website")} onClick={() => open(tool.siteUrl)}>
+            <B2Icon id="link.open-external" />
+          </button>
+        )}
       </div>
     </article>
   );

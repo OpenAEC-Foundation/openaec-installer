@@ -1,7 +1,7 @@
 {
   "appName": "OpenAEC Installer",
   "subtitle": "Open source software voor de bouw — installeren, bijwerken en starten",
-  "search": "Zoek een tool...",
+  "search": "Zoek een tool",
   "refresh": "Vernieuwen",
   "refreshing": "Vernieuwen...",
   "ok": "OK",
@@ -12,7 +12,6 @@
   "minimize": "Minimaliseren",
   "maximize": "Maximaliseren",
   "restore": "Herstellen",
-  "groupByStatus": "Groeperen op status",
   "sections": {
     "desktop": "Desktop-apps",
     "web": "Webtools",
@@ -36,11 +35,14 @@
     "downloading": "Downloaden...",
     "starting": "Installer starten...",
     "cancel": "Annuleren",
-    "updating": "Bijwerken..."
+    "updating": "Bijwerken...",
+    "launchCurrent": "Huidige versie starten"
   },
   "versions": {
     "installed": "geïnstalleerd",
-    "latest": "laatste"
+    "latest": "laatste",
+    "available": "v{{version}} beschikbaar",
+    "webtool": "webtool"
   },
   "categories": {
     "calculatie": "Calculatie",
@@ -99,5 +101,54 @@
     "restartRequired": "Bijgewerkt naar v{{version}}. Start Windows opnieuw op om het af te ronden.",
     "noMatchingSetup": "De laatste release heeft geen setup die past bij deze installatie ({{kind}}). Werk bij via de releasepagina op GitHub.",
     "alreadyCurrent": "Al bijgewerkt (v{{version}})."
+  },
+  "hero": {
+    "label": "OpenAEC Installer",
+    "title": "Alle bouwsoftware,",
+    "titleAccent": "één plek.",
+    "lead": "Ontdek, installeer, werk bij en start de open source tools van de OpenAEC Foundation.",
+    "updateAll": "Alles bijwerken ({{count}})",
+    "allCurrent": "Alles is bijgewerkt",
+    "check": "Controleren op updates",
+    "checking": "Controleren…",
+    "tools": "Tools",
+    "installed": "Geïnstalleerd",
+    "updates": "Updates",
+    "web": "Webtools",
+    "newVersion": "Nieuwe versie",
+    "featured": "Uitgelicht",
+    "show": "{{name}} tonen"
+  },
+  "filters": {
+    "label": "Filter",
+    "all": "Alle",
+    "installed": "Geïnstalleerd",
+    "updates": "Updates",
+    "A": "Architecture",
+    "E": "Engineering",
+    "C": "Construction",
+    "I": "Infra & GWW"
+  },
+  "catalog": {
+    "desktopLabel": "Desktop-apps · {{count}}",
+    "desktopTitle": "Installeren en starten op je computer",
+    "desktopText": "Windows-installers en AppImages van GitHub Releases. De installer ziet welke versie je hebt.",
+    "webLabel": "Webtools · {{count}}",
+    "webTitle": "Direct in je browser",
+    "webText": "Geen installatie nodig. Ze openen in de installer of in je eigen browser.",
+    "noDesktop": "Geen desktop-apps voor dit filter.",
+    "noWeb": "Geen webtools voor dit filter.",
+    "divider": "Webtools"
+  },
+  "stage": {
+    "alpha": "Alpha",
+    "beta": "Beta",
+    "development": "In ontwikkeling"
+  },
+  "chips": {
+    "busy": "Bezig",
+    "update": "Update",
+    "web": "Web",
+    "installed": "Geïnstalleerd"
   }
 }

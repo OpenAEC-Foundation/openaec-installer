@@ -15,10 +15,16 @@
     "theme": "Thema",
     "themeDescription": "Kies een kleurthema voor de applicatie.",
     "light": "Licht",
-    "forge": "Forge (donker)",
-    "dark": "OpenAEC (donker)",
+    "dark": "Donker",
     "blueprint": "Blueprint",
-    "contrast": "Hoog contrast"
+    "highContrastDark": "High contrast donker",
+    "highContrastLight": "High contrast licht",
+    "textSize": "Tekstgrootte",
+    "textSizes": {
+      "compact": "Compact",
+      "standard": "Standaard",
+      "large": "Groot"
+    }
   },
   "about": {
     "appName": "OpenAEC Installer",
