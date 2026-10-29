@@ -18,7 +18,7 @@ De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](htt
 - **Starten** van geïnstalleerde tools
 - **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de installer zelf; open tabs worden onthouden en behouden hun staat bij wisselen. Openen in de externe browser blijft mogelijk
 - **Werkt zichzelf bij**: de installer controleert ook zijn eigen versie en meldt het wanneer er een nieuwe versie is — bijwerken kan met één klik vanuit de app
-- Volledig in de [OpenAEC-huisstijl](https://github.com/OpenAEC-Foundation/OpenAEC-style-book), met vijf thema's (licht, Forge, OpenAEC, Blueprint, hoog contrast) en tweetalige interface (NL/EN)
+- **Ontwerp 0.4 van [OpenAEC-Blueprint](https://github.com/OpenAEC-Foundation/OpenAEC-Blueprint)**, voorstel E: het donkere vlak en de tegels van open-aec.com, met filterpillen op status en discipline (Architecture, Engineering, Construction, Infra & GWW), een uitgelichte tool en Alles bijwerken. Tokens, fonts, websitestijl en B2-iconen komen uit het webpakket van Blueprint (`node scripts/sync-openaec.mjs <pad naar OpenAEC-Blueprint>`). Vijf thema's (Licht, Donker, Blueprint, High contrast donker en licht), drie tekstgroottes en een tweetalige interface (NL/EN)
 
 > Installeren, bijwerken en starten werkt op Windows (via de officiële installers) en Linux (via AppImages, zonder beheerdersrechten — inclusief menu-snelkoppeling). De catalogus en websnelkoppelingen werken op alle platformen; macOS-installatie volgt nog.
 

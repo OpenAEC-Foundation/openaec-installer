@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { CATALOG_TAB, toolForTab } from "../lib/tabs";
-import CategoryIcon from "./CategoryIcon";
+import B2Icon from "./B2Icon";
 import "./TabBar.css";
 
 interface TabBarProps {
@@ -51,7 +51,7 @@ export default function TabBar({ open, active, onSelect, onClose }: TabBarProps)
               {tool.logo ? (
                 <img src={tool.logo} alt="" width={14} height={14} />
               ) : (
-                <CategoryIcon category={tool.category} size={13} />
+                <B2Icon id={`tools.category-${tool.category}`} size={14} />
               )}
               <span className="tab-label">{tool.name}</span>
             </button>

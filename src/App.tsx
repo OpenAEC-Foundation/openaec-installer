@@ -2,13 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import TitleBar from "./components/TitleBar";
 import StatusBar from "./components/StatusBar";
-import SettingsDialog, { applyTheme } from "./components/settings/SettingsDialog";
-import ToolCard from "./components/ToolCard";
-import OpenAecLogo from "./components/OpenAecLogo";
+import SettingsDialog, { applyTextSize, applyTheme, themeId } from "./components/settings/SettingsDialog";
+import ToolCard, { PrimaryAction, VersionLine } from "./components/ToolCard";
+import Hero from "./components/Hero";
+import B2Icon from "./components/B2Icon";
 import SelfUpdateBanner from "./components/SelfUpdateBanner";
 import TabBar from "./components/TabBar";
 import WebToolView from "./components/WebToolView";
-import { DESKTOP_TOOLS, SELF_ID, WEB_TOOLS, type CatalogTool } from "./data/catalog";
+import { CATALOG, DESKTOP_TOOLS, SELF_ID, WEB_TOOLS, type CatalogTool } from "./data/catalog";
 import {
   cancelUpdate,
   downloadAndRunInstaller,
@@ -55,6 +56,15 @@ const TABS_KEY = "openTabs";
 // elkaars vaarwater); met de knop Vernieuwen forceer je altijd een check.
 const RELEASE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
+/** Filter op status; "all" toont alles. */
+type Filter = "all" | "installed" | "updates";
+
+/** Disciplines van het ecosysteemfilter op open-aec.com. */
+const DISCIPLINES = ["A", "E", "C", "I"] as const;
+
+/** Vaste keuze voor het uitgelichte vak, na de tools met een update. */
+const FEATURED = ["open-calc-studio", "open-planner-studio", "open-energy-studio", "open-pointcloud-studio"];
+
 interface ReleaseCache {
   /** Tijdstip van de laatste ronde die iets bruikbaars opleverde. */
   ts: number;
@@ -81,9 +91,9 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [theme, setTheme] = useState("light");
   const [search, setSearch] = useState("");
-  // false = huidige indeling (Desktop-apps / Webtools); true = op status
-  // (Al geïnstalleerd / Nog te installeren). Keuze wordt bewaard.
-  const [groupByStatus, setGroupByStatus] = useState(false);
+  // Filterpillen van ontwerp E: op status, en los daarvan op discipline.
+  const [filter, setFilter] = useState<Filter>("all");
+  const [discipline, setDiscipline] = useState<string | null>(null);
   // Eigen versie, voor de zelf-update-check.
   const [appVersion, setAppVersion] = useState("");
   // Weggeklikte update-melding (per sessie; komt bij herstart weer terug).
@@ -110,10 +120,7 @@ function App() {
   const [pendingUpdate, setPendingUpdate] = useState<string | null>(null);
   const [scanned, setScanned] = useState(false);
   const refreshingRef = useRef(false);
-  // Voorkomt dat de trage opstart-load van groupByStatus een klik overschrijft
-  // die de gebruiker doet vóór die load klaar is (race bij opstart).
-  const groupTouchedRef = useRef(false);
-  // Idem voor de tabs: een klik vóór de opstart-load mag niet overschreven worden.
+  // Een klik op de tabs vóór de opstart-load mag niet overschreven worden.
   const tabsTouchedRef = useRef(false);
 
   const scanInstalled = useCallback(async () => {
@@ -189,12 +196,10 @@ function App() {
   // Opstart: thema laden, venster tonen, eerste scan + release-fetch.
   useEffect(() => {
     getSetting("theme", "light").then((saved) => {
-      setTheme(saved);
+      setTheme(themeId(saved));
       applyTheme(saved);
     });
-    getSetting("groupByStatus", false).then((saved) => {
-      if (!groupTouchedRef.current) setGroupByStatus(saved);
-    });
+    getSetting("textSize", "standard").then(applyTextSize);
     getSetting<Partial<TabState> | null>(TABS_KEY, null).then((saved) => {
       if (!tabsTouchedRef.current) setTabs(restoreTabs(saved));
     });
@@ -437,22 +442,22 @@ function App() {
     [search, lang, t],
   );
 
-  const desktopTools = useMemo(() => DESKTOP_TOOLS.filter(matches), [matches]);
-  const webTools = useMemo(() => WEB_TOOLS.filter(matches), [matches]);
-
-  // Statusindeling: geïnstalleerde tools (updates eerst) vs. nog te installeren.
-  const installedGroup = useMemo(() => {
-    const rank = (tool: CatalogTool) =>
-      deriveStatus(tool, installed[tool.id], releases[tool.id]) === "update_available" ? 0 : 1;
-    return desktopTools
-      .filter((tool) => installed[tool.id])
-      .sort((a, b) => rank(a) - rank(b));
-  }, [desktopTools, installed, releases]);
-
-  const toInstallGroup = useMemo(
-    () => desktopTools.filter((tool) => !installed[tool.id]),
-    [desktopTools, installed],
+  const hasUpdate = useCallback(
+    (tool: CatalogTool) => deriveStatus(tool, installed[tool.id], releases[tool.id]) === "update_available",
+    [installed, releases],
   );
+  const passes = useCallback(
+    (tool: CatalogTool, f: Filter) =>
+      f === "all" || (f === "installed" ? tool.kind === "desktop" && !!installed[tool.id] : hasUpdate(tool)),
+    [installed, hasUpdate],
+  );
+  const visible = useCallback(
+    (tool: CatalogTool) =>
+      matches(tool) && passes(tool, filter) && (!discipline || !!tool.disciplines?.includes(discipline)),
+    [matches, passes, filter, discipline],
+  );
+  const desktopTools = useMemo(() => DESKTOP_TOOLS.filter(visible), [visible]);
+  const webTools = useMemo(() => WEB_TOOLS.filter(visible), [visible]);
 
   // ── Zelf-update: eigen versie vergelijken met de laatste release ──
   // Verse opstart-check heeft voorrang op de gecachete waarde.
@@ -487,37 +492,52 @@ function App() {
     }
   }, [selfRelease, t]);
 
-  const toggleGroupByStatus = useCallback((value: boolean) => {
-    groupTouchedRef.current = true;
-    setGroupByStatus(value);
-    void setSetting("groupByStatus", value);
-  }, []);
+  const updateCount = useMemo(() => DESKTOP_TOOLS.filter(hasUpdate).length, [hasUpdate]);
+  const installedCount = useMemo(() => DESKTOP_TOOLS.filter((tool) => installed[tool.id]).length, [installed]);
 
-  const updateCount = useMemo(
-    () =>
-      DESKTOP_TOOLS.filter(
-        (tool) => deriveStatus(tool, installed[tool.id], releases[tool.id]) === "update_available",
-      ).length,
-    [installed, releases],
-  );
+  // Alles bijwerken: een voor een, zodat elke update zo nodig kan wachten tot de
+  // gebruiker die app sluit.
+  const handleUpdateAll = useCallback(async () => {
+    for (const tool of DESKTOP_TOOLS.filter(hasUpdate)) {
+      await handleInstall(tool);
+    }
+  }, [hasUpdate, handleInstall]);
 
-  const renderCard = (tool: CatalogTool) => (
-    <ToolCard
-      key={tool.id}
-      tool={tool}
-      status={deriveStatus(tool, installed[tool.id], releases[tool.id])}
-      installed={installed[tool.id]}
-      release={releases[tool.id]}
-      progress={progress[tool.id]}
-      busy={busy[tool.id]}
-      error={errors[tool.id]}
-      note={notes[tool.id]}
-      phase={phases[tool.id]}
-      onInstall={handleInstall}
-      onCancel={handleCancelUpdate}
-      onLaunch={handleLaunch}
-      onOpenTab={handleOpenTab}
-    />
+  // Uitgelicht bovenaan: eerst tools met een update en een schermafbeelding,
+  // daarna een vaste keuze, zoals in de galerij.
+  const featured = useMemo(() => {
+    const list = DESKTOP_TOOLS.filter((tool) => hasUpdate(tool) && tool.preview);
+    for (const id of FEATURED) {
+      const tool = CATALOG.find((x) => x.id === id);
+      if (tool && !list.includes(tool)) list.push(tool);
+    }
+    return list;
+  }, [hasUpdate]);
+
+  const cardProps = (tool: CatalogTool) => ({
+    tool,
+    status: deriveStatus(tool, installed[tool.id], releases[tool.id]),
+    installed: installed[tool.id],
+    release: releases[tool.id],
+    progress: progress[tool.id],
+    busy: busy[tool.id],
+    error: errors[tool.id],
+    note: notes[tool.id],
+    phase: phases[tool.id],
+    onInstall: handleInstall,
+    onCancel: handleCancelUpdate,
+    onLaunch: handleLaunch,
+    onOpenTab: handleOpenTab,
+  });
+
+  const renderCard = (tool: CatalogTool) => <ToolCard key={tool.id} {...cardProps(tool)} />;
+
+  const pill = (key: string, label: string, count: number, active: boolean, onClick: () => void, letter?: string) => (
+    <button key={key} className="oa-pill" aria-pressed={active} onClick={onClick}>
+      {letter && <span className="oa-pill-letter">{letter}</span>}
+      {label}
+      <span className="oa-count">{count}</span>
+    </button>
   );
 
   return (
@@ -532,126 +552,104 @@ function App() {
       />
 
       <div className="catalog-view" hidden={tabs.active !== CATALOG_TAB}>
-      <header className="app-header">
-        <div className="app-brand">
-          <OpenAecLogo size={44} />
-          <div>
-            <h1 className="app-title">
-              Open<span className="app-title-accent">AEC</span>
-              <span className="app-title-sub"> Installer</span>
-            </h1>
-            <p className="app-subtitle">{t("subtitle")}</p>
-          </div>
-        </div>
+      <div className="catalog-scroll">
+        <Hero
+          counts={{ tools: CATALOG.length, installed: installedCount, updates: updateCount, web: WEB_TOOLS.length }}
+          refreshing={refreshing}
+          onUpdateAll={() => void handleUpdateAll()}
+          onRefresh={() => refresh(true)}
+          featured={featured}
+          hasUpdate={hasUpdate}
+          renderVersion={(tool) => <VersionLine {...cardProps(tool)} />}
+          renderAction={(tool) => <PrimaryAction {...cardProps(tool)} />}
+        />
 
-        <div className="app-header-actions">
-          <label className="view-toggle">
-            <input
-              type="checkbox"
-              checked={groupByStatus}
-              onChange={(e) => toggleGroupByStatus(e.target.checked)}
+        <main className="app-main">
+          {selfUpdateAvailable && !selfUpdateDismissed && (
+            <SelfUpdateBanner
+              currentVersion={appVersion}
+              latestVersion={selfLatest!}
+              pageUrl={selfRelease?.pageUrl}
+              canInstall={!!selfRelease?.assetUrl}
+              busy={busy[SELF_ID]}
+              progress={progress[SELF_ID]}
+              error={errors[SELF_ID]}
+              note={notes[SELF_ID]}
+              onUpdate={handleSelfUpdate}
+              onDismiss={() => setSelfUpdateDismissed(true)}
             />
-            <span>{t("groupByStatus")}</span>
-          </label>
-          <div className="search-box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="search"
-              value={search}
-              placeholder={t("search")}
-              onChange={(e) => setSearch(e.target.value)}
-              spellCheck={false}
-            />
+          )}
+
+          <div className="filter-pills" role="group" aria-label={t("filters.label")}>
+            {pill("all", t("filters.all"), CATALOG.length, filter === "all" && !discipline, () => {
+              setFilter("all");
+              setDiscipline(null);
+            })}
+            {pill("installed", t("filters.installed"), installedCount, filter === "installed", () => setFilter("installed"))}
+            {pill("updates", t("filters.updates"), updateCount, filter === "updates", () => setFilter("updates"))}
+            {DISCIPLINES.map((letter) =>
+              pill(
+                letter,
+                t(`filters.${letter}`),
+                CATALOG.filter((tool) => tool.disciplines?.includes(letter)).length,
+                discipline === letter,
+                () => setDiscipline(discipline === letter ? null : letter),
+                letter,
+              ),
+            )}
           </div>
-          <button
-            className="refresh-btn"
-            onClick={() => refresh(true)}
-            disabled={refreshing}
-            title={t("refresh")}
-          >
-            <svg
-              className={refreshing ? "spinning" : ""}
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            {refreshing ? t("refreshing") : t("refresh")}
-          </button>
-        </div>
-      </header>
 
-      <main className="app-main">
-        {selfUpdateAvailable && !selfUpdateDismissed && (
-          <SelfUpdateBanner
-            currentVersion={appVersion}
-            latestVersion={selfLatest!}
-            pageUrl={selfRelease?.pageUrl}
-            canInstall={!!selfRelease?.assetUrl}
-            busy={busy[SELF_ID]}
-            progress={progress[SELF_ID]}
-            error={errors[SELF_ID]}
-            note={notes[SELF_ID]}
-            onUpdate={handleSelfUpdate}
-            onDismiss={() => setSelfUpdateDismissed(true)}
-          />
-        )}
-
-        {groupByStatus ? (
-          <>
-            {installedGroup.length > 0 && (
-              <section>
-                <div className="section-label">
-                  {t("sections.installedGroup")} ({installedGroup.length})
-                </div>
-                <div className="tool-grid">{installedGroup.map(renderCard)}</div>
-              </section>
-            )}
-            {toInstallGroup.length > 0 && (
-              <section>
-                <div className="section-label">
-                  {t("sections.toInstall")} ({toInstallGroup.length})
-                </div>
-                <div className="tool-grid">{toInstallGroup.map(renderCard)}</div>
-              </section>
-            )}
-          </>
-        ) : (
-          desktopTools.length > 0 && (
-            <section>
-              <div className="section-label">{t("sections.desktop")}</div>
+          <section className="catalog-section">
+            <div className="section-head-row">
+              <div className="section-head">
+                <span className="site-label">{t("catalog.desktopLabel", { count: desktopTools.length })}</span>
+                <h2>{t("catalog.desktopTitle")}</h2>
+                <p>{t("catalog.desktopText")}</p>
+              </div>
+              <label className="search-box">
+                <B2Icon id="view.search" />
+                <input
+                  className="oa-field"
+                  type="search"
+                  value={search}
+                  placeholder={t("search")}
+                  aria-label={t("search")}
+                  onChange={(e) => setSearch(e.target.value)}
+                  spellCheck={false}
+                />
+              </label>
+            </div>
+            {desktopTools.length > 0 ? (
               <div className="tool-grid">{desktopTools.map(renderCard)}</div>
-            </section>
-          )
-        )}
-
-        {webTools.length > 0 && (
-          <section>
-            <div className="section-label">{t("sections.web")}</div>
-            <div className="tool-grid">{webTools.map(renderCard)}</div>
+            ) : (
+              <p className="catalog-empty">{search.trim() ? t("noResults", { query: search.trim() }) : t("catalog.noDesktop")}</p>
+            )}
           </section>
-        )}
 
-        {desktopTools.length === 0 && webTools.length === 0 && (
-          <div className="no-results">
-            <p>{t("noResults", { query: search.trim() })}</p>
+          <div className="catalog-divider" aria-hidden="true">
+            <span />
+            <B2Icon id="software.open-webtab" />
+            {t("catalog.divider")}
+            <span />
           </div>
-        )}
-      </main>
+
+          <section className="catalog-section">
+            <div className="section-head">
+              <span className="site-label">{t("catalog.webLabel", { count: webTools.length })}</span>
+              <h2>{t("catalog.webTitle")}</h2>
+              <p>{t("catalog.webText")}</p>
+            </div>
+            {webTools.length > 0 ? (
+              <div className="tool-grid">{webTools.map(renderCard)}</div>
+            ) : (
+              <p className="catalog-empty">{search.trim() ? t("noResults", { query: search.trim() }) : t("catalog.noWeb")}</p>
+            )}
+          </section>
+        </main>
+      </div>
 
       <StatusBar
-        installedCount={Object.keys(installed).length}
+        installedCount={installedCount}
         totalDesktop={DESKTOP_TOOLS.length}
         updateCount={updateCount}
         lastRefresh={lastRefresh}

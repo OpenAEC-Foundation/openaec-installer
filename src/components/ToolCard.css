@@ -1,363 +1,153 @@
-/* ── Toolkaart — cards per DESIGN-SYSTEM.md (radius 12, border, hover-lift) ── */
+/* Websitetegel van installervoorstel E. De tegel zelf (.oa-site-card), de knoppen,
+   chips en ronde knoppen komen uit openaec-components.css; hier alleen de opbouw. */
 
 .tool-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: var(--theme-bg-lighter);
-  border: 1px solid var(--theme-border);
-  border-radius: 12px;
-  padding: 20px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  min-width: 0;
 }
 
-.tool-card:hover {
-  border-color: var(--theme-accent-tint);
-  box-shadow: var(--theme-dialog-shadow);
-}
-
-.tool-card.update {
-  border-color: rgba(217, 119, 6, 0.45);
-}
-
-/* ── Preview / snelkoppeling ──
-   Klikbare banner: GitHub-previewafbeelding met blueprintraster-fallback;
-   hover toont de primaire actie (starten / installeren / openen). */
 .tool-preview {
-  position: relative;
   display: block;
   width: 100%;
-  height: 132px;
   padding: 0;
-  border: 1px solid var(--theme-border-subtle);
+  border: 0;
   border-radius: 8px;
-  overflow: hidden;
-  background: var(--theme-bg);
+  background: none;
+  cursor: pointer;
 }
 
 .tool-preview:disabled {
   cursor: default;
 }
 
-/* Bouwtekening-raster als fallback/laadachtergrond */
-.tool-preview-fallback {
-  position: absolute;
-  inset: 0;
+.tool-preview:focus-visible {
+  outline: 2px solid var(--oa-focus);
+  outline-offset: 2px;
+}
+
+/* Zonder schermafbeelding: het categorie-icoon op een zacht amberverloop, even hoog. */
+.tool-preview-empty {
   display: grid;
   place-items: center;
-  color: var(--theme-accent-tint);
-  background-image:
-    linear-gradient(var(--theme-border-subtle) 1px, transparent 1px),
-    linear-gradient(90deg, var(--theme-border-subtle) 1px, transparent 1px);
-  background-size: 22px 22px;
-  background-position: center;
-}
-
-.tool-preview-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
-
-.tool-preview-overlay {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(28, 25, 23, 0.45);
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.tool-preview:hover .tool-preview-overlay,
-.tool-preview:focus-visible .tool-preview-overlay {
-  opacity: 1;
-}
-
-.tool-preview-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  font-weight: 600;
-  padding: 8px 18px;
+  aspect-ratio: 640 / 304;
   border-radius: 8px;
-  background: var(--theme-btn-primary-bg);
-  color: var(--theme-btn-primary-text);
-  box-shadow: var(--theme-dialog-shadow);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--oa-accent) 12%, transparent), color-mix(in srgb, var(--oa-accent) 3%, transparent));
 }
 
-/* ── Kop ── */
-.tool-card-head {
+[data-oa-theme^="high-contrast"] .tool-preview-empty {
+  background: var(--oa-panel);
+}
+
+.tool-logo {
+  flex: none;
+}
+
+.tool-logo .oa-icon {
+  --icon-accent: currentColor;
+}
+
+.tool-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
 }
 
-.tool-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: var(--theme-accent-soft);
-  border: 1px solid var(--theme-border-subtle);
+.tool-titles {
   display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  color: var(--theme-accent);
-}
-
-/* Eigen logo van een tool in plaats van het categorie-icoon. */
-.tool-icon-logo img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-
-.tool-card-titles {
-  flex: 1;
+  gap: 6px;
   min-width: 0;
 }
 
 .tool-name {
-  font-family: var(--font-heading);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--theme-text);
-  line-height: 1.25;
+  margin: 0;
+  font: 700 16px / 1.25 var(--oa-font-heading);
+  letter-spacing: var(--oa-letter-spacing-heading);
+  color: var(--oa-text);
 }
 
-.tool-meta {
+.tool-chips {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-/* JetBrains Mono sectielabel-patroon uit het stijlboek */
-.tool-category {
-  font-family: var(--font-code);
-  font-size: 9.5px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--theme-accent-tint);
-}
-
-.tool-community {
-  font-family: var(--font-code);
-  font-size: 9.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--theme-text-faint);
-  border: 1px solid var(--theme-border);
-  border-radius: 9999px;
-  padding: 0 6px;
-}
-
-/* ── Badges (pill, per stijlboek) ── */
-.badge {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.25em 0.75em;
-  border-radius: 9999px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.badge-success { background: #DCFCE7; color: #166534; }
-.badge-update  { background: #FEF3C7; color: #92400E; }
-.badge-muted   { background: #F4F4F5; color: #3F3F46; }
-.badge-info    { background: #DBEAFE; color: #1E40AF; }
-
-[data-theme="forge"] .badge-success,
-[data-theme="openaec"] .badge-success,
-[data-theme="blueprint"] .badge-success,
-[data-theme="contrast"] .badge-success { background: rgba(74, 222, 128, 0.14); color: #4ADE80; }
-
-[data-theme="forge"] .badge-update,
-[data-theme="openaec"] .badge-update,
-[data-theme="blueprint"] .badge-update,
-[data-theme="contrast"] .badge-update { background: rgba(245, 158, 11, 0.16); color: #FBBF24; }
-
-[data-theme="forge"] .badge-muted,
-[data-theme="openaec"] .badge-muted,
-[data-theme="blueprint"] .badge-muted,
-[data-theme="contrast"] .badge-muted { background: rgba(255, 255, 255, 0.08); color: var(--theme-text-secondary); }
-
-[data-theme="forge"] .badge-info,
-[data-theme="openaec"] .badge-info,
-[data-theme="blueprint"] .badge-info,
-[data-theme="contrast"] .badge-info { background: rgba(96, 165, 250, 0.15); color: #93C5FD; }
-
-/* ── Omschrijving ── */
 .tool-desc {
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: var(--theme-text-secondary);
-  flex: 1;
-}
-
-/* ── Versies ── */
-.tool-versions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-code);
-  font-size: 11px;
-  color: var(--theme-text-muted);
-}
-
-.tool-versions span {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.tool-versions svg {
-  color: #16A34A;
-}
-
-[data-theme="forge"] .tool-versions svg,
-[data-theme="openaec"] .tool-versions svg,
-[data-theme="blueprint"] .tool-versions svg,
-[data-theme="contrast"] .tool-versions svg {
-  color: #4ADE80;
-}
-
-.tool-versions-arrow {
-  color: var(--theme-text-faint);
-}
-
-.latest-highlight {
-  color: var(--theme-accent);
-  font-weight: 500;
-}
-
-/* ── Voortgang (progress bar per stijlboek: 8px, pill, amber) ── */
-.tool-progress {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.tool-progress-track {
-  height: 8px;
-  border-radius: 9999px;
-  background: var(--theme-border-subtle);
+  margin: 0;
+  min-height: 3.9em;
+  font: 13px / 1.5 var(--oa-font-body);
+  color: var(--oa-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.tool-progress-fill {
-  height: 100%;
-  border-radius: 9999px;
-  background: var(--theme-accent);
-  transition: width 0.3s ease;
-  min-width: 4px;
+.version-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.tool-progress-fill.indeterminate {
-  width: 40%;
-  animation: indeterminate 1.2s ease-in-out infinite;
+.version-line .oa-icon {
+  width: 12px;
+  height: 12px;
 }
 
-@keyframes indeterminate {
-  0% { margin-left: 0; }
-  50% { margin-left: 60%; }
-  100% { margin-left: 0; }
+.version-check {
+  display: inline-flex;
+  color: var(--oa-success);
+  --icon-accent: var(--oa-success);
 }
 
-.tool-progress-label {
-  font-family: var(--font-code);
-  font-size: 10.5px;
-  color: var(--theme-text-muted);
+.version-latest {
+  color: var(--oa-accent-text);
 }
 
-/* ── Meldingen ── */
-.tool-error {
-  font-size: 11.5px;
-  color: var(--theme-danger-color);
+.tool-note,
+.tool-error,
+.tool-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .tool-note {
-  font-size: 11.5px;
-  color: var(--theme-text-secondary);
+  color: var(--oa-text-secondary);
+}
+
+.tool-error {
+  color: var(--oa-error);
 }
 
 .tool-hint {
-  font-size: 11px;
-  color: var(--theme-text-faint);
+  color: var(--oa-text-secondary);
+  font-style: italic;
 }
 
-/* ── Acties ── */
 .tool-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 2px;
+  min-height: 40px;
 }
 
-.btn {
-  font-family: var(--font-body);
-  font-size: 12.5px;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 8px 18px;
-  border: none;
-  cursor: default;
-  transition: all 0.15s ease;
+.tool-actions-gap {
+  flex: 1;
 }
 
-.btn:disabled {
-  opacity: 0.4;
-}
-
-.btn-primary {
-  background: var(--theme-btn-primary-bg);
-  color: var(--theme-btn-primary-text);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--theme-btn-primary-hover-bg);
-  color: var(--theme-btn-primary-hover-text);
-}
-
-.btn-secondary {
-  background: var(--theme-btn-secondary-bg);
-  color: var(--theme-btn-secondary-text);
-  border: 1px solid var(--theme-border);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: var(--theme-btn-secondary-hover-bg);
-  border-color: var(--theme-btn-secondary-hover-border);
-}
-
-.tool-links {
-  margin-left: auto;
-  display: flex;
-  gap: 4px;
-}
-
-.icon-btn {
+.tool-progress {
   display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--theme-text-muted);
-  transition: all 0.15s ease;
+  gap: 5px;
+  width: 160px;
 }
 
-.icon-btn:hover {
-  background: var(--theme-hover);
-  color: var(--theme-accent);
+.tool-progress .oa-progress > .indeterminate {
+  width: 35%;
+  animation: tool-progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes tool-progress-slide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(300%); }
+}
+
+.tool-progress-label {
+  font: 11px / 1.3 var(--oa-font-body);
+  color: var(--oa-text-secondary);
 }

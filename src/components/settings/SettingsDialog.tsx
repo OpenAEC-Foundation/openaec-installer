@@ -9,18 +9,35 @@ import ThemedSelect from "../ThemedSelect";
 import "../ThemedSelect.css";
 import "./SettingsDialog.css";
 
+// De thema's van ontwerp 0.4, dezelfde als de Rust-bibliotheek en de galerij.
 const THEME_OPTIONS = [
-  { value: "light",     labelKey: "appearance.light",     swatches: ["#FAFAF9", "#FFFFFF", "#D97706", "#36363E"] },
-  { value: "forge",     labelKey: "appearance.forge",     swatches: ["#36363E", "#44444C", "#D97706", "#FAFAF9"] },
-  { value: "openaec",   labelKey: "appearance.dark",      swatches: ["#27272A", "#1C1917", "#D97706", "#FAFAF9"] },
-  { value: "blueprint", labelKey: "appearance.blueprint", swatches: ["#0F1B2D", "#1A2C45", "#60A5FA", "#E0E7FF"] },
-  { value: "contrast",  labelKey: "appearance.contrast",  swatches: ["#000000", "#0A0A0A", "#FFD700", "#FFFFFF"] },
+  { value: "light",               labelKey: "appearance.light",             swatches: ["#F1EEEA", "#FFFFFF", "#D97706", "#2A2A32"] },
+  { value: "dark",                labelKey: "appearance.dark",              swatches: ["#2A2A32", "#33333C", "#D97706", "#EDEBE8"] },
+  { value: "blueprint",           labelKey: "appearance.blueprint",         swatches: ["#0A1320", "#0F1B2D", "#60A5FA", "#E0E7FF"] },
+  { value: "high-contrast-dark",  labelKey: "appearance.highContrastDark",  swatches: ["#000000", "#000000", "#F59E0B", "#FFFFFF"] },
+  { value: "high-contrast-light", labelKey: "appearance.highContrastLight", swatches: ["#FFFFFF", "#FFFFFF", "#92400E", "#000000"] },
 ];
 
 const TAB_IDS = ["general", "appearance", "about"] as const;
 
+/** Het 0.4-thema bij een bewaarde waarde, ook voor de namen van eerdere versies. */
+export function themeId(theme?: string): string {
+  const earlier: Record<string, string> = { forge: "dark", openaec: "dark", contrast: "high-contrast-dark" };
+  const id = earlier[theme ?? ""] ?? theme ?? "light";
+  return THEME_OPTIONS.some((o) => o.value === id) ? id : "light";
+}
+
 export function applyTheme(theme?: string) {
-  document.documentElement.setAttribute("data-theme", theme || "light");
+  document.documentElement.setAttribute("data-oa-theme", themeId(theme));
+}
+
+/** Tekstgrootte (OpenAEC-Blueprint#27): tekst en rijhoogtes uit de 0.4-tokens. */
+export const TEXT_SIZES = ["compact", "standard", "large"] as const;
+
+export function applyTextSize(size?: string) {
+  const value = TEXT_SIZES.find((s) => s === size) ?? "standard";
+  if (value === "standard") document.documentElement.removeAttribute("data-oa-text");
+  else document.documentElement.setAttribute("data-oa-text", value);
 }
 
 interface SettingsDialogProps {
@@ -44,18 +61,24 @@ export default function SettingsDialog({
   const [activeTab, setActiveTab] = useState("general");
 
   // Draft state — only committed on Save
-  const [draftTheme, setDraftTheme] = useState(theme);
+  const [draftTheme, setDraftTheme] = useState(themeId(theme));
   const [draftLang, setDraftLang] = useState("auto");
+  const [draftText, setDraftText] = useState("standard");
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
   // Snapshot of original values when dialog opens, for reverting on Cancel
   const originalTheme = useRef(theme);
   const originalLang = useRef("");
+  const originalText = useRef("standard");
 
   useEffect(() => {
     if (open) {
-      originalTheme.current = theme;
-      setDraftTheme(theme);
+      originalTheme.current = themeId(theme);
+      setDraftTheme(themeId(theme));
+      getSetting("textSize", "standard").then((size) => {
+        originalText.current = size;
+        setDraftText(size);
+      });
       getSetting("language", "auto").then((lang) => {
         originalLang.current = lang;
         setDraftLang(lang);
@@ -68,6 +91,11 @@ export default function SettingsDialog({
     applyTheme(value);
   };
 
+  const handleTextPreview = (value: string) => {
+    setDraftText(value);
+    applyTextSize(value);
+  };
+
   const handleLangPreview = (value: string) => {
     setDraftLang(value);
     changeLanguage(value);
@@ -76,6 +104,8 @@ export default function SettingsDialog({
   const handleCancel = () => {
     setDraftTheme(originalTheme.current);
     applyTheme(originalTheme.current);
+    setDraftText(originalText.current);
+    applyTextSize(originalText.current);
     setDraftLang(originalLang.current);
     changeLanguage(originalLang.current);
     onClose();
@@ -85,6 +115,8 @@ export default function SettingsDialog({
     onThemeChange(draftTheme);
     applyTheme(draftTheme);
     setSetting("theme", draftTheme);
+    setSetting("textSize", draftText);
+    applyTextSize(draftText);
 
     setSetting("language", draftLang);
     changeLanguage(draftLang);
@@ -99,6 +131,8 @@ export default function SettingsDialog({
   const handleConfirmReset = () => {
     setDraftTheme("light");
     applyTheme("light");
+    setDraftText("standard");
+    applyTextSize("standard");
     setDraftLang("auto");
     changeLanguage("auto");
     setConfirmResetOpen(false);
@@ -141,7 +175,7 @@ export default function SettingsDialog({
             <GeneralTabContent lang={draftLang} onLangChange={handleLangPreview} />
           )}
           {activeTab === "appearance" && (
-            <AppearanceTabContent theme={draftTheme} onThemeSelect={handleThemePreview} />
+            <AppearanceTabContent theme={draftTheme} onThemeSelect={handleThemePreview} textSize={draftText} onTextSizeSelect={handleTextPreview} />
           )}
           {activeTab === "about" && <AboutTabContent latestVersion={latestVersion} />}
         </div>
@@ -198,15 +232,28 @@ function GeneralTabContent({
 function AppearanceTabContent({
   theme,
   onThemeSelect,
+  textSize,
+  onTextSizeSelect,
 }: {
   theme: string;
   onThemeSelect: (value: string) => void;
+  textSize: string;
+  onTextSizeSelect: (value: string) => void;
 }) {
   const { t } = useTranslation("settings");
   return (
     <div className="settings-section">
       <h3>{t("appearance.theme")}</h3>
       <ThemeDropdown theme={theme} onThemeSelect={onThemeSelect} />
+      <div className="settings-row">
+        <span className="settings-label">{t("appearance.textSize")}</span>
+        <ThemedSelect
+          value={textSize}
+          options={TEXT_SIZES.map((s) => ({ value: s, label: t(`appearance.textSizes.${s}`) }))}
+          onChange={onTextSizeSelect}
+          style={{ width: 180 }}
+        />
+      </div>
     </div>
   );
 }

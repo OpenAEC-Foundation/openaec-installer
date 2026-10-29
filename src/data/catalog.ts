@@ -63,6 +63,13 @@ export interface CatalogTool {
    */
   logo?: string;
   description: { nl: string; en: string };
+  /**
+   * Disciplines van het ecosysteemfilter op open-aec.com: A(rchitecture),
+   * E(ngineering), C(onstruction) en I(nfra & GWW), zoals "ECI".
+   */
+  disciplines?: string;
+  /** Fase op open-aec.com, als die er is (gelezen 2026-10-22). */
+  stage?: "alpha" | "beta" | "development";
   /** Community-project buiten de OpenAEC-Foundation org. */
   community?: boolean;
   /**
@@ -98,6 +105,7 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-calc-studio.jpg",
     kind: "desktop",
     category: "calculatie",
+    disciplines: "CI",
     repo: "OpenAEC-Foundation/open-calc-studio",
     registryName: "Open Calc Studio",
     // Deze tool zet mainBinaryName in tauri.conf.json, waardoor de binary niet
@@ -115,6 +123,7 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-pdf-studio.jpg",
     kind: "desktop",
     category: "documenten",
+    disciplines: "AECI",
     repo: "OpenAEC-Foundation/open-pdf-studio",
     registryName: "Open PDF Studio",
     exeName: "open-pdf-studio.exe",
@@ -130,6 +139,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-planner-studio.jpg",
     kind: "desktop",
     category: "planning",
+    disciplines: "ACI",
+    stage: "beta",
     repo: "OpenAEC-Foundation/open-planner-studio",
     registryName: "Open Planner Studio",
     exeName: "open-planner-studio.exe",
@@ -148,6 +159,7 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-2d-studio.jpg",
     kind: "desktop",
     category: "cad",
+    disciplines: "AEC",
     repo: "OpenAEC-Foundation/open-2d-studio",
     registryName: "Open 2D Studio",
     exeName: "open-2d-studio.exe",
@@ -163,6 +175,7 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-cad-studio.jpg",
     kind: "desktop",
     category: "cad",
+    disciplines: "AEC",
     repo: "HakanSeven12/OpenCADStudio",
     registryName: "Open CAD Studio",
     exeName: "OpenCADStudio.exe",
@@ -179,6 +192,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-calculations-studio.jpg",
     kind: "desktop",
     category: "constructief",
+    disciplines: "EI",
+    stage: "development",
     repo: "OpenAEC-Foundation/Open-Calculations-Studio",
     registryName: "Open Calculations Studio",
     exeName: "open-calculations-studio.exe",
@@ -193,6 +208,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     name: "Open Frame Studio",
     kind: "desktop",
     category: "constructief",
+    disciplines: "AC",
+    stage: "alpha",
     repo: "OpenAEC-Foundation/open-frame-studio",
     registryName: "Open Frame Studio",
     exeName: "open-frame-studio.exe",
@@ -220,6 +237,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-geotechniek-studio.jpg",
     kind: "desktop",
     category: "geotechniek",
+    disciplines: "EI",
+    stage: "beta",
     repo: "OpenAEC-Foundation/open-geotechniek-studio",
     registryName: "Open Geotechniek Studio",
     exeName: "open-geotechniek-studio.exe",
@@ -235,6 +254,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/monty-ifc-viewer.jpg",
     kind: "desktop",
     category: "bim",
+    disciplines: "C",
+    stage: "beta",
     repo: "OpenAEC-Foundation/monty-ifc-viewer",
     registryName: "Monty IFC Viewer",
     exeName: "monty-ifc-viewer.exe",
@@ -250,6 +271,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-speech-studio.jpg",
     kind: "desktop",
     category: "ai",
+    disciplines: "AECI",
+    stage: "beta",
     repo: "OpenAEC-Foundation/open-speech-studio",
     registryName: "Open Speech Studio",
     exeName: "open-speech-studio.exe",
@@ -264,6 +287,7 @@ export const ALL_TOOLS: CatalogTool[] = [
     name: "Open STL-3DMap Studio",
     kind: "desktop",
     category: "gis",
+    disciplines: "I",
     repo: "OpenAEC-Foundation/Open-STL-3DMap-Studio",
     registryName: "Open STL-3DMap Studio",
     exeName: "Open STL-3DMap Studio.exe",
@@ -281,6 +305,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     logo: "/logos/open-energy-studio.png",
     kind: "web",
     category: "energie",
+    disciplines: "E",
+    stage: "beta",
     webUrl: "https://open-energy-studio.open-aec.com/",
     siteUrl: "https://open-aec.com/open-energy-studio/",
     description: {
@@ -294,6 +320,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-heatloss-studio.jpg",
     kind: "web",
     category: "energie",
+    disciplines: "E",
+    stage: "beta",
     webUrl: "https://open-heatloss-studio.open-aec.com/",
     description: {
       nl: "Warmteverliesberekeningen voor gebouwen volgens NEN-EN 12831 / ISSO 51.",
@@ -306,6 +334,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-field-studio.jpg",
     kind: "desktop",
     category: "veld",
+    disciplines: "C",
+    stage: "beta",
     repo: "OpenAEC-Foundation/Open-Field-Studio",
     registryName: "Open Field Studio",
     exeName: "open-field-studio.exe",
@@ -321,6 +351,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-pointcloud-studio.jpg",
     kind: "desktop",
     category: "bim",
+    disciplines: "ECI",
+    stage: "beta",
     repo: "OpenAEC-Foundation/open-pointcloud-studio",
     registryName: "Open Pointcloud Studio",
     exeName: "open-pointcloud-studio.exe",
@@ -336,6 +368,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     preview: "/previews/open-books.jpg",
     kind: "web",
     category: "documenten",
+    disciplines: "A",
+    stage: "development",
     webUrl: "https://open-books.open-aec.com/",
     description: {
       nl: "Digitalisering van historische bouwliteratuur.",
@@ -360,6 +394,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     name: "Pile Plan Studio",
     kind: "web",
     category: "constructief",
+    disciplines: "EI",
+    stage: "beta",
     repo: "OpenAEC-Foundation/pile-plan-studio",
     webUrl: "https://pile-plan-studio.open-aec.com/",
     description: {
