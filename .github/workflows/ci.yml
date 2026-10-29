@@ -53,7 +53,7 @@ jobs:
         run: npm test
 
       - name: Release-kit tests
-        run: node --test "release-kit/*.test.mjs"
+        run: node --test "release-kit/*.check.mjs"
 
       - name: Rust tests
         working-directory: src-tauri
