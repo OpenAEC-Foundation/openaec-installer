@@ -76,6 +76,8 @@ fn scan_in(root: &Path, queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 display_name: q.display_name.clone(),
                 version,
                 exe_path: Some(best.to_string_lossy().into_owned()),
+                scope: Some("user"),
+                kind: Some("appimage"),
             })
         })
         .collect()

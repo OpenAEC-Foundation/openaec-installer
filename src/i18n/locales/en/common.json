@@ -34,7 +34,9 @@
     "github": "Source on GitHub",
     "website": "Website",
     "downloading": "Downloading...",
-    "starting": "Starting installer..."
+    "starting": "Starting installer...",
+    "cancel": "Cancel",
+    "updating": "Updating..."
   },
   "versions": {
     "installed": "installed",
@@ -84,9 +86,18 @@
     "rateLimitedUntil": "GitHub rate limit reached — available again at {{time}}",
     "network": "Network error while fetching releases",
     "noInstaller": "No installer for this operating system in the latest release",
-    "installFailed": "Failed to start the installation"
+    "installFailed": "Failed to start the installation",
+    "updateFailed": "Update failed"
   },
   "installerStarted": "The installer has started — follow its steps. The status will update automatically afterwards.",
   "installedDone": "Installed — you can launch the tool now.",
-  "noResults": "No tools found for “{{query}}”."
+  "noResults": "No tools found for “{{query}}”.",
+  "update": {
+    "waiting": "Close {{name}} to update. The installer does not close the app itself, so no work gets lost.",
+    "done": "Updated to v{{version}}.",
+    "doneRelaunched": "Updated to v{{version}} and restarted.",
+    "restartRequired": "Updated to v{{version}}. Restart Windows to finish.",
+    "noMatchingSetup": "The latest release has no setup that matches this installation ({{kind}}). Update via the release page on GitHub.",
+    "alreadyCurrent": "Already up to date (v{{version}})."
+  }
 }

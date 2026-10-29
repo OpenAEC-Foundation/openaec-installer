@@ -27,6 +27,12 @@ pub struct InstalledTool {
     pub display_name: String,
     pub version: Option<String>,
     pub exe_path: Option<String>,
+    /// "user" (HKCU, per gebruiker) of "machine" (HKLM, voor de hele pc).
+    pub scope: Option<&'static str>,
+    /// "nsis", "msi" of "appimage": met welk soort setup de tool erop kwam.
+    /// Een update moet dezelfde soort gebruiken, anders ontstaat er een tweede
+    /// installatie naast de eerste.
+    pub kind: Option<&'static str>,
 }
 
 #[cfg(windows)]
@@ -79,17 +85,35 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
             let display_icon = sub.get_value::<String, _>("DisplayIcon").ok();
             let install_location = sub.get_value::<String, _>("InstallLocation").ok();
             let exe_path = resolve_exe(query, display_icon, install_location);
+            let windows_installer = sub.get_value::<u32, _>("WindowsInstaller").ok();
+            let uninstall = sub.get_value::<String, _>("UninstallString").ok();
 
             found.push(InstalledTool {
                 id: query.id.clone(),
                 display_name: display_trim.to_string(),
                 version,
                 exe_path,
+                scope: Some(if hive == HKEY_CURRENT_USER { "user" } else { "machine" }),
+                kind: Some(install_kind(windows_installer, uninstall.as_deref())),
             });
         }
     }
 
     found
+}
+
+/// MSI-installaties zetten `WindowsInstaller = 1` en verwijderen via msiexec;
+/// alles anders komt bij deze tools van een NSIS-setup (Tauri).
+#[cfg(windows)]
+fn install_kind(windows_installer: Option<u32>, uninstall_string: Option<&str>) -> &'static str {
+    let msiexec = uninstall_string
+        .map(|u| u.to_ascii_lowercase().contains("msiexec"))
+        .unwrap_or(false);
+    if windows_installer == Some(1) || msiexec {
+        "msi"
+    } else {
+        "nsis"
+    }
 }
 
 /// Bepaal het exe-pad: DisplayIcon → InstallLocation + exe-naam → bekende mappen.
@@ -167,4 +191,17 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
 #[cfg(not(any(windows, target_os = "linux")))]
 pub fn scan(_queries: &[ToolQuery]) -> Vec<InstalledTool> {
     Vec::new()
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn recognises_msi_and_nsis_installations() {
+        assert_eq!(install_kind(Some(1), Some("MsiExec.exe /I{B839249A-32F4-404D-A4E8-D9D35E9E9E48}")), "msi");
+        assert_eq!(install_kind(None, Some("MsiExec.exe /X{B839249A}")), "msi");
+        assert_eq!(install_kind(None, Some(r#""C:\Users\nino\AppData\Local\Open Planner Studio\uninstall.exe""#)), "nsis");
+        assert_eq!(install_kind(None, None), "nsis");
+    }
 }

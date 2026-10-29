@@ -1,14 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./i18n/config";
-// Huisstijl-fonts (DESIGN-SYSTEM.md): Space Grotesk / Inter / JetBrains Mono
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
-import "@fontsource/space-grotesk/500.css";
-import "@fontsource/space-grotesk/700.css";
-import "@fontsource/jetbrains-mono/400.css";
-import "@fontsource/jetbrains-mono/500.css";
+// Fonts van ontwerp 0.4, dezelfde bestanden als de Rust-bibliotheek en het
+// webpakket van OpenAEC-Blueprint (OpenAEC-Blueprint#30): Inter, Space Grotesk,
+// JetBrains Mono, Inter AEC voor getallen en Noto Sans als terugval voor tekens.
+import "./openaec/openaec-fonts.css";
 import App from "./App";
 
 // Production: disable context menu and browser dev shortcuts

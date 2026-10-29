@@ -37,6 +37,16 @@ export interface CatalogTool {
   registryName?: string;
   /** Verwachte exe-naam (fallback voor pad-detectie). */
   exeName?: string;
+  /**
+   * Publieke minisign-sleutel van de tool, gelijk aan `plugins.updater.pubkey`
+   * in diens `tauri.conf.json`. Met een sleutel leest de installer eerst de
+   * `latest.json` van de release (met terugval op de GitHub API) en installeert
+   * hij alleen als de handtekening van de download klopt. Zet hem alleen als die
+   * `latest.json` dezelfde soort setup aanbiedt als de API-route: Open PDF
+   * Studio ondertekent alleen zijn systeembrede setup, terwijl de installer de
+   * per-gebruiker-setup kiest, dus die krijgt (nog) geen sleutel.
+   */
+  pubkey?: string;
   /** Web-app of demo-URL. */
   webUrl?: string;
   /** Productpagina op open-aec.com. */
@@ -123,6 +133,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     repo: "OpenAEC-Foundation/open-planner-studio",
     registryName: "Open Planner Studio",
     exeName: "open-planner-studio.exe",
+    pubkey:
+      "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI4QUM4RjA4QTg3QzkwQ0QKUldUTmtIeW9DSStzS0RyRytOY0VQNVBqREY2cm5NakpIMlBnb2ZIVm8rWE12YmI0aTYyUlI0MnMK",
     webUrl: "https://open-planner-studio.open-aec.com/",
     siteUrl: "https://open-aec.com/open-planner-studio/",
     description: {

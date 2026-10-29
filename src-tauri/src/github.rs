@@ -1,10 +1,21 @@
-//! Laatste releases ophalen via de GitHub API (ongeauthenticeerd, 60 req/uur —
-//! de frontend cachet het resultaat).
+//! Laatste releases ophalen.
 //!
-//! De versie wordt uit de naam van het installer-asset geparst in plaats van
-//! uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1) wijkt de tag
-//! af van de daadwerkelijke bestandsversie. Welk asset gekozen wordt hangt af
-//! van het platform: Windows-installers op Windows, AppImages op Linux.
+//! Tools met een publieke sleutel in de catalogus lezen eerst de `latest.json`
+//! van hun release (zie `manifest.rs`): geen API-limiet, de versie staat er
+//! expliciet in en elk bestand heeft een handtekening. Zonder sleutel, of als
+//! de release geen bruikbare `latest.json` heeft, valt het terug op de GitHub
+//! API (ongeauthenticeerd, 60 req/uur — de frontend cachet het resultaat).
+//!
+//! Op de API-route wordt de versie uit de naam van het installer-asset geparst
+//! in plaats van uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1)
+//! wijkt de tag af van de daadwerkelijke bestandsversie. Welk asset gekozen
+//! wordt hangt af van het platform: Windows-installers op Windows, AppImages op
+//! Linux. De `.sig` naast het asset haalt de installer pas bij het installeren
+//! op (zie `installer.rs`), zodat ook de terugvalroute gecontroleerd installeert.
+//!
+//! Naast het voorkeursasset (voor een nieuwe installatie) staan in `variants`
+//! alle soorten setup van de release: een update moet dezelfde soort gebruiken
+//! als de bestaande installatie, anders staat de tool er straks twee keer op.
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +27,9 @@ pub struct RepoRef {
     pub id: String,
     pub owner: String,
     pub repo: String,
+    /// Publieke minisign-sleutel van de tool (base64, zoals in tauri.conf.json).
+    #[serde(default)]
+    pub pubkey: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -36,6 +50,22 @@ pub struct ReleaseInfo {
     /// (epoch-seconden, uit de x-ratelimit-reset header). Hiermee kan de app
     /// tonen wanneer het weer kan en tot dan onnodige pogingen overslaan.
     pub rate_limit_reset: Option<u64>,
+    /// Handtekening van het asset (base64), als de release er een levert.
+    pub signature: Option<String>,
+    /// "manifest" (via latest.json) of "api" (via de GitHub API).
+    pub source: Option<&'static str>,
+    /// Per soort setup het beste asset: "nsis", "nsisUser" (aparte
+    /// per-gebruiker-setup), "msi" of "appimage".
+    pub variants: Vec<Variant>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Variant {
+    pub kind: &'static str,
+    pub asset_name: String,
+    pub asset_url: String,
+    pub signature: Option<String>,
 }
 
 pub async fn fetch_all(repos: Vec<RepoRef>) -> Vec<ReleaseInfo> {
@@ -54,6 +84,51 @@ pub async fn fetch_all(repos: Vec<RepoRef>) -> Vec<ReleaseInfo> {
 }
 
 async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
+    if repo.pubkey.is_some() {
+        if let Ok(Some(manifest)) = crate::manifest::fetch(&client, &repo.owner, &repo.repo).await {
+            if let Some(entry) = crate::manifest::pick(&manifest) {
+                return from_manifest(&repo, &manifest, entry);
+            }
+        }
+    }
+    fetch_api(client, repo).await
+}
+
+fn from_manifest(
+    repo: &RepoRef,
+    manifest: &crate::manifest::Manifest,
+    entry: &crate::manifest::PlatformEntry,
+) -> ReleaseInfo {
+    ReleaseInfo {
+        id: repo.id.clone(),
+        ok: true,
+        error: None,
+        tag: None,
+        version: Some(manifest.version.trim_start_matches('v').to_string()),
+        asset_name: Some(crate::manifest::file_name(&entry.url).to_string()),
+        asset_url: Some(entry.url.clone()),
+        asset_size: None,
+        page_url: Some(format!(
+            "https://github.com/{}/{}/releases/latest",
+            repo.owner, repo.repo
+        )),
+        published_at: manifest.pub_date.clone(),
+        rate_limit_reset: None,
+        signature: Some(entry.signature.clone()),
+        source: Some("manifest"),
+        variants: crate::manifest::variants(manifest)
+            .into_iter()
+            .map(|(kind, e)| Variant {
+                kind,
+                asset_name: crate::manifest::file_name(&e.url).to_string(),
+                asset_url: e.url.clone(),
+                signature: Some(e.signature.clone()),
+            })
+            .collect(),
+    }
+}
+
+async fn fetch_api(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
     let url = format!(
         "https://api.github.com/repos/{}/{}/releases/latest",
         repo.owner, repo.repo
@@ -114,6 +189,8 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         .and_then(extract_version)
         .or_else(|| tag.as_deref().map(|t| t.trim_start_matches('v').to_string()));
 
+    let variants = api_variants(&assets);
+
     ReleaseInfo {
         id: repo.id,
         ok: true,
@@ -126,6 +203,53 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         page_url,
         published_at,
         rate_limit_reset: None,
+        signature: None,
+        source: Some("api"),
+        variants,
+    }
+}
+
+/// Per soort setup het asset met de hoogste score.
+fn api_variants(assets: &[serde_json::Value]) -> Vec<Variant> {
+    let mut best: Vec<(u32, Variant)> = Vec::new();
+    for a in assets {
+        let (Some(name), Some(url)) = (a["name"].as_str(), a["browser_download_url"].as_str()) else {
+            continue;
+        };
+        let (Some(score), Some(kind)) = (score_asset(name), variant_kind(name)) else {
+            continue;
+        };
+        let variant = Variant {
+            kind,
+            asset_name: name.to_string(),
+            asset_url: url.to_string(),
+            signature: None,
+        };
+        match best.iter_mut().find(|(_, v)| v.kind == kind) {
+            Some(slot) if slot.0 < score => *slot = (score, variant),
+            Some(_) => {}
+            None => best.push((score, variant)),
+        }
+    }
+    best.into_iter().map(|(_, v)| v).collect()
+}
+
+/// Soort setup volgens de bestandsnaam. Een aparte per-gebruiker-setup heet
+/// bij deze tools `…_user-setup.exe`; de gewone `-setup.exe` is dan de
+/// systeembrede. Heeft een release alleen `-setup.exe`, dan is dat de enige
+/// NSIS-setup en past hij bij elke NSIS-installatie van die tool.
+fn variant_kind(name: &str) -> Option<&'static str> {
+    let n = name.to_ascii_lowercase();
+    if n.ends_with(".appimage") {
+        Some("appimage")
+    } else if n.ends_with(".msi") {
+        Some("msi")
+    } else if n.contains("user-setup") {
+        Some("nsisUser")
+    } else if n.ends_with("setup.exe") {
+        Some("nsis")
+    } else {
+        None
     }
 }
 
@@ -220,6 +344,9 @@ fn error_info(id: String, error: String) -> ReleaseInfo {
         page_url: None,
         published_at: None,
         rate_limit_reset: None,
+        signature: None,
+        source: None,
+        variants: Vec::new(),
     }
 }
 
@@ -254,6 +381,34 @@ mod tests {
         assert!(user > system && system > msi && msi.is_some());
         assert_eq!(score_windows_asset("Open.PDF.Studio_1.67.0_x64-setup.exe.sig"), None);
         assert_eq!(score_windows_asset("Open.2D.Studio_0.35.0_amd64.AppImage"), None);
+    }
+
+    #[test]
+    fn lists_one_setup_per_kind() {
+        let assets: Vec<serde_json::Value> = serde_json::from_str(
+            r#"[
+                { "name": "Open.PDF.Studio_2026.43.4_x64-setup.exe", "browser_download_url": "https://github.com/a/b/releases/download/v1/Open.PDF.Studio_2026.43.4_x64-setup.exe" },
+                { "name": "Open.PDF.Studio_2026.43.4_x64-setup.exe.sig", "browser_download_url": "https://github.com/a/b/releases/download/v1/Open.PDF.Studio_2026.43.4_x64-setup.exe.sig" },
+                { "name": "Open.PDF.Studio_2026.43.4_x64_user-setup.exe", "browser_download_url": "https://github.com/a/b/releases/download/v1/Open.PDF.Studio_2026.43.4_x64_user-setup.exe" },
+                { "name": "Open.PDF.Studio_2026.43.4_x64_en-US.msi", "browser_download_url": "https://github.com/a/b/releases/download/v1/Open.PDF.Studio_2026.43.4_x64_en-US.msi" },
+                { "name": "Open.PDF.Studio_2026.43.4_x86_en-US.msi", "browser_download_url": "https://github.com/a/b/releases/download/v1/Open.PDF.Studio_2026.43.4_x86_en-US.msi" },
+                { "name": "Open.PDF.Studio_2026.43.4_amd64.AppImage", "browser_download_url": "https://github.com/a/b/releases/download/v1/Open.PDF.Studio_2026.43.4_amd64.AppImage" },
+                { "name": "latest.json", "browser_download_url": "https://github.com/a/b/releases/download/v1/latest.json" }
+            ]"#,
+        )
+        .unwrap();
+        let variants = api_variants(&assets);
+        let name = |kind: &str| variants.iter().find(|v| v.kind == kind).map(|v| v.asset_name.as_str());
+        if cfg!(target_os = "linux") {
+            assert_eq!(name("appimage"), Some("Open.PDF.Studio_2026.43.4_amd64.AppImage"));
+            assert_eq!(variants.len(), 1);
+        } else if cfg!(windows) {
+            assert_eq!(name("nsis"), Some("Open.PDF.Studio_2026.43.4_x64-setup.exe"));
+            assert_eq!(name("nsisUser"), Some("Open.PDF.Studio_2026.43.4_x64_user-setup.exe"));
+            // x64 wint van x86 binnen dezelfde soort.
+            assert_eq!(name("msi"), Some("Open.PDF.Studio_2026.43.4_x64_en-US.msi"));
+            assert_eq!(variants.len(), 3);
+        }
     }
 
     #[test]
