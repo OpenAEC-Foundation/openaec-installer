@@ -131,11 +131,14 @@ mod tests {
     fn reads_the_version_and_picks_the_platform_file() {
         let m: Manifest = serde_json::from_str(PLANNER).unwrap();
         assert_eq!(m.version, "2026.43.0");
-        let picked = file_name(&pick(&m).unwrap().url);
+        let picked = pick(&m).map(|e| file_name(&e.url));
         if cfg!(target_os = "linux") {
-            assert_eq!(picked, "Open.Planner.Studio_2026.43.0_amd64.AppImage");
+            assert_eq!(picked, Some("Open.Planner.Studio_2026.43.0_amd64.AppImage"));
         } else if cfg!(windows) {
-            assert_eq!(picked, "Open.Planner.Studio_2026.43.0_x64-setup.nsis.zip");
+            assert_eq!(picked, Some("Open.Planner.Studio_2026.43.0_x64-setup.nsis.zip"));
+        } else {
+            // macOS: de installer installeert daar nog niets, dus ook geen keuze.
+            assert_eq!(picked, None);
         }
     }
 
