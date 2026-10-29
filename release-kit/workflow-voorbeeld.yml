@@ -1,0 +1,57 @@
+# Voorbeeld voor de releaseworkflow van een app: de laatste job, ná het
+# publiceren van de release. Kopieer hem naar .github/workflows/release.yml van de
+# app en pas `needs`, `TAG` en `VERSION_FILE` aan.
+#
+# Nodig in de app-repo:
+#   - variabele  UPDATER_PUBKEY                       publieke sleutel (ook in de catalogus van de installer)
+#   - geheimen   TAURI_SIGNING_PRIVATE_KEY(_PASSWORD) voor het ondertekenen bij het bouwen
+# Tauri-apps zetten in tauri.conf.json `bundle.createUpdaterArtifacts: true`; dan
+# komt er naast elke setup een .sig. Andere apps ondertekenen hun setups zelf, zie
+# README.md (`tauri signer sign`).
+
+  updater-manifest:
+    name: latest.json voor de OpenAEC Installer
+    needs: [publish-release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+      VERSION_FILE: src-tauri/tauri.conf.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release-kit ophalen
+        uses: actions/checkout@v4
+        with:
+          repository: OpenAEC-Foundation/openaec-installer
+          # Zet hier liever een vaste commit; dan verandert de kit niet ongemerkt.
+          ref: main
+          path: .release-kit
+          sparse-checkout: release-kit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Alleen een gepubliceerde release
+        run: |
+          state=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease --jq '"\(.isDraft) \(.isPrerelease)"')
+          if [ "$state" != "false false" ]; then
+            echo "::error::$TAG is een concept of pre-release; geen latest.json"
+            exit 1
+          fi
+      - name: Setups en handtekeningen ophalen
+        run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir dist \
+            --pattern '*-setup.exe' --pattern '*-setup.exe.sig' \
+            --pattern '*.msi' --pattern '*.msi.sig' \
+            --pattern '*.AppImage' --pattern '*.AppImage.sig' \
+            --pattern '*.app.tar.gz' --pattern '*.app.tar.gz.sig'
+      - name: latest.json maken (controleert elke handtekening)
+        run: |
+          node .release-kit/release-kit/latest-json.mjs \
+            --repo "$GITHUB_REPOSITORY" --tag "$TAG" --dir dist \
+            --pubkey "${{ vars.UPDATER_PUBKEY }}" --version-file "$VERSION_FILE" \
+            --notes "Zie https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG" \
+            --out latest.json
+      - name: latest.json als laatste aan de release hangen
+        run: gh release upload "$TAG" latest.json --repo "$GITHUB_REPOSITORY" --clobber

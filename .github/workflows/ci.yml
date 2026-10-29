@@ -52,6 +52,9 @@ jobs:
       - name: Frontend tests
         run: npm test
 
+      - name: Release-kit tests
+        run: node --test release-kit/latest-json.check.mjs
+
       - name: Rust tests
         working-directory: src-tauri
         run: cargo test
