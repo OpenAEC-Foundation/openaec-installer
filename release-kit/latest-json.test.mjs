@@ -6,7 +6,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { build, platformsFor } from "./latest-json.mjs";
+import { build, platformsFor, versionIn } from "./latest-json.mjs";
 import { verifySignature } from "./minisign.mjs";
 
 const PUBKEY = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQxNEI2N0M1MjNENUQ4NUMKUldSYzJOVWp4V2RMUWJMTHZzaHRDcEE1cHhRZldybmR5dXBjRGpmT1RNTS93NEFNTi9NajJFQUkK";
@@ -27,6 +27,21 @@ test("kent de platformsleutels van de installer", () => {
   assert.equal(platformsFor("app_2026.44.1_x64-user-setup.exe"), null);
   assert.equal(platformsFor("app_2026.44.1_amd64.deb"), null);
   assert.equal(platformsFor("app_2026.44.1_x64-setup.exe.sig"), null);
+});
+
+test("leest de versie uit tauri.conf.json en Cargo.toml", () => {
+  const dir = release({
+    "a.toml": '[package]\nname = "x"\nversion = "1.2.3"\n',
+    "b.toml": '[workspace]\nmembers = []\n\n[workspace.package]\nversion = "2026.44.1"\n',
+    "c.json": '{"version":"0.13.0"}',
+  });
+  try {
+    assert.equal(versionIn(join(dir, "a.toml")), "1.2.3");
+    assert.equal(versionIn(join(dir, "b.toml")), "2026.44.1");
+    assert.equal(versionIn(join(dir, "c.json")), "0.13.0");
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
 });
 
 function release(files) {

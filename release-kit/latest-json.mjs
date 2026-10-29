@@ -40,8 +40,9 @@ function fail(message) {
 export function versionIn(path) {
   const text = readFileSync(path, "utf8");
   if (path.endsWith(".toml")) {
-    const m = text.match(/\[package\][^[]*?\nversion\s*=\s*"([^"]+)"/);
-    if (!m) throw new Error(`geen [package] version in ${path}`);
+    // [package], of [workspace.package] in een werkruimte zoals native/Cargo.toml van Pointcloud.
+    const m = text.match(/\[(?:workspace\.)?package\][^[]*?\nversion\s*=\s*"([^"]+)"/);
+    if (!m) throw new Error(`geen [package] of [workspace.package] version in ${path}`);
     return m[1];
   }
   const json = JSON.parse(text);
