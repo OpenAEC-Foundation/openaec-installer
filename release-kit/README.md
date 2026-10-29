@@ -10,7 +10,7 @@ Stap 4 van [bijwerken via de installer](https://github.com/OpenAEC-Foundation/Op
 | [`minisign.mjs`](minisign.mjs) | De controle van de handtekeningen, in hetzelfde formaat als de Tauri-updater en de installer (`src-tauri/src/signature.rs`). |
 | [`latest-json-workflow.yml`](latest-json-workflow.yml) | Een losse workflow voor de app: maakt `latest.json` zodra een release gepubliceerd wordt, en met de hand voor een bestaande tag (noodknop). |
 | [`workflow-voorbeeld.yml`](workflow-voorbeeld.yml) | Dezelfde stappen als laatste job van een releaseworkflow, voor apps die hun release in de workflow zelf publiceren. |
-| [`latest-json.check.mjs`](latest-json.check.mjs) | Tests, ook in de CI van de installer: `node --test "release-kit/*.check.mjs"`. |
+| [`latest-json.check.mjs`](latest-json.check.mjs) | Tests, ook in de CI van de installer: `node --test release-kit/latest-json.check.mjs`. |
 
 ## Wat het script bewaakt
 

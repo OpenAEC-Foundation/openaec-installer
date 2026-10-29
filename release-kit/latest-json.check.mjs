@@ -1,4 +1,4 @@
-// node --test "release-kit/*.check.mjs"  —  draait ook in de CI (niet in vitest).
+// node --test release-kit/latest-json.check.mjs  —  draait ook in de CI (niet in vitest).
 // Gebruikt de vaste testsleutel uit src-tauri/src/signature.rs (de geheime
 // sleutel is weggegooid), zodat de kit hetzelfde formaat leest als de installer.
 import assert from "node:assert/strict";
