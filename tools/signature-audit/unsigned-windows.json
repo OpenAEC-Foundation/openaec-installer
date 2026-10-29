@@ -86,5 +86,13 @@
     "name": "Open.Geotechniek.Studio_0.4.1_x64-setup.exe",
     "url": "https://github.com/OpenAEC-Foundation/open-geotechniek-studio/releases/download/v0.4.1/Open.Geotechniek.Studio_0.4.1_x64-setup.exe",
     "sha256": "aa78c79c0707480db64799702ab53b00c505107fd49bbc9c83e4402d570d4f8c"
+  },
+  {
+    "tool": "Open Structural Calculation Studio (nieuwe repository)",
+    "repo": "OpenAEC-Foundation/Open-Structural-Calculation-Studio",
+    "tag": "nightly",
+    "name": "Open.Structural.Calculation.Studio_2026.43.0_x64-setup.exe",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Structural-Calculation-Studio/releases/download/nightly/Open.Structural.Calculation.Studio_2026.43.0_x64-setup.exe",
+    "sha256": "2c83abf272a79e771ff1e588df06febe6631ac4e973e1af4bc2c6171328655fa"
   }
 ]
