@@ -1,0 +1,46 @@
+# Noodknop: maak de latest.json van een bestaande release opnieuw. Kopieer dit
+# bestand naar .github/workflows/latest-json.yml van de app. Handig als de laatste
+# job van een release mislukte; "Re-run failed jobs" slaat die soms over.
+name: latest.json opnieuw maken
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Bestaande tag, zoals v2026.44.1
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  updater-manifest:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.tag }}
+      VERSION_FILE: src-tauri/tauri.conf.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/checkout@v4
+        with:
+          repository: OpenAEC-Foundation/openaec-installer
+          ref: main
+          path: .release-kit
+          sparse-checkout: release-kit
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Alleen een gepubliceerde release
+        run: |
+          state=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease --jq '"\(.isDraft) \(.isPrerelease)"')
+          [ "$state" = "false false" ] || { echo "::error::$TAG is een concept of pre-release"; exit 1; }
+      - run: |
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir dist \
+            --pattern '*-setup.exe' --pattern '*-setup.exe.sig' --pattern '*.msi' --pattern '*.msi.sig' \
+            --pattern '*.AppImage' --pattern '*.AppImage.sig' --pattern '*.app.tar.gz' --pattern '*.app.tar.gz.sig'
+          node .release-kit/release-kit/latest-json.mjs --repo "$GITHUB_REPOSITORY" --tag "$TAG" --dir dist \
+            --pubkey "${{ vars.UPDATER_PUBKEY }}" --version-file "$VERSION_FILE" --out latest.json
+          gh release upload "$TAG" latest.json --repo "$GITHUB_REPOSITORY" --clobber
