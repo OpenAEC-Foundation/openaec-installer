@@ -1,0 +1,74 @@
+[
+  {
+    "tool": "Open Heatloss Studio",
+    "repo": "OpenAEC-Foundation/open-heatloss-studio",
+    "tag": "v0.1.1-pr13.alpha",
+    "name": "gen_pdf.exe",
+    "url": "https://github.com/OpenAEC-Foundation/open-heatloss-studio/releases/download/v0.1.1-pr13.alpha/gen_pdf.exe",
+    "sha256": "54e4e506df375548e20b03eb88f27a0e1e96c6d7b1da22b5ca016695972c5811"
+  },
+  {
+    "tool": "Open Heatloss Studio",
+    "repo": "OpenAEC-Foundation/open-heatloss-studio",
+    "tag": "v0.1.1-pr13.alpha",
+    "name": "Open.Heatloss.Studio_0.1.1_x64-setup.exe",
+    "url": "https://github.com/OpenAEC-Foundation/open-heatloss-studio/releases/download/v0.1.1-pr13.alpha/Open.Heatloss.Studio_0.1.1_x64-setup.exe",
+    "sha256": "e5bc333438fa32ecf5150672be0bd9b7871f948c2992a3941b1bbf8144af1d59"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "OpenAEC.Installer_0.2.4_x64-setup.exe",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.4/OpenAEC.Installer_0.2.4_x64-setup.exe",
+    "sha256": "2fae1706527bbc34899004a2547180065970d9acc947c07e465a87c258cdc858"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "OpenAEC.Installer_0.2.4_x64_en-US.msi",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.4/OpenAEC.Installer_0.2.4_x64_en-US.msi",
+    "sha256": "e3b5729632fa9bbf8e0bb5e07b329533dcef60c166ad4c4fdc4cf1c3875e9ec3"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "OpenAEC.Installer_0.2.2_x64-setup.exe",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.2/OpenAEC.Installer_0.2.2_x64-setup.exe",
+    "sha256": "baeee66b7bec2cc41fb43ca7a0a0a742ae0bd237e96108a70d279df787e49291"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "OpenAEC.Installer_0.2.2_x64_en-US.msi",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.2/OpenAEC.Installer_0.2.2_x64_en-US.msi",
+    "sha256": "c17dc2c386efc7ac2781100ef490ea58f153c0bbc971255dbf6953c20724dd81"
+  },
+  {
+    "tool": "Open Field Studio",
+    "repo": "OpenAEC-Foundation/Open-Field-Studio",
+    "tag": "v0.3.6",
+    "name": "Open.Field.Studio_0.3.6_x64-setup.exe",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Field-Studio/releases/download/v0.3.6/Open.Field.Studio_0.3.6_x64-setup.exe",
+    "sha256": "13605f9c81f11e23d234237ec3ef9a576579859f92e7589ead04466ed3b479c9"
+  },
+  {
+    "tool": "Open Field Studio",
+    "repo": "OpenAEC-Foundation/Open-Field-Studio",
+    "tag": "v0.3.6",
+    "name": "Open.Field.Studio_0.3.6_x64_en-US.msi",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Field-Studio/releases/download/v0.3.6/Open.Field.Studio_0.3.6_x64_en-US.msi",
+    "sha256": "2fe4de9e316cdeb57509d9213df7e91227bae1348fde9387d3a72cec8363bfab"
+  },
+  {
+    "tool": "Open Geotechniek Studio",
+    "repo": "OpenAEC-Foundation/open-geotechniek-studio",
+    "tag": "v0.4.1",
+    "name": "Open.Geotechniek.Studio_0.4.1_x64-setup.exe",
+    "url": "https://github.com/OpenAEC-Foundation/open-geotechniek-studio/releases/download/v0.4.1/Open.Geotechniek.Studio_0.4.1_x64-setup.exe",
+    "sha256": "aa78c79c0707480db64799702ab53b00c505107fd49bbc9c83e4402d570d4f8c"
+  }
+]
