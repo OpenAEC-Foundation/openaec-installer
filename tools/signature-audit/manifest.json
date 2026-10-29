@@ -178,5 +178,14 @@
     "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Office.Studio_2026.44.7_aarch64.dmg",
     "asset_id": 688039188,
     "github_digest": "sha256:bedfbc566f58e47ad0fb058c6c6d965d274fe00445c05e7496180f4bf2d2092f"
+  },
+  {
+    "tool": "Open Structural Calculation Studio (nieuwe repository)",
+    "repo": "OpenAEC-Foundation/Open-Structural-Calculation-Studio",
+    "tag": "nightly",
+    "name": "Open.Structural.Calculation.Studio_2026.43.0_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Structural-Calculation-Studio/releases/download/nightly/Open.Structural.Calculation.Studio_2026.43.0_universal.dmg",
+    "asset_id": 687328817,
+    "github_digest": "sha256:dffc27b0fd2e036102c81a7b67d075171516989444a3cec7ff1a9618d76c3f4a"
   }
 ]
