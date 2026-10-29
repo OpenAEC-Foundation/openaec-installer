@@ -74,6 +74,12 @@ export function pickUpdateVariant(
       return find("appimage");
     case "nsis":
       return installed.scope === "user" ? (find("nsisUser") ?? find("nsis")) : find("nsis");
+    case "inno": {
+      // Een Inno Setup-setup is ook een .exe; hij heet in de release "nsis", maar
+      // draait met de vlaggen van Inno, in dezelfde modus als de installatie.
+      const setup = find("nsis");
+      return setup ? { ...setup, kind: installed.scope === "user" ? "innoUser" : "inno" } : null;
+    }
     default:
       return null;
   }

@@ -29,7 +29,7 @@ pub struct InstalledTool {
     pub exe_path: Option<String>,
     /// "user" (HKCU, per gebruiker) of "machine" (HKLM, voor de hele pc).
     pub scope: Option<&'static str>,
-    /// "nsis", "msi" of "appimage": met welk soort setup de tool erop kwam.
+    /// "nsis", "msi", "inno" of "appimage": met welk soort setup de tool erop kwam.
     /// Een update moet dezelfde soort gebruiken, anders ontstaat er een tweede
     /// installatie naast de eerste.
     pub kind: Option<&'static str>,
@@ -87,6 +87,9 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
             let exe_path = resolve_exe(query, display_icon, install_location);
             let windows_installer = sub.get_value::<u32, _>("WindowsInstaller").ok();
             let uninstall = sub.get_value::<String, _>("UninstallString").ok();
+            // Inno Setup zet een eigen sleutel `<AppId>_is1` met "Inno Setup: App Path".
+            let inno = key_name.to_ascii_lowercase().ends_with("_is1")
+                || sub.get_value::<String, _>("Inno Setup: App Path").is_ok();
 
             found.push(InstalledTool {
                 id: query.id.clone(),
@@ -94,7 +97,7 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 version,
                 exe_path,
                 scope: Some(if hive == HKEY_CURRENT_USER { "user" } else { "machine" }),
-                kind: Some(install_kind(windows_installer, uninstall.as_deref())),
+                kind: Some(install_kind(windows_installer, uninstall.as_deref(), inno)),
             });
         }
     }
@@ -103,14 +106,17 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
 }
 
 /// MSI-installaties zetten `WindowsInstaller = 1` en verwijderen via msiexec;
-/// alles anders komt bij deze tools van een NSIS-setup (Tauri).
+/// een Inno Setup-installatie (zoals Open Pointcloud Studio) herkent de aanroeper
+/// aan de `_is1`-sleutel; alles anders komt bij deze tools van een NSIS-setup (Tauri).
 #[cfg(windows)]
-fn install_kind(windows_installer: Option<u32>, uninstall_string: Option<&str>) -> &'static str {
+fn install_kind(windows_installer: Option<u32>, uninstall_string: Option<&str>, inno: bool) -> &'static str {
     let msiexec = uninstall_string
         .map(|u| u.to_ascii_lowercase().contains("msiexec"))
         .unwrap_or(false);
     if windows_installer == Some(1) || msiexec {
         "msi"
+    } else if inno {
+        "inno"
     } else {
         "nsis"
     }
@@ -199,9 +205,10 @@ mod tests {
 
     #[test]
     fn recognises_msi_and_nsis_installations() {
-        assert_eq!(install_kind(Some(1), Some("MsiExec.exe /I{B839249A-32F4-404D-A4E8-D9D35E9E9E48}")), "msi");
-        assert_eq!(install_kind(None, Some("MsiExec.exe /X{B839249A}")), "msi");
-        assert_eq!(install_kind(None, Some(r#""C:\Users\nino\AppData\Local\Open Planner Studio\uninstall.exe""#)), "nsis");
-        assert_eq!(install_kind(None, None), "nsis");
+        assert_eq!(install_kind(Some(1), Some("MsiExec.exe /I{B839249A-32F4-404D-A4E8-D9D35E9E9E48}"), false), "msi");
+        assert_eq!(install_kind(None, Some("MsiExec.exe /X{B839249A}"), false), "msi");
+        assert_eq!(install_kind(None, Some(r#""C:\Users\nino\AppData\Local\Programs\Open Pointcloud Studio\unins000.exe""#), true), "inno");
+        assert_eq!(install_kind(None, Some(r#""C:\Users\nino\AppData\Local\Open Planner Studio\uninstall.exe""#), false), "nsis");
+        assert_eq!(install_kind(None, None, false), "nsis");
     }
 }

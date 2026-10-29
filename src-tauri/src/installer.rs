@@ -277,6 +277,8 @@ fn wait_until_closed(id: &str, exe: &str) -> Result<(), String> {
 /// app-gegevens en autostart blijven staan); zonder `/R`, want het opnieuw
 /// starten doet de installer zelf. MSI: `/passive` toont alleen een
 /// voortgangsbalk, `/norestart` laat het herstarten van Windows aan de gebruiker.
+/// Inno Setup: `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART`, met `/CURRENTUSER` of
+/// `/ALLUSERS` zodat de update in dezelfde modus en map landt als de installatie.
 fn silent_command(kind: &str, setup: &std::path::Path) -> Result<(String, String), String> {
     let ext = setup
         .extension()
@@ -284,6 +286,8 @@ fn silent_command(kind: &str, setup: &std::path::Path) -> Result<(String, String
         .unwrap_or_default();
     match (kind, ext.as_str()) {
         ("nsis" | "nsisUser", "exe") => Ok((setup.to_string_lossy().into_owned(), "/S /UPDATE".into())),
+        ("innoUser", "exe") => Ok((setup.to_string_lossy().into_owned(), "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CURRENTUSER".into())),
+        ("inno", "exe") => Ok((setup.to_string_lossy().into_owned(), "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /ALLUSERS".into())),
         ("msi", "msi") => {
             let msiexec = std::env::var("SYSTEMROOT")
                 .map(|r| format!(r"{r}\System32\msiexec.exe"))
@@ -300,7 +304,7 @@ fn setup_result(kind: &str, code: u32) -> Result<bool, String> {
     match (kind, code) {
         (_, 0) => Ok(false),
         ("msi", 3010) | ("msi", 1641) => Ok(true),
-        ("msi", 1602) | ("nsis" | "nsisUser", 1) => Err("De setup is geannuleerd.".into()),
+        ("msi", 1602) | ("nsis" | "nsisUser", 1) | ("inno" | "innoUser", 2 | 5) => Err("De setup is geannuleerd.".into()),
         ("msi", 1618) => Err("Er loopt al een andere installatie; probeer het straks opnieuw.".into()),
         (_, code) => Err(format!("De setup stopte met code {code}.")),
     }
@@ -643,6 +647,9 @@ mod update_tests {
         let msi = std::path::Path::new(r"C:\Temp\App_1.0.0_x64_en-US.msi");
         assert_eq!(silent_command("nsis", exe).unwrap().1, "/S /UPDATE");
         assert_eq!(silent_command("nsisUser", exe).unwrap().1, "/S /UPDATE");
+        assert_eq!(silent_command("innoUser", exe).unwrap().1, "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /CURRENTUSER");
+        assert_eq!(silent_command("inno", exe).unwrap().1, "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /ALLUSERS");
+        assert!(silent_command("inno", msi).is_err());
         let (prog, args) = silent_command("msi", msi).unwrap();
         assert!(prog.to_ascii_lowercase().ends_with("msiexec.exe"));
         assert_eq!(args, r#"/i "C:\Temp\App_1.0.0_x64_en-US.msi" /passive /norestart"#);
