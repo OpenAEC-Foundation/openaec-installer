@@ -3,8 +3,8 @@ import json, pathlib, subprocess, hashlib, os, re, urllib.request
 root=pathlib.Path('audit-work');root.mkdir(exist_ok=True)
 manifest=json.loads(pathlib.Path('tools/signature-audit/manifest.json').read_text())
 results=[]
-def run(args):
- p=subprocess.run(args,text=True,capture_output=True,timeout=180)
+def run(args,input=None):
+ p=subprocess.run(args,text=True,capture_output=True,input=input,timeout=180)
  return {'exit_code':p.returncode,'output':(p.stdout+p.stderr)[-24000:]}
 for a in manifest:
  if not a['name'].endswith('.dmg'):continue
@@ -20,7 +20,7 @@ for a in manifest:
   result['dmg_details']=run(['codesign','-d','--verbose=4',str(path)])
   result['stapler']=run(['xcrun','stapler','validate',str(path)])
   mount=path.parent/'mount';mount.mkdir(exist_ok=True)
-  attach=run(['hdiutil','attach',str(path),'-readonly','-nobrowse','-noautoopen','-mountpoint',str(mount)])
+  attach=run(['hdiutil','attach',str(path),'-readonly','-nobrowse','-noautoopen','-mountpoint',str(mount)],input='Y\n')
   result['mount']=attach
   if attach['exit_code']==0:
    try:

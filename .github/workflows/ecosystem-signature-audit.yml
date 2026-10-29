@@ -2,7 +2,7 @@ name: Ecosystem signature audit
 on:
   push:
     branches: [codex/ecosystem-signature-audit-20261029]
-    paths: ['tools/signature-audit/**', '.github/workflows/ecosystem-signature-audit.yml']
+    paths: ['tools/signature-audit/native_audit.py', 'tools/signature-audit/manifest.json', '.github/workflows/ecosystem-signature-audit.yml']
   workflow_dispatch:
 permissions:
   contents: read
