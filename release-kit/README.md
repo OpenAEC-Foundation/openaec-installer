@@ -8,8 +8,8 @@ Stap 4 van [bijwerken via de installer](https://github.com/OpenAEC-Foundation/Op
 | --- | --- |
 | [`latest-json.mjs`](latest-json.mjs) | Maakt `latest.json` uit de setups van een release, alleen als elke `.sig` klopt. Geen extra pakketten, Node 20 of nieuwer. |
 | [`minisign.mjs`](minisign.mjs) | De controle van de handtekeningen, in hetzelfde formaat als de Tauri-updater en de installer (`src-tauri/src/signature.rs`). |
-| [`workflow-voorbeeld.yml`](workflow-voorbeeld.yml) | De laatste job van de releaseworkflow van een app. |
-| [`noodknop.yml`](noodknop.yml) | Een handmatige workflow die `latest.json` voor een bestaande tag opnieuw maakt. |
+| [`latest-json-workflow.yml`](latest-json-workflow.yml) | Een losse workflow voor de app: maakt `latest.json` zodra een release gepubliceerd wordt, en met de hand voor een bestaande tag (noodknop). |
+| [`workflow-voorbeeld.yml`](workflow-voorbeeld.yml) | Dezelfde stappen als laatste job van een releaseworkflow, voor apps die hun release in de workflow zelf publiceren. |
 | [`latest-json.test.mjs`](latest-json.test.mjs) | Tests, ook in de CI van de installer: `node --test "release-kit/*.test.mjs"`. |
 
 ## Wat het script bewaakt
@@ -37,7 +37,8 @@ Stap 4 van [bijwerken via de installer](https://github.com/OpenAEC-Foundation/Op
      ```bash
      npx --yes @tauri-apps/cli@2 signer sign -k "$TAURI_SIGNING_PRIVATE_KEY" -p "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" app_2026.44.1_x64-setup.exe
      ```
-3. **Laatste job.** Voeg [`workflow-voorbeeld.yml`](workflow-voorbeeld.yml) als laatste job toe, na het publiceren, en [`noodknop.yml`](noodknop.yml) als losse workflow.
+3. **`latest.json` maken.** Kopieer [`latest-json-workflow.yml`](latest-json-workflow.yml) naar `.github/workflows/latest-json.yml`. Die draait bij het publiceren van een release.
+   - Publiceert de releaseworkflow de release zelf met `GITHUB_TOKEN`, dan start GitHub geen andere workflows. Zet in dat geval ook [`workflow-voorbeeld.yml`](workflow-voorbeeld.yml) als laatste job in de releaseworkflow.
 4. **Catalogus.** Pas na de eerste release mét `latest.json` gaat de publieke sleutel als `pubkey` in `src/data/catalog.ts` van de installer. Met een sleutel in de catalogus installeert de installer niets zonder kloppende handtekening.
 
 ## Stil bijwerken

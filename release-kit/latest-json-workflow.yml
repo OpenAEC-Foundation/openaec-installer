@@ -1,9 +1,13 @@
-# Noodknop: maak de latest.json van een bestaande release opnieuw. Kopieer dit
-# bestand naar .github/workflows/latest-json.yml van de app. Handig als de laatste
-# job van een release mislukte; "Re-run failed jobs" slaat die soms over.
-name: latest.json opnieuw maken
+# Kopieer dit bestand naar .github/workflows/latest-json.yml van de app.
+# Het maakt de latest.json zodra een release gepubliceerd wordt (ook een concept
+# dat je met de hand publiceert), en met de hand voor een bestaande tag, als
+# noodknop. Let op: een release die een workflow met GITHUB_TOKEN publiceert,
+# start deze workflow niet; zet dan workflow-voorbeeld.yml als laatste job erbij.
+name: latest.json voor de OpenAEC Installer
 
 on:
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       tag:
@@ -18,12 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      TAG: ${{ inputs.tag }}
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
       VERSION_FILE: src-tauri/tauri.conf.json
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
       - uses: actions/checkout@v4
         with:
           repository: OpenAEC-Foundation/openaec-installer
