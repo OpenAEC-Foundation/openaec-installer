@@ -1,7 +1,7 @@
 """Onderteken vastgepinde pakketbestanden met de bestaande organisatiesleutel."""
 import os,pathlib,json,subprocess,hashlib,concurrent.futures
 ROOT=pathlib.Path('linux-signatures');ROOT.mkdir(exist_ok=True)
-manifest=json.loads(pathlib.Path('tools/signature-audit/unsigned-linux.json').read_text())
+manifest=json.loads(pathlib.Path(os.environ.get('LINUX_SIGNING_MANIFEST','tools/signature-audit/unsigned-linux.json')).read_text())
 fingerprint='13F6D414ADEE4ED4CD09AC60601D86C93C504D29'
 def gpg(args,**kw):
  p=subprocess.run(['gpg','--batch']+args,capture_output=True,**kw)

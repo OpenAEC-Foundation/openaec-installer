@@ -1,6 +1,12 @@
 name: Onderteken gecontroleerde Linux-pakketten
 on:
   workflow_dispatch:
+    inputs:
+      manifest:
+        description: Vastgepinde pakketlijst
+        type: choice
+        options: [unsigned-linux.json, infra-linux.json]
+        default: unsigned-linux.json
 permissions:
   contents: read
 jobs:
@@ -13,6 +19,7 @@ jobs:
           persist-credentials: false
       - name: Importeer bestaande organisatiesleutel en onderteken vastgepinde pakketten
         env:
+          LINUX_SIGNING_MANIFEST: tools/signature-audit/${{ inputs.manifest || 'unsigned-linux.json' }}
           GH_TOKEN: ${{ github.token }}
           OPENAEC_GPG_PRIVATE_KEY: ${{ secrets.OPENAEC_GPG_PRIVATE_KEY }}
           OPENAEC_GPG_PASSPHRASE: ${{ secrets.OPENAEC_GPG_PASSPHRASE }}

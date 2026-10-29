@@ -1,0 +1,18 @@
+[
+  {
+    "tool": "Open Infra Studio",
+    "repo": "OpenAEC-Foundation/Open-Infra",
+    "tag": "v2026.44.2",
+    "name": "openaec.open-infra-linux-x86_64.so",
+    "sha256": "7ca59d39fde6d45eef7cbdd54331e730c6ee6edaf49012dd10c9329101820736",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Infra/releases/download/v2026.44.2/openaec.open-infra-linux-x86_64.so"
+  },
+  {
+    "tool": "Open Infra Studio",
+    "repo": "OpenAEC-Foundation/Open-Infra",
+    "tag": "v2026.43",
+    "name": "openaec.open-infra-linux-x86_64.so",
+    "sha256": "6bbb8068a8cb86c8f973cde082a5216fb5076bfc5b7862bb0eb5b3a2111455ba",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Infra/releases/download/v2026.43/openaec.open-infra-linux-x86_64.so"
+  }
+]
