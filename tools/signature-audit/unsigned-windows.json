@@ -48,6 +48,22 @@
     "sha256": "c17dc2c386efc7ac2781100ef490ea58f153c0bbc971255dbf6953c20724dd81"
   },
   {
+    "tool": "Open Infra Studio",
+    "repo": "OpenAEC-Foundation/Open-Infra",
+    "tag": "v2026.44.2",
+    "name": "openaec.open-infra-windows-x86_64.dll",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Infra/releases/download/v2026.44.2/openaec.open-infra-windows-x86_64.dll",
+    "sha256": "51f0b301f555917a6fca2be92989aa52439b1ff368545204a8814437be8dad56"
+  },
+  {
+    "tool": "Open Infra Studio",
+    "repo": "OpenAEC-Foundation/Open-Infra",
+    "tag": "v2026.43",
+    "name": "openaec.open-infra-windows-x86_64.dll",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Infra/releases/download/v2026.43/openaec.open-infra-windows-x86_64.dll",
+    "sha256": "0bebe187e4c9b7711c29b045beb463e0be5478ae1970b25fa018acf07a12c8f5"
+  },
+  {
     "tool": "Open Field Studio",
     "repo": "OpenAEC-Foundation/Open-Field-Studio",
     "tag": "v0.3.6",
