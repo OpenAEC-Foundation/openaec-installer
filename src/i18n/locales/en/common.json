@@ -97,6 +97,7 @@
     "done": "Updated to v{{version}}.",
     "doneRelaunched": "Updated to v{{version}} and restarted.",
     "restartRequired": "Updated to v{{version}}. Restart Windows to finish.",
-    "noMatchingSetup": "The latest release has no setup that matches this installation ({{kind}}). Update via the release page on GitHub."
+    "noMatchingSetup": "The latest release has no setup that matches this installation ({{kind}}). Update via the release page on GitHub.",
+    "alreadyCurrent": "Already up to date (v{{version}})."
   }
 }

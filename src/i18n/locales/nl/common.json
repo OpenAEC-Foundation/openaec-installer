@@ -97,6 +97,7 @@
     "done": "Bijgewerkt naar v{{version}}.",
     "doneRelaunched": "Bijgewerkt naar v{{version}} en opnieuw gestart.",
     "restartRequired": "Bijgewerkt naar v{{version}}. Start Windows opnieuw op om het af te ronden.",
-    "noMatchingSetup": "De laatste release heeft geen setup die past bij deze installatie ({{kind}}). Werk bij via de releasepagina op GitHub."
+    "noMatchingSetup": "De laatste release heeft geen setup die past bij deze installatie ({{kind}}). Werk bij via de releasepagina op GitHub.",
+    "alreadyCurrent": "Al bijgewerkt (v{{version}})."
   }
 }

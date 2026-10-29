@@ -1,5 +1,6 @@
 mod github;
 mod installer;
+mod launch;
 #[cfg(target_os = "linux")]
 mod linux;
 mod manifest;
@@ -65,8 +66,32 @@ fn launch_tool(exe_path: String) -> Result<(), String> {
     installer::launch(&exe_path)
 }
 
+/// De opdracht waarmee de installer gestart is (`--update <id>`, `--check`), of
+/// een opdracht die een tweede start heeft doorgegeven.
+#[tauri::command]
+fn take_launch_request() -> Option<launch::LaunchRequest> {
+    launch::take()
+}
+
+/// Schrijf het statusbestand dat de apps lezen (`updates.json`).
+#[tauri::command]
+fn write_update_status(apps: std::collections::BTreeMap<String, launch::AppStatus>) -> Result<String, String> {
+    launch::write_status(&apps).map(|p| p.display().to_string())
+}
+
+/// Sluit de installer, na `--check`.
+#[tauri::command]
+fn quit(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    let request = launch::LaunchRequest::from_args(std::env::args());
+    if !launch::claim_single_instance(&request) {
+        return;
+    }
+    launch::set_startup(request);
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
@@ -77,6 +102,9 @@ pub fn run() {
             update_tool,
             cancel_update,
             launch_tool,
+            take_launch_request,
+            write_update_status,
+            quit,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

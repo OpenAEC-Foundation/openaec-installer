@@ -7,9 +7,9 @@
    ============================================================ */
 
 :root {
-  --font-heading: "Space Grotesk", system-ui, sans-serif;
-  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
-  --font-code: "JetBrains Mono", Consolas, monospace;
+  --font-heading: "Space Grotesk", "Noto Sans", "Noto Sans Symbols", system-ui, sans-serif;
+  --font-body: "Inter", "Noto Sans", "Noto Sans Symbols", system-ui, sans-serif;
+  --font-code: "JetBrains Mono", "Noto Sans", "Noto Sans Symbols", monospace;
 
   font-family: var(--font-body);
   font-size: 14px;

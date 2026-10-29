@@ -170,3 +170,31 @@ export function onDownloadProgress(
 ): Promise<UnlistenFn> {
   return listen<DownloadProgress>("download-progress", (e) => handler(e.payload));
 }
+
+/** De opdracht waarmee de installer gestart is: `--update <id>` of `--check`. */
+export interface LaunchRequest {
+  update: string | null;
+  check: boolean;
+}
+
+/** Eenmalig de opdracht van deze start, daarna doorgegeven opdrachten van een tweede start. */
+export async function takeLaunchRequest(): Promise<LaunchRequest | null> {
+  return invoke<LaunchRequest | null>("take_launch_request");
+}
+
+/**
+ * Schrijf `updates.json`: per tool de nieuwste versie en de releasepagina. Apps
+ * lezen dit bij het starten en tonen dan "Versie … staat klaar" (OpenAEC-Blueprint#33).
+ */
+export async function writeUpdateStatus(releases: ReleaseInfo[]): Promise<void> {
+  const apps: Record<string, { latest: string; page_url?: string }> = {};
+  for (const r of releases) {
+    if (r.ok && r.version) apps[r.id] = r.pageUrl ? { latest: r.version, page_url: r.pageUrl } : { latest: r.version };
+  }
+  await invoke("write_update_status", { apps });
+}
+
+/** Sluit de installer (na `--check`). */
+export async function quitInstaller(): Promise<void> {
+  await invoke("quit");
+}

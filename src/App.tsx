@@ -18,7 +18,10 @@ import {
   launchTool,
   onDownloadProgress,
   onUpdatePhase,
+  quitInstaller,
+  takeLaunchRequest,
   updateTool,
+  writeUpdateStatus,
   type DownloadProgress,
   type InstalledTool,
   type ReleaseInfo,
@@ -60,6 +63,19 @@ interface ReleaseCache {
   rateLimitReset?: number | null;
 }
 
+/** Het venster tonen en naar voren halen (het start verborgen, voor `--check`). */
+async function showWindow() {
+  try {
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
+    const win = getCurrentWindow();
+    await win.show();
+    await win.unminimize();
+    await win.setFocus();
+  } catch {
+    // buiten Tauri
+  }
+}
+
 function App() {
   const { t, i18n } = useTranslation();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -89,6 +105,10 @@ function App() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [phases, setPhases] = useState<Record<string, UpdatePhase["phase"]>>({});
+  // `--update <id>` van een app (knop Bijwerken): start zodra versies en
+  // installaties bekend zijn.
+  const [pendingUpdate, setPendingUpdate] = useState<string | null>(null);
+  const [scanned, setScanned] = useState(false);
   const refreshingRef = useRef(false);
   // Voorkomt dat de trage opstart-load van groupByStatus een klik overschrijft
   // die de gebruiker doet vóór die load klaar is (race bij opstart).
@@ -102,6 +122,8 @@ function App() {
       setInstalled(Object.fromEntries(list.map((i) => [i.id, i])));
     } catch {
       // buiten Tauri (bijv. vite preview) — laat leeg
+    } finally {
+      setScanned(true);
     }
   }, []);
 
@@ -118,6 +140,8 @@ function App() {
       if (cache?.data?.length) {
         setReleases(known);
         if (cache.ts) setLastRefresh(new Date(cache.ts));
+        // Ook zonder nieuwe ronde krijgen de apps de laatst bekende versies.
+        void writeUpdateStatus(cache.data).catch(() => {});
       }
 
       if (!force) {
@@ -135,6 +159,7 @@ function App() {
         if (r.ok || !merged[r.id]?.ok) merged[r.id] = r;
       }
       setReleases(merged);
+      void writeUpdateStatus(Object.values(merged)).catch(() => {});
 
       const anyOk = data.some((r) => r.ok);
       const resetSec = data.find((r) => r.rateLimitReset)?.rateLimitReset ?? null;
@@ -177,9 +202,6 @@ function App() {
       .then(({ getVersion }) => getVersion())
       .then(setAppVersion)
       .catch(() => setAppVersion(""));
-    import("@tauri-apps/api/window")
-      .then(({ getCurrentWindow }) => getCurrentWindow().show())
-      .catch(() => {});
     // Altijd bij opstart de eigen versie checken (1 call), los van de 6-uurs
     // tool-cache. Zo verschijnt de update-melding meteen bij een nieuwe
     // installer-versie, zonder de rate limit met de hele toollijst te belasten.
@@ -188,7 +210,39 @@ function App() {
         if (self?.ok) setSelfReleaseFresh(self);
       })
       .catch(() => {});
-    refresh(false);
+    // `--check`: zonder venster controleren, updates.json schrijven en stoppen.
+    // `--update <id>`: venster tonen, vers controleren en die tool bijwerken.
+    takeLaunchRequest()
+      .catch(() => null)
+      .then(async (request) => {
+        if (request?.check) {
+          await fetchReleases(true);
+          await quitInstaller().catch(() => {});
+          return;
+        }
+        void showWindow();
+        if (request?.update) setPendingUpdate(request.update);
+        refresh(Boolean(request?.update));
+      });
+  }, [refresh, fetchReleases]);
+
+  // Een tweede start (bijvoorbeeld Bijwerken in een app terwijl de installer al
+  // open is) geeft zijn opdracht door; die wordt hier opgepakt.
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      takeLaunchRequest()
+        .then((request) => {
+          if (request?.update) {
+            setPendingUpdate(request.update);
+            void showWindow();
+            refresh(true);
+          } else if (request?.check) {
+            refresh(true);
+          }
+        })
+        .catch(() => {});
+    }, 1500);
+    return () => window.clearInterval(timer);
   }, [refresh]);
 
   // Wanneer het venster focus terugkrijgt (bijv. na het doorlopen van een
@@ -268,6 +322,18 @@ function App() {
     },
     [releases, installed, t, scanInstalled],
   );
+
+  // De update uit `--update <id>`, zodra de versies vers zijn en de scan klaar is.
+  useEffect(() => {
+    if (!pendingUpdate || !scanned || refreshing) return;
+    setPendingUpdate(null);
+    const tool = DESKTOP_TOOLS.find((x) => x.id === pendingUpdate);
+    if (!tool) return;
+    const status = deriveStatus(tool, installed[tool.id], releases[tool.id]);
+    if (status === "update_available") void handleUpdate(tool);
+    else if (status === "installed_latest")
+      setNotes((n) => ({ ...n, [tool.id]: t("update.alreadyCurrent", { version: installed[tool.id]?.version ?? "" }) }));
+  }, [pendingUpdate, scanned, refreshing, installed, releases, handleUpdate, t]);
 
   const handleCancelUpdate = useCallback((tool: CatalogTool) => {
     void cancelUpdate(tool.id);
