@@ -5,7 +5,7 @@ on:
       manifest:
         description: Vastgepinde pakketlijst
         type: choice
-        options: [unsigned-linux.json, infra-linux.json]
+        options: [unsigned-linux.json, infra-linux.json, pdf-linux.json]
         default: unsigned-linux.json
 permissions:
   contents: read
