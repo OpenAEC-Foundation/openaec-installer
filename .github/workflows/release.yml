@@ -10,6 +10,10 @@ on:
         description: 'Version tag (e.g., v0.1.0)'
         required: true
         default: 'v0.1.0'
+      publish:
+        description: 'Publish a release after signing checks pass'
+        type: boolean
+        default: true
 
 jobs:
   create-release:
@@ -33,6 +37,7 @@ jobs:
           fi
 
       - name: Create release
+        if: github.event_name != 'workflow_dispatch' || inputs.publish
         id: create-release
         uses: actions/github-script@v7
         with:
@@ -93,13 +98,59 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
-      - name: Build Tauri app
+      - name: Prepare notarization key (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+        run: |
+          set -euo pipefail
+          test -n "$APPLE_API_KEY_CONTENT"
+          umask 077
+          printf '%s' "$APPLE_API_KEY_CONTENT" > "$RUNNER_TEMP/apple-api-key.p8"
+
+      - name: Build Tauri app (Linux)
+        if: runner.os == 'Linux'
         uses: tauri-apps/tauri-action@action-v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.args }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
+
+      - name: Build signed and notarized Tauri app (macOS)
+        if: runner.os == 'macOS'
+        uses: tauri-apps/tauri-action@action-v0.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ runner.temp }}/apple-api-key.p8
+        with:
+          args: ${{ matrix.args }}
+          releaseId: ${{ needs.create-release.outputs.release_id }}
+
+      - name: Verify macOS signature and notarization
+        if: runner.os == 'macOS'
+        run: bash scripts/verify-macos-signing.sh
+
+      - name: Remove notarization key
+        if: always() && runner.os == 'macOS'
+        run: rm -f "$RUNNER_TEMP/apple-api-key.p8"
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ runner.os }}
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          if-no-files-found: error
 
   build-windows:
     needs: create-release
@@ -126,14 +177,59 @@ jobs:
       - name: Install frontend dependencies
         run: npm install
 
+      - name: Compile Windows app
+        run: npm run tauri -- build --no-bundle
+
+      - name: Install Azure signing tools
+        uses: azure/trusted-signing-action@v1
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
+          cache-dependencies: false
+          files-folder: ${{ github.workspace }}/src-tauri/target/release
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Configure Tauri signing
+        shell: pwsh
+        env:
+          AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
+          AZURE_ACCOUNT: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
+          AZURE_PROFILE: ${{ secrets.AZURE_CERTIFICATE_PROFILE_NAME }}
+        run: ./scripts/configure-windows-signing.ps1
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@action-v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
         with:
+          args: --config src-tauri/tauri.signing.conf.json
           releaseId: ${{ needs.create-release.outputs.release_id }}
 
+      - name: Verify Windows installers and installed binaries
+        shell: pwsh
+        run: ./scripts/verify-windows-signing.ps1
+
+      - name: Save Windows installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-Windows
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+          if-no-files-found: error
+
   publish-release:
+    if: github.event_name != 'workflow_dispatch' || inputs.publish
     permissions:
       contents: write
     runs-on: ubuntu-latest
