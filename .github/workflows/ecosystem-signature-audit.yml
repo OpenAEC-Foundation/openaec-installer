@@ -1,0 +1,26 @@
+name: Ecosystem signature audit
+on:
+  push:
+    branches: [codex/ecosystem-signature-audit-20261029]
+    paths: ['tools/signature-audit/**', '.github/workflows/ecosystem-signature-audit.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Inspect public release signatures without launching applications
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/signature-audit/native_audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecosystem-macos-signatures
+          path: macos-results.json
+          if-no-files-found: error
