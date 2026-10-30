@@ -41,3 +41,7 @@ npm-debug.log*
 
 # Rust
 **/*.rs.bk
+
+# Plugin openaec-update (library: no lockfile)
+crates/openaec-update/target/
+crates/openaec-update/Cargo.lock
