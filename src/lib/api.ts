@@ -14,6 +14,19 @@ export interface InstalledTool {
   scope?: "user" | "machine" | null;
   /** Met welk soort setup de tool erop kwam; een update gebruikt dezelfde soort. */
   kind?: "nsis" | "msi" | "inno" | "appimage" | null;
+  /**
+   * Andere installaties van dezelfde tool, bijvoorbeeld per gebruiker én voor de
+   * hele pc. De velden hierboven zijn die van de eerste (HKCU vóór HKLM).
+   */
+  copies?: InstalledCopy[];
+}
+
+/** Een tweede (of verdere) installatie van een tool. */
+export interface InstalledCopy {
+  version: string | null;
+  exePath: string | null;
+  scope?: "user" | "machine" | null;
+  kind?: "nsis" | "msi" | "inno" | "appimage" | null;
 }
 
 /** Eén soort setup in een release. */

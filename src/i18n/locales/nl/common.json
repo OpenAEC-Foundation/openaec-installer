@@ -101,7 +101,11 @@
     "doneRelaunched": "Bijgewerkt naar v{{version}} en opnieuw gestart.",
     "restartRequired": "Bijgewerkt naar v{{version}}. Start Windows opnieuw op om het af te ronden.",
     "noMatchingSetup": "De laatste release heeft geen setup die past bij deze installatie ({{kind}}). Werk bij via de releasepagina op GitHub.",
-    "alreadyCurrent": "Al bijgewerkt (v{{version}})."
+    "alreadyCurrent": "Al bijgewerkt (v{{version}}).",
+    "duplicate": "Staat {{count}} keer op deze pc: {{list}}. Bijwerken werkt elke kopie bij; verwijder er zo nodig één via Instellingen > Apps.",
+    "copyUser": "per gebruiker v{{version}}",
+    "copyMachine": "voor de hele pc v{{version}}",
+    "doneCopies": "{{count}} kopieën bijgewerkt naar v{{version}}."
   },
   "hero": {
     "label": "OpenAEC Installer",

@@ -2,7 +2,7 @@
  * Statusmodel per tool: afgeleid uit register-scan + laatste GitHub-release.
  */
 import type { CatalogTool } from "../data/catalog";
-import type { InstalledTool, ReleaseInfo, ReleaseVariant } from "./api";
+import type { InstalledCopy, InstalledTool, ReleaseInfo, ReleaseVariant } from "./api";
 
 export type ToolStatus =
   | "not_installed"
@@ -40,6 +40,26 @@ export function compareVersions(a: string, b: string): number {
   return 0;
 }
 
+/** Elke installatie van een tool: de eerste en zijn verdere kopieën. */
+export function allCopies(installed: InstalledTool | undefined): InstalledCopy[] {
+  if (!installed) return [];
+  const { version, exePath, scope, kind } = installed;
+  return [{ version, exePath, scope, kind }, ...(installed.copies ?? [])];
+}
+
+/** De kopieën die ouder zijn dan de laatste release. */
+export function outdatedCopies(installed: InstalledTool | undefined, release: ReleaseInfo | undefined): InstalledCopy[] {
+  const latest = release?.ok ? release.version : null;
+  if (!latest) return [];
+  return allCopies(installed).filter((c) => !!c.version && compareVersions(c.version, latest) < 0);
+}
+
+/** De oudste geïnstalleerde versie: die bepaalt of er een update is en staat op de kaart. */
+export function oldestVersion(installed: InstalledTool | undefined): string | null {
+  const versions = allCopies(installed).map((c) => c.version).filter((v): v is string => !!v);
+  return versions.reduce<string | null>((low, v) => (low === null || compareVersions(v, low) < 0 ? v : low), null);
+}
+
 export function deriveStatus(
   tool: CatalogTool,
   installed: InstalledTool | undefined,
@@ -48,10 +68,11 @@ export function deriveStatus(
   if (tool.kind === "web") return "web_only";
   if (!installed) return "not_installed";
   const latest = release?.ok ? release.version : null;
-  if (!latest || !installed.version) return "installed_unknown";
-  return compareVersions(installed.version, latest) < 0
-    ? "update_available"
-    : "installed_latest";
+  const oldest = oldestVersion(installed);
+  if (!latest || !oldest) return "installed_unknown";
+  // Staat een tool twee keer op de pc, dan telt de oudste kopie: anders blijft
+  // die voor altijd oud.
+  return compareVersions(oldest, latest) < 0 ? "update_available" : "installed_latest";
 }
 
 /**
@@ -68,7 +89,7 @@ export function deriveStatus(
  */
 export function pickUpdateVariant(
   release: ReleaseInfo | undefined,
-  installed: InstalledTool | undefined,
+  installed: InstalledCopy | undefined,
 ): ReleaseVariant | null {
   const variants = release?.variants ?? [];
   const find = (kind: ReleaseVariant["kind"]) => variants.find((v) => v.kind === kind) ?? null;

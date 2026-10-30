@@ -33,6 +33,19 @@ pub struct InstalledTool {
     /// Een update moet dezelfde soort gebruiken, anders ontstaat er een tweede
     /// installatie naast de eerste.
     pub kind: Option<&'static str>,
+    /// Andere installaties van dezelfde tool, bijvoorbeeld per gebruiker én voor
+    /// de hele pc. Zonder deze lijst bleef zo'n tweede kopie voor altijd oud.
+    pub copies: Vec<InstalledCopy>,
+}
+
+/// Een tweede (of verdere) installatie van een tool; de eerste staat in `InstalledTool`.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstalledCopy {
+    pub version: Option<String>,
+    pub exe_path: Option<String>,
+    pub scope: Option<&'static str>,
+    pub kind: Option<&'static str>,
 }
 
 #[cfg(windows)]
@@ -76,11 +89,6 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
             else {
                 continue;
             };
-            // Eerste treffer per tool wint (HKCU vóór HKLM).
-            if found.iter().any(|f| f.id == query.id) {
-                continue;
-            }
-
             let version = sub.get_value::<String, _>("DisplayVersion").ok();
             let display_icon = sub.get_value::<String, _>("DisplayIcon").ok();
             let install_location = sub.get_value::<String, _>("InstallLocation").ok();
@@ -91,13 +99,22 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
             let inno = key_name.to_ascii_lowercase().ends_with("_is1")
                 || sub.get_value::<String, _>("Inno Setup: App Path").is_ok();
 
+            let scope = Some(if hive == HKEY_CURRENT_USER { "user" } else { "machine" });
+            let kind = Some(install_kind(windows_installer, uninstall.as_deref(), inno));
+            // De eerste treffer per tool (HKCU vóór HKLM) is de hoofdkopie; een
+            // volgende installatie van dezelfde tool komt in `copies`.
+            if let Some(first) = found.iter_mut().find(|f| f.id == query.id) {
+                first.copies.push(InstalledCopy { version, exe_path, scope, kind });
+                continue;
+            }
             found.push(InstalledTool {
                 id: query.id.clone(),
                 display_name: display_trim.to_string(),
                 version,
                 exe_path,
-                scope: Some(if hive == HKEY_CURRENT_USER { "user" } else { "machine" }),
-                kind: Some(install_kind(windows_installer, uninstall.as_deref(), inno)),
+                scope,
+                kind,
+                copies: Vec::new(),
             });
         }
     }
