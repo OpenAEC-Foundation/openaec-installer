@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { CatalogTool } from "../data/catalog";
+import B2Icon from "./B2Icon";
 import "./WebToolView.css";
 
 interface WebToolViewProps {
@@ -33,10 +34,7 @@ export default function WebToolView({ tool, hidden }: WebToolViewProps) {
     <div className="webtool-view" hidden={hidden}>
       <div className="webtool-bar">
         <button className="webtool-btn" onClick={reload} title={t("tabs.reload")} aria-label={t("tabs.reload")}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <polyline points="23 4 23 10 17 10" />
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-          </svg>
+          <B2Icon id="view.web-reload" />
         </button>
         <span className="webtool-url" title={url}>{url}</span>
         {loading && <span className="webtool-loading">{t("tabs.loading")}</span>}
@@ -46,11 +44,7 @@ export default function WebToolView({ tool, hidden }: WebToolViewProps) {
           title={t("tabs.openExternal")}
           aria-label={t("tabs.openExternal")}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
+          <B2Icon id="link.open-external" />
         </button>
       </div>
 
