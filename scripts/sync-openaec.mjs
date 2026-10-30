@@ -9,6 +9,8 @@
 //   src/openaec/openaec-fonts.css        de fonts, alleen WOFF2 (de webview leest dat)
 //   src/openaec/fonts/                   de WOFF2-bestanden en hun licenties
 //   public/icons/installer.svg           alleen de B2-iconen die de installer gebruikt
+//   crates/openaec-update/src/update_core.rs   het updatecontract van openaec-ui
+//                                        (crates/openaec-ui/src/design/update_core.rs)
 //
 //   node scripts/sync-openaec.mjs ../OpenAEC-Blueprint           schrijven
 //   node scripts/sync-openaec.mjs ../OpenAEC-Blueprint --check   alleen vergelijken
@@ -67,6 +69,8 @@ function files(web) {
     if (font.endsWith(".woff2") || font.endsWith(".txt")) out.set(join(ROOT, "src/openaec/fonts", font), readFileSync(join(web, "fonts", font)));
   }
   out.set(join(ROOT, "public/icons/installer.svg"), sprite(web));
+  const contract = readFileSync(join(web, "..", "crates/openaec-ui/src/design/update_core.rs"), "utf8");
+  out.set(join(ROOT, "crates/openaec-update/src/update_core.rs"), "// Copied from OpenAEC-Blueprint crates/openaec-ui/src/design/update_core.rs by scripts/sync-openaec.mjs; do not edit here.\n" + contract);
   return out;
 }
 

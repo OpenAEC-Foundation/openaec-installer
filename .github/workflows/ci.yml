@@ -59,5 +59,10 @@ jobs:
         working-directory: src-tauri
         run: cargo test
 
+      - name: Plugin openaec-update tests
+        if: matrix.platform == 'ubuntu-22.04'
+        working-directory: crates/openaec-update
+        run: cargo test
+
       - name: Build Tauri app
         run: npm run tauri build -- --no-bundle

@@ -80,7 +80,8 @@
     "dismiss": "Later",
     "started": "De installer is gestart — volg de stappen. OpenAEC Installer wordt tijdens het bijwerken afgesloten; daarna kun je hem weer starten.",
     "restartToApply": "De nieuwe versie is geïnstalleerd — sluit OpenAEC Installer af en start hem opnieuw om de update te gebruiken.",
-    "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release — werk handmatig bij via GitHub."
+    "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release — werk handmatig bij via GitHub.",
+    "updating": "De installer wordt bijgewerkt en start zo opnieuw."
   },
   "errors": {
     "no_releases": "Geen releases gevonden",

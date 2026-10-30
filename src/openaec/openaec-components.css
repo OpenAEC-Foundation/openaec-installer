@@ -294,6 +294,9 @@ select.oa-field { padding-right: 24px; appearance: none; background-image: linea
 .oa-banner--success > .oa-icon { color: var(--oa-success); --icon-accent: currentColor; }
 .oa-banner--info > .oa-icon, .oa-banner > .oa-icon { color: var(--oa-info); --icon-accent: currentColor; }
 
+/* Update notice in the title bar (issue #33): "Versie … staat klaar" and a compact Bijwerken button. */
+.oa-update-notice { display: inline-flex; align-items: center; gap: 8px; font-size: var(--oa-size-label); color: var(--oa-text-secondary); white-space: nowrap; }
+
 .oa-toast { display: flex; gap: 10px; width: 340px; padding: 12px; border-radius: var(--oa-radius-large); background: var(--oa-raised); box-shadow: var(--oa-shadow-popup); }
 .oa-toast > div { flex: 1; display: grid; gap: 2px; }
 .oa-toast b { font-weight: var(--oa-weight-semibold); }

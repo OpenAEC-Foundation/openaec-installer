@@ -350,7 +350,7 @@ fn unpack_setup(
 
 #[cfg(windows)]
 fn run_installer(
-    _id: &str,
+    id: &str,
     _display_name: Option<&str>,
     path: &std::path::Path,
 ) -> Result<&'static str, String> {
@@ -358,6 +358,17 @@ fn run_installer(
         .extension()
         .map(|e| e.eq_ignore_ascii_case("msi"))
         .unwrap_or(false);
+    if id == "openaec-installer" && !is_msi && installed_per_user() {
+        // Zelf bijwerken (stap 6 van OpenAEC-Blueprint#33): de setup stil, in
+        // dezelfde per-gebruiker-installatie (geen UAC). De Tauri-setup sluit de
+        // draaiende installer, installeert en start hem met `/R` opnieuw; de
+        // frontend sluit de installer meteen na deze aanroep.
+        std::process::Command::new(path)
+            .args(SELF_UPDATE_ARGS)
+            .spawn()
+            .map_err(|e| format!("setup starten: {e}"))?;
+        return Ok("selfUpdating");
+    }
     if is_msi {
         // msiexec vraagt zelf om elevatie voor een perMachine-installatie.
         shell_execute("msiexec.exe", Some(&format!("/i \"{}\"", path.display())))?;
@@ -370,6 +381,22 @@ fn run_installer(
         shell_execute(&path.to_string_lossy(), None)?;
     }
     Ok("ranInstaller")
+}
+
+/// De vlaggen van de Tauri-NSIS-setup voor zelf bijwerken: stil, als update, en
+/// daarna de installer opnieuw starten.
+#[cfg(windows)]
+const SELF_UPDATE_ARGS: [&str; 3] = ["/S", "/UPDATE", "/R"];
+
+/// Staat de installer per gebruiker geïnstalleerd (onder `%LOCALAPPDATA%`, zoals
+/// de NSIS-setup met `installMode: currentUser`)? Alleen dan werkt hij zichzelf
+/// stil bij; een systeembrede of MSI-installatie doorloopt de gewone setup.
+#[cfg(windows)]
+fn installed_per_user() -> bool {
+    let (Ok(exe), Some(local)) = (std::env::current_exe(), std::env::var_os("LOCALAPPDATA")) else {
+        return false;
+    };
+    exe.starts_with(std::path::Path::new(&local))
 }
 
 /// Start een bestand via de Windows-shell (ShellExecuteW). Met een leeg werkwoord

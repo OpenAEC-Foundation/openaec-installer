@@ -1,0 +1,5 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Read whether an update is ready, and update through the OpenAEC Installer."
+permissions = ["allow-installer-present", "allow-check", "allow-update-now"]

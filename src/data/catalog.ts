@@ -363,6 +363,27 @@ export const ALL_TOOLS: CatalogTool[] = [
     },
   },
   {
+    // De sync-client van de OpenAEC SuperCloud (repo openaec-cloud-desktop); tot
+    // versie 0.4 heette hij "OpenAEC Storage". Een systeemvak-app: sluiten verbergt
+    // het venster, afsluiten gaat via het systeemvak. De setup is per gebruiker.
+    id: "openaec-cloud-desktop",
+    name: "OpenAEC Desktop App",
+    kind: "desktop",
+    category: "documenten",
+    disciplines: "AECI",
+    stage: "development",
+    repo: "OpenAEC-Foundation/openaec-cloud-desktop",
+    registryName: "OpenAEC Desktop App",
+    exeName: "openaec-cloud.exe",
+    pubkey:
+      "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY1Nzg3M0JEQzQxRTNBQjQKUldTME9oN0V2WE40OWZRMCs3eHNSQkxhTEhuOHp1Q0s4dWdOKzJaQXFmK3NQdFJyMCtVTjhDSU8K",
+    siteUrl: "https://open-aec.com/openaec-cloud/",
+    description: {
+      nl: "Projectbestanden synchroniseren, vergrendelen en delen met je OpenAEC-omgeving.",
+      en: "Sync, lock and share project files with your OpenAEC environment.",
+    },
+  },
+  {
     id: "open-books",
     name: "Open Books Studio",
     preview: "/previews/open-books.jpg",
