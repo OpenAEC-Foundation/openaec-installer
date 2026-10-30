@@ -50,11 +50,11 @@ import "./App.css";
 // (`variants`); zonder die lijst kan een update de juiste soort niet kiezen.
 const RELEASE_CACHE_KEY = "releaseCache.v4";
 const TABS_KEY = "openTabs";
-// Releases veranderen hooguit een paar keer per week, terwijl elke ronde 13
-// GitHub-aanroepen kost tegen een limiet van 60 per uur per IP. Een ruime cache
-// houdt de app bruikbaar (en meerdere gebruikers achter één kantoor-IP uit
-// elkaars vaarwater); met de knop Vernieuwen forceer je altijd een check.
-const RELEASE_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+// Een ronde leest het releasebestand op GitHub Pages (één aanvraag, buiten de
+// API-limiet) en alleen bij een probleem daarmee per tool de GitHub API (60 per
+// uur per netwerk). Een uur cache is dus genoeg; met Controleren op updates
+// forceer je altijd een check.
+const RELEASE_CACHE_TTL_MS = 60 * 60 * 1000;
 
 /** Filter op status; "all" toont alles. */
 type Filter = "all" | "installed" | "updates";
@@ -151,12 +151,10 @@ function App() {
         void writeUpdateStatus(cache.data).catch(() => {});
       }
 
-      if (!force) {
-        // Vers genoeg? Dan geen aanroepen verspillen.
-        if (cache?.ts && Date.now() - cache.ts < RELEASE_CACHE_TTL_MS) return;
-        // Limiet nog actief? Dan heeft proberen toch geen zin.
-        if (cache?.rateLimitReset && Date.now() < cache.rateLimitReset) return;
-      }
+      // Vers genoeg? Dan geen aanroepen verspillen. Ook bij een bereikte
+      // GitHub-limiet toch proberen: de versies komen eerst uit het
+      // releasebestand, dat niet onder die limiet valt.
+      if (!force && cache?.ts && Date.now() - cache.ts < RELEASE_CACHE_TTL_MS) return;
 
       const data = await getLatestReleases();
       // Samenvoegen in plaats van vervangen: een mislukte ronde (bijv. de

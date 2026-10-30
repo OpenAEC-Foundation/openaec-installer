@@ -84,8 +84,8 @@
   },
   "errors": {
     "no_releases": "Geen releases gevonden",
-    "rate_limited": "GitHub-limiet bereikt, probeer later opnieuw",
-    "rateLimitedUntil": "GitHub-limiet bereikt — weer beschikbaar om {{time}}",
+    "rate_limited": "GitHub geeft tijdelijk geen versies door: de limiet van 60 aanvragen per uur voor dit netwerk is bereikt. Binnen het uur werkt het weer.",
+    "rateLimitedUntil": "GitHub geeft tijdelijk geen versies door: de limiet van 60 aanvragen per uur voor dit netwerk is bereikt. Vanaf {{time}} werkt het weer.",
     "network": "Netwerkfout bij ophalen releases",
     "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release",
     "installFailed": "Installatie starten mislukt",

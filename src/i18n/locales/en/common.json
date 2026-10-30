@@ -84,8 +84,8 @@
   },
   "errors": {
     "no_releases": "No releases found",
-    "rate_limited": "GitHub rate limit reached, try again later",
-    "rateLimitedUntil": "GitHub rate limit reached — available again at {{time}}",
+    "rate_limited": "GitHub is temporarily not sending versions: this network reached the limit of 60 requests per hour. It works again within the hour.",
+    "rateLimitedUntil": "GitHub is temporarily not sending versions: this network reached the limit of 60 requests per hour. It works again from {{time}}.",
     "network": "Network error while fetching releases",
     "noInstaller": "No installer for this operating system in the latest release",
     "installFailed": "Failed to start the installation",

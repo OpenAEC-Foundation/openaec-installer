@@ -1,0 +1,55 @@
+# Publiceert het releasebestand van de installer op GitHub Pages:
+# https://openaec-foundation.github.io/openaec-installer/releases.json
+#
+# De installer leest dat ene bestand in plaats van per tool de GitHub API, die
+# zonder account 60 aanvragen per uur per netwerk toestaat. Deze workflow leest
+# de releases met zijn eigen token, elk kwartier en na een wijziging van de
+# catalogus. Zie scripts/build-feed.mjs en src-tauri/src/github.rs.
+name: Release feed
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - src/data/catalog.ts
+      - scripts/build-feed.mjs
+      - .github/workflows/release-feed.yml
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: release-feed
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}releases.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build releases.json
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/build-feed.mjs --out site/releases.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
