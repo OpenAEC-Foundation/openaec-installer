@@ -475,6 +475,13 @@ function App() {
         selfRelease.assetUrl,
         selfRelease.assetName,
       );
+      // Windows: de setup werkt de installer stil bij en start hem opnieuw; deze
+      // installer moet daarvoor nu dicht.
+      if (outcome.mode === "selfUpdating") {
+        setNotes((n) => ({ ...n, [SELF_ID]: t("selfUpdate.updating") }));
+        await quitInstaller().catch(() => {});
+        return;
+      }
       // Op Linux is de eigen AppImage al vervangen — alleen nog herstarten.
       setNotes((n) => ({
         ...n,

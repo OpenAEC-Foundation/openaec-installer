@@ -88,7 +88,7 @@ export default function SelfUpdateBanner({
           </button>
         )}
         {canInstall && (
-          <button className="btn btn-primary" disabled={busy} onClick={onUpdate}>
+          <button className="oa-site-button oa-site-button--primary oa-site-button--small" disabled={busy} onClick={onUpdate}>
             {busy ? t("actions.downloading") : t("selfUpdate.update")}
           </button>
         )}
