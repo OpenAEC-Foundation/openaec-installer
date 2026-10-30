@@ -99,10 +99,10 @@ export async function getLatestReleases(): Promise<ReleaseInfo[]> {
 }
 
 /**
- * Alleen de laatste release van de installer zelf ophalen (1 API-call).
- * Wordt bij elke opstart gebruikt — los van de cache voor de tools — zodat een
- * nieuwe versie van de installer meteen wordt opgemerkt zonder de rate limit te
- * belasten met de volledige toollijst.
+ * Alleen de laatste release van de installer zelf ophalen, uit het
+ * releasebestand (of met 1 API-aanroep als terugval). Wordt bij elke opstart
+ * gebruikt, los van de cache voor de tools, zodat een nieuwe versie van de
+ * installer meteen wordt opgemerkt.
  */
 export async function getSelfRelease(): Promise<ReleaseInfo | null> {
   const [owner, repo] = SELF_REPO.split("/");

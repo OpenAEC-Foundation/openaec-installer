@@ -2,9 +2,14 @@
 //!
 //! Tools met een publieke sleutel in de catalogus lezen eerst de `latest.json`
 //! van hun release (zie `manifest.rs`): geen API-limiet, de versie staat er
-//! expliciet in en elk bestand heeft een handtekening. Zonder sleutel, of als
-//! de release geen bruikbare `latest.json` heeft, valt het terug op de GitHub
-//! API (ongeauthenticeerd, 60 req/uur — de frontend cachet het resultaat).
+//! expliciet in en elk bestand heeft een handtekening. Zonder sleutel leest de
+//! installer de release uit het releasebestand (`FEED_URL`): één bestand met de
+//! laatste release van elke tool, dat een workflow van deze repository elk
+//! kwartier maakt met zijn eigen token (`scripts/build-feed.mjs`). Pas als dat
+//! bestand ontbreekt, te oud is of de tool niet kent, valt het terug op de
+//! GitHub API. Die mag zonder account 60 aanvragen per uur per netwerk; met
+//! een aanvraag per tool raakte een kantoor met een paar gebruikers die snel
+//! op.
 //!
 //! Op de API-route wordt de versie uit de naam van het installer-asset geparst
 //! in plaats van uit de tag: bij sommige repo's (bijv. monty-ifc-viewer v1.0.1)
@@ -20,6 +25,55 @@
 use serde::{Deserialize, Serialize};
 
 const USER_AGENT: &str = "OpenAEC-Installer (https://github.com/OpenAEC-Foundation)";
+
+/// Het releasebestand op GitHub Pages; Pages en downloads tellen niet mee voor
+/// de API-limiet. Voor een test te vervangen met `OPENAEC_RELEASE_FEED`.
+const FEED_URL: &str = "https://openaec-foundation.github.io/openaec-installer/releases.json";
+
+/// Een releasebestand ouder dan dit wordt genegeerd: dan werkt de workflow niet
+/// meer en is de API betrouwbaarder.
+const FEED_MAX_AGE_SECS: u64 = 6 * 60 * 60;
+
+/// Het releasebestand: per repository ("eigenaar/naam", kleine letters) de
+/// laatste release in de vorm van de GitHub API, of `null` zonder release.
+#[derive(Debug, Deserialize)]
+pub(crate) struct Feed {
+    /// Wanneer het bestand gemaakt is (epoch-seconden).
+    generated_unix: u64,
+    releases: std::collections::HashMap<String, serde_json::Value>,
+}
+
+impl Feed {
+    /// De release van een repository: `Some(None)` als die er geen heeft,
+    /// `None` als het bestand de repository niet kent.
+    fn release(&self, repo: &RepoRef) -> Option<Option<&serde_json::Value>> {
+        let key = format!("{}/{}", repo.owner, repo.repo).to_ascii_lowercase();
+        self.releases.get(&key).map(|v| (!v.is_null()).then_some(v))
+    }
+
+    fn fresh(&self, now_unix: u64) -> bool {
+        now_unix.saturating_sub(self.generated_unix) <= FEED_MAX_AGE_SECS
+    }
+}
+
+/// Haal het releasebestand op; `None` als dat niet lukt of als het te oud is.
+async fn fetch_feed(client: &reqwest::Client) -> Option<Feed> {
+    let url = std::env::var("OPENAEC_RELEASE_FEED").unwrap_or_else(|_| FEED_URL.to_string());
+    let resp = client
+        .get(url)
+        .timeout(std::time::Duration::from_secs(10))
+        .send()
+        .await
+        .ok()?
+        .error_for_status()
+        .ok()?;
+    let feed: Feed = resp.json().await.ok()?;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()?
+        .as_secs();
+    feed.fresh(now).then_some(feed)
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -52,7 +106,8 @@ pub struct ReleaseInfo {
     pub rate_limit_reset: Option<u64>,
     /// Handtekening van het asset (base64), als de release er een levert.
     pub signature: Option<String>,
-    /// "manifest" (via latest.json) of "api" (via de GitHub API).
+    /// "manifest" (via latest.json), "feed" (via het releasebestand) of "api"
+    /// (via de GitHub API).
     pub source: Option<&'static str>,
     /// Per soort setup het beste asset: "nsis", "nsisUser" (aparte
     /// per-gebruiker-setup), "msi" of "appimage".
@@ -79,11 +134,12 @@ pub async fn fetch_all(repos: Vec<RepoRef>) -> Vec<ReleaseInfo> {
         }
     };
 
-    let futures = repos.into_iter().map(|r| fetch_one(client.clone(), r));
+    let feed = fetch_feed(&client).await;
+    let futures = repos.into_iter().map(|r| fetch_one(client.clone(), r, feed.as_ref()));
     futures_util::future::join_all(futures).await
 }
 
-async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
+async fn fetch_one(client: reqwest::Client, repo: RepoRef, feed: Option<&Feed>) -> ReleaseInfo {
     if repo.pubkey.is_some() {
         if let Ok(Some(manifest)) = crate::manifest::fetch(&client, &repo.owner, &repo.repo).await {
             if let Some(entry) = crate::manifest::pick(&manifest) {
@@ -91,7 +147,11 @@ async fn fetch_one(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
             }
         }
     }
-    fetch_api(client, repo).await
+    match feed.and_then(|f| f.release(&repo)) {
+        Some(Some(release)) => from_release(repo, release, "feed"),
+        Some(None) => error_info(repo.id, "no_releases".into()),
+        None => fetch_api(client, repo).await,
+    }
 }
 
 fn from_manifest(
@@ -160,7 +220,11 @@ async fn fetch_api(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         Ok(v) => v,
         Err(e) => return error_info(repo.id, format!("json: {e}")),
     };
+    from_release(repo, &json, "api")
+}
 
+/// Een release in de vorm van de GitHub API, uit de API of uit het releasebestand.
+fn from_release(repo: RepoRef, json: &serde_json::Value, source: &'static str) -> ReleaseInfo {
     let tag = json["tag_name"].as_str().map(str::to_string);
     let page_url = json["html_url"].as_str().map(str::to_string);
     let published_at = json["published_at"].as_str().map(str::to_string);
@@ -204,7 +268,7 @@ async fn fetch_api(client: reqwest::Client, repo: RepoRef) -> ReleaseInfo {
         published_at,
         rate_limit_reset: None,
         signature: None,
-        source: Some("api"),
+        source: Some(source),
         variants,
     }
 }
@@ -409,6 +473,46 @@ mod tests {
             assert_eq!(name("msi"), Some("Open.PDF.Studio_2026.43.4_x64_en-US.msi"));
             assert_eq!(variants.len(), 3);
         }
+    }
+
+    #[test]
+    fn reads_releases_from_the_feed() {
+        let feed: Feed = serde_json::from_str(
+            r#"{
+                "generated_unix": 1000,
+                "releases": {
+                    "openaec-foundation/open-calc-studio": {
+                        "tag_name": "v0.13.0",
+                        "html_url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/tag/v0.13.0",
+                        "published_at": "2026-10-20T10:00:00Z",
+                        "assets": [
+                            { "name": "Open.Calc.Studio_0.13.0_x64-setup.exe", "browser_download_url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/Open.Calc.Studio_0.13.0_x64-setup.exe", "size": 5 },
+                            { "name": "Open.Calc.Studio_0.13.0_amd64.AppImage", "browser_download_url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/Open.Calc.Studio_0.13.0_amd64.AppImage", "size": 9 }
+                        ]
+                    },
+                    "openaec-foundation/open-frame-studio": null
+                }
+            }"#,
+        )
+        .unwrap();
+        let repo = |owner: &str, name: &str| RepoRef { id: name.to_lowercase(), owner: owner.into(), repo: name.into(), pubkey: None };
+
+        // Hoofdletters in de catalogus maken niet uit.
+        let calc = feed.release(&repo("OpenAEC-Foundation", "Open-Calc-Studio")).unwrap().unwrap();
+        let info = from_release(repo("OpenAEC-Foundation", "open-calc-studio"), calc, "feed");
+        assert!(info.ok);
+        assert_eq!(info.source, Some("feed"));
+        assert_eq!(info.version.as_deref(), Some("0.13.0"));
+        if cfg!(windows) {
+            assert_eq!(info.asset_name.as_deref(), Some("Open.Calc.Studio_0.13.0_x64-setup.exe"));
+        }
+
+        // `null`: geen release; ontbreekt de tool, dan de API.
+        assert!(matches!(feed.release(&repo("OpenAEC-Foundation", "open-frame-studio")), Some(None)));
+        assert!(feed.release(&repo("OpenAEC-Foundation", "open-pdf-studio")).is_none());
+
+        assert!(feed.fresh(1000 + FEED_MAX_AGE_SECS));
+        assert!(!feed.fresh(1001 + FEED_MAX_AGE_SECS));
     }
 
     #[test]
