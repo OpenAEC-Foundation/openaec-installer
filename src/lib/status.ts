@@ -25,6 +25,11 @@ export function compareVersions(a: string, b: string): number {
       .filter((n) => !Number.isNaN(n));
   const pa = parse(a);
   const pb = parse(b);
+  // Een MSI-versie mag niet boven 255 komen, dus een MSI van calver 2026.43
+  // zet "26.43.0" in het register (Open CAD Studio). Tegenover een jaartal van
+  // vier cijfers telt een eerste getal onder 100 daarom als 20xx.
+  if (pa[0] < 100 && pb[0] >= 2000) pa[0] += 2000;
+  if (pb[0] < 100 && pa[0] >= 2000) pb[0] += 2000;
   const len = Math.max(pa.length, pb.length);
   for (let i = 0; i < len; i++) {
     const na = pa[i] ?? 0;

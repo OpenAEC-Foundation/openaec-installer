@@ -1,6 +1,23 @@
 import { describe, expect, it } from "vitest";
 import type { InstalledTool, ReleaseInfo, ReleaseVariant } from "./api";
-import { pickUpdateVariant } from "./status";
+import { compareVersions, pickUpdateVariant } from "./status";
+
+describe("compareVersions", () => {
+  it("vergelijkt semver en calver per getal", () => {
+    expect(compareVersions("0.2.7", "0.2.8")).toBe(-1);
+    expect(compareVersions("v2026.44.4", "2026.44.2")).toBe(1);
+    expect(compareVersions("2026.43", "2026.43.0")).toBe(0);
+  });
+
+  it("telt een jaar van twee cijfers uit een MSI als hetzelfde jaar", () => {
+    // Open CAD Studio: register "26.43.0", release "v2026.43".
+    expect(compareVersions("26.43.0", "2026.43")).toBe(0);
+    expect(compareVersions("26.43.0", "2026.44")).toBe(-1);
+    expect(compareVersions("2026.44", "26.43.0")).toBe(1);
+    // Gewone kleine versies blijven gewoon kleiner dan een jaartal.
+    expect(compareVersions("0.13.0", "2026.1")).toBe(-1);
+  });
+});
 
 const variant = (kind: ReleaseVariant["kind"], assetName: string): ReleaseVariant => ({
   kind,
