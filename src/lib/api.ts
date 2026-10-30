@@ -51,9 +51,11 @@ export interface InstallOutcome {
   /**
    * ranInstaller — setup-UI gestart (Windows);
    * installed — direct geïnstalleerd, klaar voor gebruik (Linux);
-   * selfReplaced — eigen AppImage vervangen, herstart nodig (Linux).
+   * selfReplaced — eigen AppImage vervangen, herstart nodig (Linux);
+   * selfUpdating — eigen setup stil gestart; de installer sluit nu en de setup
+   *   start hem opnieuw (Windows, per-gebruiker-installatie).
    */
-  mode: "ranInstaller" | "installed" | "selfReplaced";
+  mode: "ranInstaller" | "installed" | "selfReplaced" | "selfUpdating";
 }
 
 export interface UpdateOutcome {

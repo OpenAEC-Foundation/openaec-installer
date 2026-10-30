@@ -80,7 +80,8 @@
     "dismiss": "Later",
     "started": "The installer has started — follow its steps. OpenAEC Installer closes during the update; you can reopen it afterwards.",
     "restartToApply": "The new version has been installed — close OpenAEC Installer and start it again to use the update.",
-    "noInstaller": "No installer for this operating system in the latest release — update manually via GitHub."
+    "noInstaller": "No installer for this operating system in the latest release — update manually via GitHub.",
+    "updating": "The installer is updating and will start again shortly."
   },
   "errors": {
     "no_releases": "No releases found",
