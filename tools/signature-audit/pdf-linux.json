@@ -1,0 +1,11 @@
+[
+  {
+    "repo": "OpenAEC-Foundation/open-pdf-studio",
+    "tool": "Open PDF Studio",
+    "tag": "v2026.44.1",
+    "name": "open-pdf-studio_2026.44.1_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/open-pdf-studio/releases/download/v2026.44.1/open-pdf-studio_2026.44.1_amd64.snap",
+    "sha256": "d934c62c656354a62e04a9653aa205c6e9e23fb50f3dfd2d57b72c919671ee08",
+    "asset_id": 688303428
+  }
+]

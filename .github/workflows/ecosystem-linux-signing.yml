@@ -1,0 +1,40 @@
+name: Onderteken gecontroleerde Linux-pakketten
+on:
+  workflow_dispatch:
+    inputs:
+      manifest:
+        description: Vastgepinde pakketlijst
+        type: choice
+        options: [unsigned-linux.json, infra-linux.json, pdf-linux.json]
+        default: unsigned-linux.json
+permissions:
+  contents: read
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Importeer bestaande organisatiesleutel en onderteken vastgepinde pakketten
+        env:
+          LINUX_SIGNING_MANIFEST: tools/signature-audit/${{ inputs.manifest || 'unsigned-linux.json' }}
+          GH_TOKEN: ${{ github.token }}
+          OPENAEC_GPG_PRIVATE_KEY: ${{ secrets.OPENAEC_GPG_PRIVATE_KEY }}
+          OPENAEC_GPG_PASSPHRASE: ${{ secrets.OPENAEC_GPG_PASSPHRASE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$OPENAEC_GPG_PRIVATE_KEY" || { echo 'Bestaande organisatiesleutel is niet gedeeld met deze repository'; exit 1; }
+          export GNUPGHOME="$RUNNER_TEMP/openaec-signing-gnupg"
+          mkdir -m 700 "$GNUPGHOME"
+          trap 'gpgconf --kill all; rm -rf "$GNUPGHOME"' EXIT
+          printf '%s' "$OPENAEC_GPG_PRIVATE_KEY" | gpg --batch --import
+          unset OPENAEC_GPG_PRIVATE_KEY
+          python3 tools/signature-audit/linux_sign.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: verified-linux-signatures
+          path: linux-signatures/
+          if-no-files-found: error

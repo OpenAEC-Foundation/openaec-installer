@@ -1,0 +1,90 @@
+[
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.43",
+    "name": "OpenCADStudio-v2026.43-macos-arm64.dmg",
+    "sha256": "4e8ba1b36b85c7f8c860b04bdd238be7f6ead3de3ef6de80c7cedb6318aefc2a",
+    "asset_id": 675507733
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.39",
+    "name": "OpenCADStudio-v2026.39-macos-arm64.dmg",
+    "sha256": "bf12326c854dfc2e3f78a8ad111444d74e2d8b3f415466b26297bc109ea24cc3",
+    "asset_id": 593362443
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v0.8.0",
+    "name": "open-pointcloud-studio_0.8.0_macos-universal.dmg",
+    "sha256": "aae56194b64e83244f99673f8cd29bf42f614a0ea31138b3ef4f070dcc719a06",
+    "asset_id": 608644564
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "OpenAEC.Installer_0.2.4_universal.dmg",
+    "sha256": "9a40f9328dcdd213e992b45e60ebfa9b8b5c3ef4b7193b75738f5b8aa35768b6",
+    "asset_id": 665640121
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "OpenAEC.Installer_0.2.2_universal.dmg",
+    "sha256": "586c4768b476446680287d2c6c07539ec3de81ee21a440b1ed7b588ac986030e",
+    "asset_id": 527596980
+  },
+  {
+    "tool": "Open Calc Studio",
+    "repo": "OpenAEC-Foundation/open-calc-studio",
+    "tag": "v0.13.0",
+    "name": "Open.Calc.Studio_0.13.0_aarch64.dmg",
+    "sha256": "9f30784323a929feb4e57f2887a6cc557a13a66b330c64751e7895ef6131a137",
+    "asset_id": 559298109
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio_0.12.2_aarch64.dmg",
+    "sha256": "92249966a50d6577c4302a480b81aeb76120483b02357d01739bd95cbaa2f91a",
+    "asset_id": 627602197
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio_0.12.2_x64.dmg",
+    "sha256": "eee91d7df7fcf3ab0b12076c3795aa019e44f324f6e0a10dc4ddc3f1300626b5",
+    "asset_id": 627602198
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v2026.44.0",
+    "name": "Open.Energy.Studio_2026.44.0_universal.dmg",
+    "sha256": "3c07f63e62bf2149dd8de476ec9c73e9a08b8200e62bb9800f8e0e82c0d59d44",
+    "asset_id": 677896688
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v0.1.7-alpha",
+    "name": "Open.Energy.Studio_0.1.7-alpha_aarch64.dmg",
+    "sha256": "7336c1b3d2b9b775affa058ef5528fa85be790d95b38f608c29d7f377d0243a6",
+    "asset_id": 615064596
+  },
+  {
+    "tool": "Open Structural Calculation Studio (nieuwe repository)",
+    "repo": "OpenAEC-Foundation/Open-Structural-Calculation-Studio",
+    "tag": "nightly",
+    "name": "Open.Structural.Calculation.Studio_2026.43.0_universal.dmg",
+    "sha256": "dffc27b0fd2e036102c81a7b67d075171516989444a3cec7ff1a9618d76c3f4a",
+    "asset_id": 687328817
+  }
+]

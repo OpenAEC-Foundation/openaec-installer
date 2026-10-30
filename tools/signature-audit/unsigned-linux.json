@@ -1,0 +1,394 @@
+[
+  {
+    "tool": "Monty IFC Viewer",
+    "repo": "OpenAEC-Foundation/monty-ifc-viewer",
+    "tag": "v1.0.1",
+    "name": "Monty.IFC.Viewer-1.0.0-1.x86_64.rpm",
+    "url": "https://github.com/OpenAEC-Foundation/monty-ifc-viewer/releases/download/v1.0.1/Monty.IFC.Viewer-1.0.0-1.x86_64.rpm",
+    "sha256": "08e0337628a2a59a15e6f7d685fc3d0869fcb1a05544526403c77a4f77dd8280"
+  },
+  {
+    "tool": "Monty IFC Viewer",
+    "repo": "OpenAEC-Foundation/monty-ifc-viewer",
+    "tag": "v1.0.1",
+    "name": "Monty.IFC.Viewer_1.0.0_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/monty-ifc-viewer/releases/download/v1.0.1/Monty.IFC.Viewer_1.0.0_amd64.AppImage",
+    "sha256": "875268305d1b63704e6078f25ec6fee4fc5c8ad4234c53ad20fd7bf7d068bbd2"
+  },
+  {
+    "tool": "Monty IFC Viewer",
+    "repo": "OpenAEC-Foundation/monty-ifc-viewer",
+    "tag": "v1.0.1",
+    "name": "Monty.IFC.Viewer_1.0.0_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/monty-ifc-viewer/releases/download/v1.0.1/Monty.IFC.Viewer_1.0.0_amd64.deb",
+    "sha256": "2f52c1cdbccf507c1505c5ae77bf137693b0a9600e14ee76bfa9de42b2cc1867"
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.43",
+    "name": "OpenCADStudio-v2026.43-linux-x86_64.AppImage",
+    "url": "https://github.com/HakanSeven12/OpenCADStudio/releases/download/v2026.43/OpenCADStudio-v2026.43-linux-x86_64.AppImage",
+    "sha256": "824d957b32fb92bfc97a043907f0a51a134f5a892636fb1fb6319a98d88edb8d"
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.43",
+    "name": "OpenCADStudio-v2026.43-linux-x86_64.snap",
+    "url": "https://github.com/HakanSeven12/OpenCADStudio/releases/download/v2026.43/OpenCADStudio-v2026.43-linux-x86_64.snap",
+    "sha256": "ae7dc77d15e39fbe99bc2782dedceacf6b2aa01adfbb72843f54c33b2f713639"
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.39",
+    "name": "OpenCADStudio-v2026.39-linux-x86_64.AppImage",
+    "url": "https://github.com/HakanSeven12/OpenCADStudio/releases/download/v2026.39/OpenCADStudio-v2026.39-linux-x86_64.AppImage",
+    "sha256": "113eccf8fd92b1fae97a34f2d0d6caa1e75efdfe243612c8282ab5d00a9cfaed"
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.39",
+    "name": "OpenCADStudio-v2026.39-linux-x86_64.snap",
+    "url": "https://github.com/HakanSeven12/OpenCADStudio/releases/download/v2026.39/OpenCADStudio-v2026.39-linux-x86_64.snap",
+    "sha256": "156198ee807f7c1223f1329c330ff5b028560aa5560c05d7814a1112b6014cd2"
+  },
+  {
+    "tool": "Open PDF Studio",
+    "repo": "OpenAEC-Foundation/open-pdf-studio",
+    "tag": "v2026.44.0",
+    "name": "open-pdf-studio_2026.44.0_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/open-pdf-studio/releases/download/v2026.44.0/open-pdf-studio_2026.44.0_amd64.snap",
+    "sha256": "4fe70832b0ee2e389e84d19ac59463b9fb801daa78231bb5bb9ae4ccc44220a1"
+  },
+  {
+    "tool": "Open BIM Studio",
+    "repo": "OpenAEC-Foundation/open-bim-studio",
+    "tag": "v0.1.1",
+    "name": "Open-BIM-Studio-0.1.1-linux-x86_64.run",
+    "url": "https://github.com/OpenAEC-Foundation/open-bim-studio/releases/download/v0.1.1/Open-BIM-Studio-0.1.1-linux-x86_64.run",
+    "sha256": "0a0f7be764255bd3c4af2fc5b944695f8234e8627c44ac39f2a81ff1a6263a06"
+  },
+  {
+    "tool": "Open Planner Studio",
+    "repo": "OpenAEC-Foundation/open-planner-studio",
+    "tag": "v2026.43.0",
+    "name": "open-planner-studio_2026.43.0_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/open-planner-studio/releases/download/v2026.43.0/open-planner-studio_2026.43.0_amd64.snap",
+    "sha256": "d8dc5a77cfcba3a72f023f4c09d7a21b32b10d746cf36b67003b637e31845d31"
+  },
+  {
+    "tool": "Open Planner Studio",
+    "repo": "OpenAEC-Foundation/open-planner-studio",
+    "tag": "v2026.10.0",
+    "name": "open-planner-studio_2026.10.0_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/open-planner-studio/releases/download/v2026.10.0/open-planner-studio_2026.10.0_amd64.snap",
+    "sha256": "6a59dadb3fed93944f8021ca03ab675420688e7c2fcadbb6215a4f226834e40d"
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v0.8.0",
+    "name": "open-pointcloud-studio_0.8.0_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/download/v0.8.0/open-pointcloud-studio_0.8.0_amd64.AppImage",
+    "sha256": "521760d808e710b0fed647930b053a7293cc19be3c90cde7dd137616a5cf6d0a"
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v0.8.0",
+    "name": "open-pointcloud-studio_0.8.0_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/download/v0.8.0/open-pointcloud-studio_0.8.0_amd64.deb",
+    "sha256": "81f41d1c5c8840f26112350b62d7ac58ca0507d0343c0d03b0ffca9fab4a117e"
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v0.8.0",
+    "name": "open-pointcloud-studio_0.8.0_arm64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/download/v0.8.0/open-pointcloud-studio_0.8.0_arm64.AppImage",
+    "sha256": "0567f33c58fbdb6acbec2db9749961de5ecc5b3db629a87b738d8a54cbef61fe"
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v0.8.0",
+    "name": "open-pointcloud-studio_0.8.0_arm64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/download/v0.8.0/open-pointcloud-studio_0.8.0_arm64.deb",
+    "sha256": "fd9f23060aea600f72ce943fc40079af467131a2cd904c72901ac97730b77c81"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "open-aec-installer_0.2.4_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.4/open-aec-installer_0.2.4_amd64.snap",
+    "sha256": "4e932f2386018aa188fc82ecae136ff1b5851214125b7113afdf695cf14418fb"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "OpenAEC.Installer_0.2.4_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.4/OpenAEC.Installer_0.2.4_amd64.AppImage",
+    "sha256": "4f96bf126b28fbf4b89d4857f14470654e27445bc6fdbcd4d8f8f5651548ffbc"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "OpenAEC.Installer_0.2.4_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.4/OpenAEC.Installer_0.2.4_amd64.deb",
+    "sha256": "eb237eb3fda2d8595dc024bd40fd68a4f0f6bb907b931067a35bab0a85e2c563"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "open-aec-installer_0.2.2_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.2/open-aec-installer_0.2.2_amd64.snap",
+    "sha256": "6e22ff3a06dee125d7acde04b19dc1d56aaa3d439e4c6353f7e544c3193ec3d5"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "OpenAEC.Installer_0.2.2_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.2/OpenAEC.Installer_0.2.2_amd64.AppImage",
+    "sha256": "f0068303b880a79af6814e5d99cb4c3be56c7d1bad0760327a20310038b73dfa"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "OpenAEC.Installer_0.2.2_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.2/OpenAEC.Installer_0.2.2_amd64.deb",
+    "sha256": "3415556971c8859153fa945ceeab2e380a5f0f7b977c40cdd1d5b9fe577beb06"
+  },
+  {
+    "tool": "Open Calc Studio",
+    "repo": "OpenAEC-Foundation/open-calc-studio",
+    "tag": "v0.13.0",
+    "name": "open-calc-studio_0.13.0_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/open-calc-studio_0.13.0_amd64.snap",
+    "sha256": "9b8d382a9830da3a328121cbe99a9a658787663c2d963ac39477604852ffc1ee"
+  },
+  {
+    "tool": "Open Calc Studio",
+    "repo": "OpenAEC-Foundation/open-calc-studio",
+    "tag": "v0.13.0",
+    "name": "Open.Calc.Studio-0.13.0-1.x86_64.rpm",
+    "url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/Open.Calc.Studio-0.13.0-1.x86_64.rpm",
+    "sha256": "b15d179cf7e17dd1994198d9482d78befb3d2ffd76da39f72872e39db5573c95"
+  },
+  {
+    "tool": "Open Calc Studio",
+    "repo": "OpenAEC-Foundation/open-calc-studio",
+    "tag": "v0.13.0",
+    "name": "Open.Calc.Studio_0.13.0_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/Open.Calc.Studio_0.13.0_amd64.AppImage",
+    "sha256": "4aef7a820963f1865c121a27f94037bedf790a80991269c23c002820b563112b"
+  },
+  {
+    "tool": "Open Calc Studio",
+    "repo": "OpenAEC-Foundation/open-calc-studio",
+    "tag": "v0.13.0",
+    "name": "Open.Calc.Studio_0.13.0_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/Open.Calc.Studio_0.13.0_amd64.deb",
+    "sha256": "9e6afe70f8b4befcf5931b4d6acc587e45dcda96f8400d27632a4a678f6d1ec7"
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio-0.12.2-1.x86_64.rpm",
+    "url": "https://github.com/OpenAEC-Foundation/open-speech-studio/releases/download/v0.12.2/Open.Speech.Studio-0.12.2-1.x86_64.rpm",
+    "sha256": "c2e761c7caf4821a1793df76b91d7b341fba075d2267c34e953aabbe8779cead"
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio_0.12.2_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-speech-studio/releases/download/v0.12.2/Open.Speech.Studio_0.12.2_amd64.AppImage",
+    "sha256": "4f717eeecd399061cbfba5f248becb960d261c20a65600421c8cf2d255078c20"
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio_0.12.2_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-speech-studio/releases/download/v0.12.2/Open.Speech.Studio_0.12.2_amd64.deb",
+    "sha256": "26dfae6d98ac5d4d8d455975b0909c9355819ced610f58e1ae2a6fc5bc95078c"
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.10.3",
+    "name": "Open.Speech.Studio_0.10.3_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-speech-studio/releases/download/v0.10.3/Open.Speech.Studio_0.10.3_amd64.deb",
+    "sha256": "cf3fb8cfbe1a9771230b16b0add395844fe1ee5ec7f0e11badaff521165831c4"
+  },
+  {
+    "tool": "Open Paint Studio",
+    "repo": "OpenAEC-Foundation/open-paint-studio",
+    "tag": "v2026.43.2",
+    "name": "OpenAEC-Paint-Studio_2026.43.2_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-paint-studio/releases/download/v2026.43.2/OpenAEC-Paint-Studio_2026.43.2_amd64.AppImage",
+    "sha256": "e4bf81b93ffd477389939c189c2942775ffde960bc7c1433be89e660f56caa5e"
+  },
+  {
+    "tool": "Open Paint Studio",
+    "repo": "OpenAEC-Foundation/open-paint-studio",
+    "tag": "v2026.43.2",
+    "name": "OpenAEC-Paint-Studio_2026.43.2_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-paint-studio/releases/download/v2026.43.2/OpenAEC-Paint-Studio_2026.43.2_amd64.deb",
+    "sha256": "42ddd889fd671bd8ba229a35cef5b5ec52191f0bc3d457cbdf2b926ba60e47a1"
+  },
+  {
+    "tool": "Open Field Studio",
+    "repo": "OpenAEC-Foundation/Open-Field-Studio",
+    "tag": "v0.3.6",
+    "name": "Open.Field.Studio-0.3.6-1.x86_64.rpm",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Field-Studio/releases/download/v0.3.6/Open.Field.Studio-0.3.6-1.x86_64.rpm",
+    "sha256": "178a91e90ecf8b9669e99d80994e5152eb0e85d8b6293d5cc9d70f7e4af52a28"
+  },
+  {
+    "tool": "Open Field Studio",
+    "repo": "OpenAEC-Foundation/Open-Field-Studio",
+    "tag": "v0.3.6",
+    "name": "Open.Field.Studio_0.3.6_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Field-Studio/releases/download/v0.3.6/Open.Field.Studio_0.3.6_amd64.AppImage",
+    "sha256": "ef898df000a213b720b12758e7c6c0cf84a61b65254af6e56b75e884ccbb4e6f"
+  },
+  {
+    "tool": "Open Field Studio",
+    "repo": "OpenAEC-Foundation/Open-Field-Studio",
+    "tag": "v0.3.6",
+    "name": "Open.Field.Studio_0.3.6_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Field-Studio/releases/download/v0.3.6/Open.Field.Studio_0.3.6_amd64.deb",
+    "sha256": "a2a972acb1b534d323546fb7815b25ebb8a078aa94ed138bd03b9c0b349a62c5"
+  },
+  {
+    "tool": "Open Geotechniek Studio",
+    "repo": "OpenAEC-Foundation/open-geotechniek-studio",
+    "tag": "v0.4.1",
+    "name": "open-geotechniek-studio_0.4.1_amd64.snap",
+    "url": "https://github.com/OpenAEC-Foundation/open-geotechniek-studio/releases/download/v0.4.1/open-geotechniek-studio_0.4.1_amd64.snap",
+    "sha256": "e21da76f33328ccb987ff972ae4ed92765f687fa080133a6aa0a851c7b42c0e3"
+  },
+  {
+    "tool": "Open Geotechniek Studio",
+    "repo": "OpenAEC-Foundation/open-geotechniek-studio",
+    "tag": "v0.4.1",
+    "name": "Open.Geotechniek.Studio_0.4.1_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-geotechniek-studio/releases/download/v0.4.1/Open.Geotechniek.Studio_0.4.1_amd64.AppImage",
+    "sha256": "bbdbd458ce8883463f840ce4bad769b6835258c3b8ff3398084f70cd14f8a233"
+  },
+  {
+    "tool": "Open Geotechniek Studio",
+    "repo": "OpenAEC-Foundation/open-geotechniek-studio",
+    "tag": "v0.4.1",
+    "name": "Open.Geotechniek.Studio_0.4.1_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-geotechniek-studio/releases/download/v0.4.1/Open.Geotechniek.Studio_0.4.1_amd64.deb",
+    "sha256": "6561e64d547d4f11b1f720ff6be833662d9eb93c80c0e5d4dc1b9e29d05c80f1"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v2026.44.0",
+    "name": "Open.Energy.Studio-2026.44.0-1.x86_64.rpm",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v2026.44.0/Open.Energy.Studio-2026.44.0-1.x86_64.rpm",
+    "sha256": "d6a8c43ed08fbbede9f39497f78b58206ab36073d44e3485e918ef1b9f45db91"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v2026.44.0",
+    "name": "Open.Energy.Studio_2026.44.0_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v2026.44.0/Open.Energy.Studio_2026.44.0_amd64.AppImage",
+    "sha256": "d15c57607edfcde57f37d425b875e30dd0beb4a61d459635332c8847463f5ff8"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v2026.44.0",
+    "name": "Open.Energy.Studio_2026.44.0_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v2026.44.0/Open.Energy.Studio_2026.44.0_amd64.deb",
+    "sha256": "762b72f3a727b0d0dfbc77d47b6af169dae249e9ee0d97a4b30e6e436b95a7f2"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v0.1.7-alpha",
+    "name": "Open.Energy.Studio_0.1.6-alpha_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v0.1.7-alpha/Open.Energy.Studio_0.1.6-alpha_amd64.deb",
+    "sha256": "5367eb74d01f30224396dd65e8a6f336fe015a342ca306eb651b6892cc86d18a"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v0.1.7-alpha",
+    "name": "Open.Energy.Studio_0.1.7-alpha_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v0.1.7-alpha/Open.Energy.Studio_0.1.7-alpha_amd64.AppImage",
+    "sha256": "0a0757711b88383ef205520d374da533aed9e3c8d55691912024dc780bc45524"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v0.1.7-alpha",
+    "name": "Open.Energy.Studio_0.1.7-alpha_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v0.1.7-alpha/Open.Energy.Studio_0.1.7-alpha_amd64.deb",
+    "sha256": "21a19d3d988673a42e12363fcf67185ad569220f9a4df6827c17a3d3ad6e6687"
+  },
+  {
+    "tool": "OpenAEC Office Studio",
+    "repo": "OpenAEC-Foundation/open-office-studio",
+    "tag": "v2026.44.7",
+    "name": "Open.Database.Studio_2026.44.7_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Database.Studio_2026.44.7_amd64.AppImage",
+    "sha256": "dada6259afe853c8716156b94a63388b2ae862544a49d25d9775bec610b1060b"
+  },
+  {
+    "tool": "OpenAEC Office Studio",
+    "repo": "OpenAEC-Foundation/open-office-studio",
+    "tag": "v2026.44.7",
+    "name": "Open.Database.Studio_2026.44.7_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Database.Studio_2026.44.7_amd64.deb",
+    "sha256": "ced8f5d14fa4d10d03fe444b0a4790d72b9ae05ec6f753aa32f6958e25d4d53e"
+  },
+  {
+    "tool": "OpenAEC Office Studio",
+    "repo": "OpenAEC-Foundation/open-office-studio",
+    "tag": "v2026.44.7",
+    "name": "Open.Office.Studio_2026.44.7_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Office.Studio_2026.44.7_amd64.AppImage",
+    "sha256": "f1fe342bd84999b489ca793c5a1a3319cc7ee634352774265bfc77e768bb0022"
+  },
+  {
+    "tool": "OpenAEC Office Studio",
+    "repo": "OpenAEC-Foundation/open-office-studio",
+    "tag": "v2026.44.7",
+    "name": "Open.Office.Studio_2026.44.7_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Office.Studio_2026.44.7_amd64.deb",
+    "sha256": "a7a89b56b489b6513029c130035f7fe2b75d8e4fa5ff7630c6c2080190a3dc49"
+  },
+  {
+    "tool": "Open Structural Calculation Studio (nieuwe repository)",
+    "repo": "OpenAEC-Foundation/Open-Structural-Calculation-Studio",
+    "tag": "nightly",
+    "name": "Open.Structural.Calculation.Studio_2026.43.0_amd64.AppImage",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Structural-Calculation-Studio/releases/download/nightly/Open.Structural.Calculation.Studio_2026.43.0_amd64.AppImage",
+    "sha256": "b587c758fab3d3b55948c5b5a316c74289fa1e2fdeea04db85ece337d4053c62"
+  },
+  {
+    "tool": "Open Structural Calculation Studio (nieuwe repository)",
+    "repo": "OpenAEC-Foundation/Open-Structural-Calculation-Studio",
+    "tag": "nightly",
+    "name": "Open.Structural.Calculation.Studio_2026.43.0_amd64.deb",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Structural-Calculation-Studio/releases/download/nightly/Open.Structural.Calculation.Studio_2026.43.0_amd64.deb",
+    "sha256": "9d35a97d3e14c79c9c4b880ca8616a0a1fabd41464bf8285d0497b6dc95e62cd"
+  }
+]

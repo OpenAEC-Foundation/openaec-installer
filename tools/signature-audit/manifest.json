@@ -1,0 +1,191 @@
+[
+  {
+    "tool": "OpenAEC Cloud Desktop",
+    "repo": "OpenAEC-Foundation/openaec-cloud-desktop",
+    "tag": "v2026.44.10",
+    "name": "OpenAEC.Desktop.App_2026.44.10_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-cloud-desktop/releases/download/v2026.44.10/OpenAEC.Desktop.App_2026.44.10_universal.dmg",
+    "asset_id": 686737119,
+    "github_digest": "sha256:5a68d28f19daabff0900e27caa80d829520a8c5346efe869f2d7df51e4999814"
+  },
+  {
+    "tool": "Monty IFC Viewer",
+    "repo": "OpenAEC-Foundation/monty-ifc-viewer",
+    "tag": "v1.0.1",
+    "name": "Monty.IFC.Viewer_1.0.0_aarch64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/monty-ifc-viewer/releases/download/v1.0.1/Monty.IFC.Viewer_1.0.0_aarch64.dmg",
+    "asset_id": 360802340,
+    "github_digest": "sha256:4dfb5712cbdd6d608fc94c98171f74baa7bd898e575bd141aad9a86864dfa56c"
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.43",
+    "name": "OpenCADStudio-v2026.43-macos-arm64.dmg",
+    "url": "https://github.com/HakanSeven12/OpenCADStudio/releases/download/v2026.43/OpenCADStudio-v2026.43-macos-arm64.dmg",
+    "asset_id": 675507733,
+    "github_digest": "sha256:4e8ba1b36b85c7f8c860b04bdd238be7f6ead3de3ef6de80c7cedb6318aefc2a"
+  },
+  {
+    "tool": "Open CAD Studio",
+    "repo": "HakanSeven12/OpenCADStudio",
+    "tag": "v2026.39",
+    "name": "OpenCADStudio-v2026.39-macos-arm64.dmg",
+    "url": "https://github.com/HakanSeven12/OpenCADStudio/releases/download/v2026.39/OpenCADStudio-v2026.39-macos-arm64.dmg",
+    "asset_id": 593362443,
+    "github_digest": "sha256:bf12326c854dfc2e3f78a8ad111444d74e2d8b3f415466b26297bc109ea24cc3"
+  },
+  {
+    "tool": "Open PDF Studio",
+    "repo": "OpenAEC-Foundation/open-pdf-studio",
+    "tag": "v2026.44.0",
+    "name": "Open.PDF.Studio_2026.44.0_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-pdf-studio/releases/download/v2026.44.0/Open.PDF.Studio_2026.44.0_universal.dmg",
+    "asset_id": 687757613,
+    "github_digest": "sha256:7f003b4d475c84fd76e75fb7fe0a9cc22cadd10405c3355ee49541e4fd8b2866"
+  },
+  {
+    "tool": "Open Planner Studio",
+    "repo": "OpenAEC-Foundation/open-planner-studio",
+    "tag": "v2026.43.0",
+    "name": "Open.Planner.Studio_2026.43.0_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-planner-studio/releases/download/v2026.43.0/Open.Planner.Studio_2026.43.0_universal.dmg",
+    "asset_id": 672934505,
+    "github_digest": "sha256:1a3ac4dced0e98b1716a623abfe186438568227c694948e4e0dba6b1f5c123ed"
+  },
+  {
+    "tool": "Open Planner Studio",
+    "repo": "OpenAEC-Foundation/open-planner-studio",
+    "tag": "v2026.10.0",
+    "name": "Open.Planner.Studio_2026.10.0_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-planner-studio/releases/download/v2026.10.0/Open.Planner.Studio_2026.10.0_universal.dmg",
+    "asset_id": 663868083,
+    "github_digest": "sha256:9014498b5b16bf433a47fc2da9802baa6d7f1fb404eb3f6dc7a32620a47c496e"
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v2026.44.1",
+    "name": "open-pointcloud-studio_2026.44.1_macos-universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/download/v2026.44.1/open-pointcloud-studio_2026.44.1_macos-universal.dmg",
+    "asset_id": 679141414,
+    "github_digest": "sha256:c824d190a36d204f644798f4efdff3e4c581d433912ba87a18724cae7dc0b8d4"
+  },
+  {
+    "tool": "Open Pointcloud Studio",
+    "repo": "OpenAEC-Foundation/open-pointcloud-studio",
+    "tag": "v0.8.0",
+    "name": "open-pointcloud-studio_0.8.0_macos-universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/download/v0.8.0/open-pointcloud-studio_0.8.0_macos-universal.dmg",
+    "asset_id": 608644564,
+    "github_digest": "sha256:aae56194b64e83244f99673f8cd29bf42f614a0ea31138b3ef4f070dcc719a06"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.4",
+    "name": "OpenAEC.Installer_0.2.4_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.4/OpenAEC.Installer_0.2.4_universal.dmg",
+    "asset_id": 665640121,
+    "github_digest": "sha256:9a40f9328dcdd213e992b45e60ebfa9b8b5c3ef4b7193b75738f5b8aa35768b6"
+  },
+  {
+    "tool": "OpenAEC Installer",
+    "repo": "OpenAEC-Foundation/openaec-installer",
+    "tag": "v0.2.2",
+    "name": "OpenAEC.Installer_0.2.2_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/openaec-installer/releases/download/v0.2.2/OpenAEC.Installer_0.2.2_universal.dmg",
+    "asset_id": 527596980,
+    "github_digest": "sha256:586c4768b476446680287d2c6c07539ec3de81ee21a440b1ed7b588ac986030e"
+  },
+  {
+    "tool": "Open Calc Studio",
+    "repo": "OpenAEC-Foundation/open-calc-studio",
+    "tag": "v0.13.0",
+    "name": "Open.Calc.Studio_0.13.0_aarch64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-calc-studio/releases/download/v0.13.0/Open.Calc.Studio_0.13.0_aarch64.dmg",
+    "asset_id": 559298109,
+    "github_digest": "sha256:9f30784323a929feb4e57f2887a6cc557a13a66b330c64751e7895ef6131a137"
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio_0.12.2_aarch64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-speech-studio/releases/download/v0.12.2/Open.Speech.Studio_0.12.2_aarch64.dmg",
+    "asset_id": 627602197,
+    "github_digest": "sha256:92249966a50d6577c4302a480b81aeb76120483b02357d01739bd95cbaa2f91a"
+  },
+  {
+    "tool": "Open Speech Studio",
+    "repo": "OpenAEC-Foundation/open-speech-studio",
+    "tag": "v0.12.2",
+    "name": "Open.Speech.Studio_0.12.2_x64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-speech-studio/releases/download/v0.12.2/Open.Speech.Studio_0.12.2_x64.dmg",
+    "asset_id": 627602198,
+    "github_digest": "sha256:eee91d7df7fcf3ab0b12076c3795aa019e44f324f6e0a10dc4ddc3f1300626b5"
+  },
+  {
+    "tool": "Open Paint Studio",
+    "repo": "OpenAEC-Foundation/open-paint-studio",
+    "tag": "v2026.43.2",
+    "name": "OpenAEC-Paint-Studio_2026.43.2_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-paint-studio/releases/download/v2026.43.2/OpenAEC-Paint-Studio_2026.43.2_universal.dmg",
+    "asset_id": 676848389,
+    "github_digest": "sha256:fc5dc269aae05a5b7a3fea2ee0563d5dcca6d797a9e44395866ef10f913b0cf9"
+  },
+  {
+    "tool": "Open Geotechniek Studio",
+    "repo": "OpenAEC-Foundation/open-geotechniek-studio",
+    "tag": "v2026.44.4",
+    "name": "Open.Geotechniek.Studio_2026.44.4_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-geotechniek-studio/releases/download/v2026.44.4/Open.Geotechniek.Studio_2026.44.4_universal.dmg",
+    "asset_id": 687321478,
+    "github_digest": "sha256:7e867b208a5e65fdbf803cb2968c3cf5bf9f036e6684f57bae4229bd42f292d4"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v2026.44.0",
+    "name": "Open.Energy.Studio_2026.44.0_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v2026.44.0/Open.Energy.Studio_2026.44.0_universal.dmg",
+    "asset_id": 677896688,
+    "github_digest": "sha256:3c07f63e62bf2149dd8de476ec9c73e9a08b8200e62bb9800f8e0e82c0d59d44"
+  },
+  {
+    "tool": "Open Energy Studio",
+    "repo": "OpenAEC-Foundation/open-energy-studio",
+    "tag": "v0.1.7-alpha",
+    "name": "Open.Energy.Studio_0.1.7-alpha_aarch64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-energy-studio/releases/download/v0.1.7-alpha/Open.Energy.Studio_0.1.7-alpha_aarch64.dmg",
+    "asset_id": 615064596,
+    "github_digest": "sha256:7336c1b3d2b9b775affa058ef5528fa85be790d95b38f608c29d7f377d0243a6"
+  },
+  {
+    "tool": "OpenAEC Office Studio",
+    "repo": "OpenAEC-Foundation/open-office-studio",
+    "tag": "v2026.44.7",
+    "name": "Open.Database.Studio_2026.44.7_aarch64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Database.Studio_2026.44.7_aarch64.dmg",
+    "asset_id": 688039189,
+    "github_digest": "sha256:ff876467db5197902b1d90391af40e8170e5aaae23846cb459127dc531257d8e"
+  },
+  {
+    "tool": "OpenAEC Office Studio",
+    "repo": "OpenAEC-Foundation/open-office-studio",
+    "tag": "v2026.44.7",
+    "name": "Open.Office.Studio_2026.44.7_aarch64.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/open-office-studio/releases/download/v2026.44.7/Open.Office.Studio_2026.44.7_aarch64.dmg",
+    "asset_id": 688039188,
+    "github_digest": "sha256:bedfbc566f58e47ad0fb058c6c6d965d274fe00445c05e7496180f4bf2d2092f"
+  },
+  {
+    "tool": "Open Structural Calculation Studio (nieuwe repository)",
+    "repo": "OpenAEC-Foundation/Open-Structural-Calculation-Studio",
+    "tag": "nightly",
+    "name": "Open.Structural.Calculation.Studio_2026.43.0_universal.dmg",
+    "url": "https://github.com/OpenAEC-Foundation/Open-Structural-Calculation-Studio/releases/download/nightly/Open.Structural.Calculation.Studio_2026.43.0_universal.dmg",
+    "asset_id": 687328817,
+    "github_digest": "sha256:dffc27b0fd2e036102c81a7b67d075171516989444a3cec7ff1a9618d76c3f4a"
+  }
+]
