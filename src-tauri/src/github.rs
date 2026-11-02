@@ -357,6 +357,12 @@ fn score_windows_asset(name: &str) -> Option<u32> {
     {
         return None;
     }
+    // Een ARM-installer start niet op een x64-pc: msiexec weigert hem met 1633.
+    // Open CAD Studio levert naast de x86_64-MSI ook een windows-arm64-MSI; die
+    // scoorde gelijk en won dan als laatste in de lijst.
+    if !cfg!(target_arch = "aarch64") && ["arm64", "aarch64", "armv7", "armhf"].iter().any(|a| n.contains(a)) {
+        return None;
+    }
     let x64 = n.contains("x64") || n.contains("x86_64") || n.contains("amd64");
     if n.ends_with("-setup.exe") || n.ends_with("_setup.exe") {
         // Voorkeur voor de per-gebruiker-installer: die vraagt geen
@@ -513,6 +519,22 @@ mod tests {
 
         assert!(feed.fresh(1000 + FEED_MAX_AGE_SECS));
         assert!(!feed.fresh(1001 + FEED_MAX_AGE_SECS));
+    }
+
+    #[test]
+    fn windows_never_picks_an_arm_installer_on_x64() {
+        // Zoals de release v2026.44 van Open CAD Studio: alleen MSI's, voor twee architecturen.
+        let x64 = score_windows_asset("OpenCADStudio-v2026.44-windows-x86_64-installer.msi");
+        let arm = score_windows_asset("OpenCADStudio-v2026.44-windows-arm64-installer.msi");
+        if cfg!(target_arch = "aarch64") {
+            assert!(arm.is_some());
+        } else {
+            assert!(x64.is_some());
+            assert_eq!(arm, None);
+            assert_eq!(score_windows_asset("App_1.0.0_aarch64-setup.exe"), None);
+        }
+        // Een draagbare exe is geen installer.
+        assert_eq!(score_windows_asset("OpenCADStudio-v2026.44-windows-x86_64-portable.exe"), None);
     }
 
     #[test]
