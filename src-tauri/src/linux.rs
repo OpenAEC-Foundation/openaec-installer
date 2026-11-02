@@ -78,6 +78,7 @@ fn scan_in(root: &Path, queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 exe_path: Some(best.to_string_lossy().into_owned()),
                 scope: Some("user"),
                 kind: Some("appimage"),
+                copies: Vec::new(),
             })
         })
         .collect()

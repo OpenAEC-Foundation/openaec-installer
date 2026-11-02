@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { InstalledTool, ReleaseInfo, ReleaseVariant } from "./api";
-import { compareVersions, pickUpdateVariant } from "./status";
+import { allCopies, compareVersions, deriveStatus, oldestVersion, outdatedCopies, pickUpdateVariant } from "./status";
+import type { CatalogTool } from "../data/catalog";
 
 describe("compareVersions", () => {
   it("vergelijkt semver en calver per getal", () => {
@@ -89,5 +90,34 @@ describe("setup voor een update", () => {
   it("kiest niets zonder bekende installatiesoort of zonder varianten", () => {
     expect(pickUpdateVariant(pdf, installed(null, null))).toBeNull();
     expect(pickUpdateVariant({ ...pdf, variants: undefined }, installed("nsis", "user"))).toBeNull();
+  });
+});
+
+describe("dubbele installaties", () => {
+  // Zoals Open PDF Studio op een testmachine: per gebruiker actueel, voor de hele pc oud.
+  const pdfTwice: InstalledTool = {
+    id: "open-pdf-studio",
+    displayName: "Open PDF Studio",
+    version: "2026.44.4",
+    exePath: "C:/Users/x/AppData/Local/Open PDF Studio/open-pdf-studio.exe",
+    kind: "nsis",
+    scope: "user",
+    copies: [{ version: "2026.42.11", exePath: "C:/Program Files/Open PDF Studio/open-pdf-studio.exe", kind: "nsis", scope: "machine" }],
+  };
+  const tool = { id: "open-pdf-studio", kind: "desktop" } as CatalogTool;
+  const latest = { ...pdf, version: "2026.44.4" };
+
+  it("telt de oudste kopie, zodat een oude tweede installatie een update krijgt", () => {
+    expect(oldestVersion(pdfTwice)).toBe("2026.42.11");
+    expect(deriveStatus(tool, pdfTwice, latest)).toBe("update_available");
+    expect(deriveStatus(tool, { ...pdfTwice, copies: [] }, latest)).toBe("installed_latest");
+  });
+
+  it("werkt alleen de verouderde kopie bij, met de setup van haar eigen soort", () => {
+    const outdated = outdatedCopies(pdfTwice, latest);
+    expect(outdated).toHaveLength(1);
+    expect(outdated[0].scope).toBe("machine");
+    expect(pickUpdateVariant(latest, outdated[0])?.kind).toBe("nsis");
+    expect(allCopies(pdfTwice)).toHaveLength(2);
   });
 });

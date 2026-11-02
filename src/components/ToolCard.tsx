@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import type { CatalogTool } from "../data/catalog";
 import type { DownloadProgress, InstalledTool, ReleaseInfo, UpdatePhase } from "../lib/api";
-import type { ToolStatus } from "../lib/status";
+import { allCopies, oldestVersion, type ToolStatus } from "../lib/status";
 import B2Icon, { GitHubMark } from "./B2Icon";
 import "./ToolCard.css";
 
@@ -57,13 +57,16 @@ export function VersionLine({ tool, status, installed, release }: Pick<ToolCardP
       </span>
     );
   }
-  if (installed?.version) {
+  // Staat de tool twee keer op de pc, dan staat hier de oudste kopie: die
+  // bepaalt of er een update is.
+  const shown = oldestVersion(installed);
+  if (shown) {
     return (
       <span className="version-line">
         <span className="version-check">
           <B2Icon id="status.success" size={12} />
         </span>
-        <span title={t("versions.installed")}>v{installed.version}</span>
+        <span title={t("versions.installed")}>v{shown}</span>
         {/* De pijl alleen bij een echte update: "→ zelfde versie" zou ten onrechte
             suggereren dat de geïnstalleerde versie niet actueel is. */}
         {status === "update_available" && latest && (
@@ -164,6 +167,18 @@ export default function ToolCard(props: ToolCardProps) {
   const downloading = !waiting && !!progress && (!progress.done || !!busy);
   const canLaunch = tool.kind === "desktop" && !!installed?.exePath;
 
+  // Een tool die per gebruiker én voor de hele pc staat: zeg het, met de versies.
+  const copies = allCopies(installed);
+  const duplicate =
+    tool.kind === "desktop" && copies.length > 1
+      ? t("update.duplicate", {
+          count: copies.length,
+          list: copies
+            .map((c) => t(c.scope === "machine" ? "update.copyMachine" : "update.copyUser", { version: c.version ?? "?" }))
+            .join(", "),
+        })
+      : null;
+
   const releaseError = (() => {
     if (tool.kind !== "desktop") return null;
     if (release && !release.ok) {
@@ -249,6 +264,7 @@ export default function ToolCard(props: ToolCardProps) {
       {error && <p className="tool-error">{error}</p>}
       {!error && !downloading && !waiting && note && <p className="tool-note">{note}</p>}
       {!error && !downloading && !note && releaseError && <p className="tool-hint">{releaseError}</p>}
+      {!error && !downloading && !waiting && duplicate && <p className="tool-hint">{duplicate}</p>}
 
       <div className="oa-card-actions tool-actions">
         <PrimaryAction {...props} />

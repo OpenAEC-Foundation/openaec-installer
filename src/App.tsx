@@ -26,9 +26,10 @@ import {
   type DownloadProgress,
   type InstalledTool,
   type ReleaseInfo,
+  type UpdateOutcome,
   type UpdatePhase,
 } from "./lib/api";
-import { compareVersions, deriveStatus, pickUpdateVariant } from "./lib/status";
+import { compareVersions, deriveStatus, outdatedCopies, pickUpdateVariant } from "./lib/status";
 import {
   CATALOG_TAB,
   EMPTY_TABS,
@@ -279,44 +280,67 @@ function App() {
   }, []);
 
   // Bijwerken: stil, met dezelfde soort setup als de bestaande installatie.
-  // Staat de tool open, dan wacht de backend tot de gebruiker hem sluit.
+  // Staat de tool open, dan wacht de backend tot de gebruiker hem sluit. Staat
+  // de tool twee keer op de pc (per gebruiker en voor de hele pc), dan wordt
+  // elke verouderde kopie na elkaar bijgewerkt, elk in zijn eigen soort.
   const handleUpdate = useCallback(
     async (tool: CatalogTool) => {
       const release = releases[tool.id];
       const current = installed[tool.id];
       setErrors(({ [tool.id]: _drop, ...rest }) => rest);
       setNotes(({ [tool.id]: _drop, ...rest }) => rest);
-      const variant = pickUpdateVariant(release, current);
-      if (!variant) {
-        const kind = [current?.kind, current?.scope].filter(Boolean).join(", ");
+      const copies = outdatedCopies(current, release);
+      const plans = copies.map((copy) => ({ copy, variant: pickUpdateVariant(release, copy) }));
+      const missing = plans.filter((x) => !x.variant);
+      if (plans.length === 0) return;
+      if (missing.length === plans.length) {
+        const kind = [missing[0]?.copy.kind, missing[0]?.copy.scope].filter(Boolean).join(", ");
         setErrors((er) => ({ ...er, [tool.id]: t("update.noMatchingSetup", { kind }) }));
         return;
       }
       setBusy((b) => ({ ...b, [tool.id]: true }));
+      const failures: string[] = [];
+      let last: UpdateOutcome | null = null;
+      let done = 0;
       try {
-        const outcome = await updateTool({
-          id: tool.id,
-          variant,
-          displayName: tool.name,
-          pubkey: tool.pubkey,
-          exePath: current?.exePath,
-        });
+        for (const { copy, variant } of plans) {
+          if (!variant) {
+            failures.push(t("update.noMatchingSetup", { kind: [copy.kind, copy.scope].filter(Boolean).join(", ") }));
+            continue;
+          }
+          try {
+            last = await updateTool({
+              id: tool.id,
+              variant,
+              displayName: tool.name,
+              pubkey: tool.pubkey,
+              exePath: copy.exePath,
+            });
+            done += 1;
+          } catch (e) {
+            failures.push(String(e));
+          }
+          setProgress(({ [tool.id]: _drop, ...rest }) => rest);
+          setPhases(({ [tool.id]: _drop, ...rest }) => rest);
+        }
         const version = release?.version ?? "";
-        const key =
-          outcome.mode !== "updated"
-            ? "installedDone"
-            : outcome.restartRequired
-              ? "update.restartRequired"
-              : outcome.relaunched
-                ? "update.doneRelaunched"
-                : "update.done";
-        setNotes((n) => ({ ...n, [tool.id]: t(key, { version }) }));
+        if (last && done > 0) {
+          const key =
+            last.mode !== "updated"
+              ? "installedDone"
+              : done > 1
+                ? "update.doneCopies"
+                : last.restartRequired
+                  ? "update.restartRequired"
+                  : last.relaunched
+                    ? "update.doneRelaunched"
+                    : "update.done";
+          setNotes((n) => ({ ...n, [tool.id]: t(key, { version, count: done }) }));
+        }
+        if (failures.length > 0) {
+          setErrors((er) => ({ ...er, [tool.id]: `${t("errors.updateFailed")}: ${failures.join(" · ")}` }));
+        }
         void scanInstalled();
-      } catch (e) {
-        setErrors((er) => ({
-          ...er,
-          [tool.id]: `${t("errors.updateFailed")}: ${String(e)}`,
-        }));
       } finally {
         setBusy(({ [tool.id]: _drop, ...rest }) => rest);
         setProgress(({ [tool.id]: _drop, ...rest }) => rest);
