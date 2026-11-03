@@ -19,6 +19,10 @@ export interface InstalledTool {
    * hele pc. De velden hierboven zijn die van de eerste (HKCU vóór HKLM).
    */
   copies?: InstalledCopy[];
+  /** Oude naam waaronder deze installatie in het register staat (de tool is hernoemd). */
+  legacyName?: string | null;
+  /** UninstallString van die installatie onder de oude naam. */
+  legacyUninstall?: string | null;
 }
 
 /** Een tweede (of verdere) installatie van een tool. */
@@ -27,6 +31,10 @@ export interface InstalledCopy {
   exePath: string | null;
   scope?: "user" | "machine" | null;
   kind?: "nsis" | "msi" | "inno" | "appimage" | null;
+  /** Oude naam waaronder deze installatie in het register staat (de tool is hernoemd). */
+  legacyName?: string | null;
+  /** UninstallString van die installatie onder de oude naam. */
+  legacyUninstall?: string | null;
 }
 
 /** Eén soort setup in een release. */
@@ -78,6 +86,8 @@ export interface UpdateOutcome {
   relaunched: boolean;
   /** Windows moet opnieuw opstarten om het af te ronden (MSI). */
   restartRequired: boolean;
+  /** De installatie onder de oude naam van de tool is na de update verwijderd. */
+  removedLegacy?: boolean;
 }
 
 export interface UpdatePhase {
@@ -98,6 +108,7 @@ export async function getInstalledTools(): Promise<InstalledTool[]> {
     id: t.id,
     displayName: t.registryName ?? t.name,
     exeName: t.exeName ?? null,
+    legacyNames: t.legacyNames ?? [],
   }));
   return invoke<InstalledTool[]>("get_installed_tools", { queries });
 }
@@ -156,6 +167,7 @@ export async function updateTool(args: {
   displayName: string;
   pubkey?: string | null;
   exePath?: string | null;
+  legacyUninstall?: string | null;
 }): Promise<UpdateOutcome> {
   return invoke<UpdateOutcome>("update_tool", {
     id: args.id,
@@ -166,6 +178,7 @@ export async function updateTool(args: {
     pubkey: args.pubkey ?? null,
     kind: args.variant.kind,
     exePath: args.exePath ?? null,
+    legacyUninstall: args.legacyUninstall ?? null,
   });
 }
 

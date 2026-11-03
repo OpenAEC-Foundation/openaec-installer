@@ -181,6 +181,8 @@ pub struct UpdateOutcome {
     pub relaunched: bool,
     /// msiexec meldde dat Windows opnieuw moet opstarten (code 3010).
     pub restart_required: bool,
+    /// De installatie onder de oude naam van de tool is na de update verwijderd.
+    pub removed_legacy: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -211,6 +213,7 @@ pub async fn update(
     pubkey: Option<String>,
     kind: String,
     exe_path: Option<String>,
+    legacy_uninstall: Option<String>,
 ) -> Result<UpdateOutcome, String> {
     clear_cancel(&id);
     let setup = download_verified(&app, &id, &url, &file_name, signature, pubkey).await?;
@@ -219,7 +222,7 @@ pub async fn update(
         // Een draaiende AppImage mag vervangen worden: het proces houdt het
         // oude bestand vast tot het stopt.
         let mode = run_installer(&id, display_name.as_deref(), &setup)?;
-        return Ok(UpdateOutcome { mode, relaunched: false, restart_required: false });
+        return Ok(UpdateOutcome { mode, relaunched: false, restart_required: false, removed_legacy: false });
     }
 
     let silent = silent_command(&kind, &setup)?;
@@ -240,8 +243,50 @@ pub async fn update(
         .map_err(|e| format!("setup: {e}"))??;
     let restart_required = setup_result(&kind, code)?;
 
-    let relaunched = was_running && exe.as_deref().is_some_and(|p| launch(p).is_ok());
-    Ok(UpdateOutcome { mode: "updated", relaunched, restart_required })
+    // Stond de tool er onder een oude naam op, dan staat de nieuwe versie nu als
+    // aparte app naast de oude. Die oude ruimen we stil op; app-gegevens en
+    // instellingen blijven staan. Lukt dat niet, dan blijft de update geslaagd.
+    let removed_legacy = match legacy_uninstall {
+        Some(cmd) => tauri::async_runtime::spawn_blocking(move || remove_legacy(&cmd))
+            .await
+            .map(|r| r.is_ok())
+            .unwrap_or(false),
+        None => false,
+    };
+
+    // De oude exe bestaat na het opruimen niet meer: dan niet herstarten.
+    let relaunched = was_running && !removed_legacy && exe.as_deref().is_some_and(|p| launch(p).is_ok());
+    Ok(UpdateOutcome { mode: "updated", relaunched, restart_required, removed_legacy })
+}
+
+/// Verwijder een installatie stil met haar UninstallString uit het register.
+/// NSIS: `/S`; MSI: `/X{…} /passive /norestart`; Inno Setup: `/VERYSILENT`.
+fn remove_legacy(uninstall_string: &str) -> Result<u32, String> {
+    let (program, args) = split_command(uninstall_string);
+    let lower = program.to_ascii_lowercase();
+    let args = if lower.ends_with("msiexec.exe") || lower.ends_with("msiexec") {
+        format!("{} /passive /norestart", args.replace("/I", "/X").replace("/i", "/X"))
+    } else if lower.contains("unins") && lower.ends_with(".exe") && !lower.ends_with("uninstall.exe") {
+        format!("{args} /VERYSILENT /SUPPRESSMSGBOXES /NORESTART")
+    } else {
+        format!("{args} /S")
+    };
+    process::run_and_wait(&program, args.trim())
+}
+
+/// Splits een opdrachtregel uit het register in programma en argumenten; het
+/// programma staat vaak tussen aanhalingstekens.
+fn split_command(command: &str) -> (String, String) {
+    let c = command.trim();
+    if let Some(rest) = c.strip_prefix('"') {
+        if let Some(end) = rest.find('"') {
+            return (rest[..end].to_string(), rest[end + 1..].trim().to_string());
+        }
+    }
+    match c.split_once(' ') {
+        Some((p, a)) => (p.to_string(), a.trim().to_string()),
+        None => (c.to_string(), String::new()),
+    }
 }
 
 /// Stop het wachten op het sluiten van een tool (knop "Annuleren").

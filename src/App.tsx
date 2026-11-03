@@ -302,6 +302,7 @@ function App() {
       const failures: string[] = [];
       let last: UpdateOutcome | null = null;
       let done = 0;
+      let renamedFrom: string | null = null;
       try {
         for (const { copy, variant } of plans) {
           if (!variant) {
@@ -315,7 +316,9 @@ function App() {
               displayName: tool.name,
               pubkey: tool.pubkey,
               exePath: copy.exePath,
+              legacyUninstall: copy.legacyUninstall,
             });
+            if (last.removedLegacy && copy.legacyName) renamedFrom = copy.legacyName;
             done += 1;
           } catch (e) {
             failures.push(String(e));
@@ -335,7 +338,8 @@ function App() {
                   : last.relaunched
                     ? "update.doneRelaunched"
                     : "update.done";
-          setNotes((n) => ({ ...n, [tool.id]: t(key, { version, count: done }) }));
+          const renamed = renamedFrom ? ` ${t("update.renamedDone", { from: renamedFrom, to: tool.name })}` : "";
+          setNotes((n) => ({ ...n, [tool.id]: t(key, { version, count: done }) + renamed }));
         }
         if (failures.length > 0) {
           setErrors((er) => ({ ...er, [tool.id]: `${t("errors.updateFailed")}: ${failures.join(" · ")}` }));

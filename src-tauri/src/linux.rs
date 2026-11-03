@@ -79,6 +79,8 @@ fn scan_in(root: &Path, queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 scope: Some("user"),
                 kind: Some("appimage"),
                 copies: Vec::new(),
+                legacy_name: None,
+                legacy_uninstall: None,
             })
         })
         .collect()

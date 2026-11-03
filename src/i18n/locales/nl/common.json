@@ -105,7 +105,9 @@
     "duplicate": "Staat {{count}} keer op deze pc: {{list}}. Bijwerken werkt elke kopie bij; verwijder er zo nodig één via Instellingen > Apps.",
     "copyUser": "per gebruiker v{{version}}",
     "copyMachine": "voor de hele pc v{{version}}",
-    "doneCopies": "{{count}} kopieën bijgewerkt naar v{{version}}."
+    "doneCopies": "{{count}} kopieën bijgewerkt naar v{{version}}.",
+    "renamed": "Bij bijwerken verandert de naam: {{from}} heet nu {{to}}.",
+    "renamedDone": "De oude installatie ({{from}}) is verwijderd; je hebt nu {{to}}."
   },
   "hero": {
     "label": "OpenAEC Installer",
