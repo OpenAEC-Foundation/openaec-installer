@@ -163,6 +163,7 @@ export default function ToolCard(props: ToolCardProps) {
   const [previewFailed, setPreviewFailed] = useState(false);
   const lang = i18n.language?.startsWith("en") ? "en" : "nl";
   const update = status === "update_available";
+  const renamedFrom = installed?.legacyName ?? installed?.copies?.find((c) => c.legacyName)?.legacyName ?? null;
   const waiting = phase === "waiting";
   const downloading = !waiting && !!progress && (!progress.done || !!busy);
   const canLaunch = tool.kind === "desktop" && !!installed?.exePath;
@@ -261,6 +262,9 @@ export default function ToolCard(props: ToolCardProps) {
       </div>
 
       {waiting && <p className="tool-note">{t("update.waiting", { name: tool.name })}</p>}
+      {renamedFrom && update && !downloading && !waiting && !note && (
+        <p className="tool-note">{t("update.renamed", { from: renamedFrom, to: tool.name })}</p>
+      )}
       {error && <p className="tool-error">{error}</p>}
       {!error && !downloading && !waiting && note && <p className="tool-note">{note}</p>}
       {!error && !downloading && !note && releaseError && <p className="tool-hint">{releaseError}</p>}

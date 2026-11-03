@@ -105,7 +105,9 @@
     "duplicate": "Installed {{count}} times on this PC: {{list}}. Update updates every copy; remove one in Settings > Apps if you like.",
     "copyUser": "for this user v{{version}}",
     "copyMachine": "for all users v{{version}}",
-    "doneCopies": "{{count}} copies updated to v{{version}}."
+    "doneCopies": "{{count}} copies updated to v{{version}}.",
+    "renamed": "Updating changes the name: {{from}} is now called {{to}}.",
+    "renamedDone": "The old installation ({{from}}) has been removed; you now have {{to}}."
   },
   "hero": {
     "label": "OpenAEC Installer",

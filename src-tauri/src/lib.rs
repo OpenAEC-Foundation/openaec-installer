@@ -50,8 +50,9 @@ async fn update_tool(
     pubkey: Option<String>,
     kind: String,
     exe_path: Option<String>,
+    legacy_uninstall: Option<String>,
 ) -> Result<installer::UpdateOutcome, String> {
-    installer::update(app, id, url, file_name, display_name, signature, pubkey, kind, exe_path).await
+    installer::update(app, id, url, file_name, display_name, signature, pubkey, kind, exe_path, legacy_uninstall).await
 }
 
 /// Stop het wachten tot een tool gesloten is.

@@ -43,8 +43,8 @@ export function compareVersions(a: string, b: string): number {
 /** Elke installatie van een tool: de eerste en zijn verdere kopieën. */
 export function allCopies(installed: InstalledTool | undefined): InstalledCopy[] {
   if (!installed) return [];
-  const { version, exePath, scope, kind } = installed;
-  return [{ version, exePath, scope, kind }, ...(installed.copies ?? [])];
+  const { version, exePath, scope, kind, legacyName, legacyUninstall } = installed;
+  return [{ version, exePath, scope, kind, legacyName, legacyUninstall }, ...(installed.copies ?? [])];
 }
 
 /** De kopieën die ouder zijn dan de laatste release. */

@@ -18,6 +18,10 @@ pub struct ToolQuery {
     pub display_name: String,
     /// Verwachte exe-naam, als fallback wanneer het register geen pad geeft.
     pub exe_name: Option<String>,
+    /// Vorige namen van de tool. Een installatie onder zo'n naam telt als deze
+    /// tool; bijwerken zet hem om naar de nieuwe naam.
+    #[serde(default)]
+    pub legacy_names: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -36,6 +40,12 @@ pub struct InstalledTool {
     /// Andere installaties van dezelfde tool, bijvoorbeeld per gebruiker én voor
     /// de hele pc. Zonder deze lijst bleef zo'n tweede kopie voor altijd oud.
     pub copies: Vec<InstalledCopy>,
+    /// De oude naam waaronder deze installatie in het register staat, als die
+    /// afwijkt van de huidige naam van de tool.
+    pub legacy_name: Option<String>,
+    /// UninstallString van die installatie onder de oude naam: na een geslaagde
+    /// update ruimt de installer haar daarmee op.
+    pub legacy_uninstall: Option<String>,
 }
 
 /// Een tweede (of verdere) installatie van een tool; de eerste staat in `InstalledTool`.
@@ -46,6 +56,12 @@ pub struct InstalledCopy {
     pub exe_path: Option<String>,
     pub scope: Option<&'static str>,
     pub kind: Option<&'static str>,
+    /// De oude naam waaronder deze installatie in het register staat, als die
+    /// afwijkt van de huidige naam van de tool.
+    pub legacy_name: Option<String>,
+    /// UninstallString van die installatie onder de oude naam: na een geslaagde
+    /// update ruimt de installer haar daarmee op.
+    pub legacy_uninstall: Option<String>,
 }
 
 #[cfg(windows)]
@@ -83,12 +99,13 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 continue;
             };
             let display_trim = display_name.trim();
-            let Some(query) = queries
-                .iter()
-                .find(|q| q.display_name.eq_ignore_ascii_case(display_trim))
-            else {
+            let Some(query) = queries.iter().find(|q| {
+                q.display_name.eq_ignore_ascii_case(display_trim)
+                    || q.legacy_names.iter().any(|n| n.eq_ignore_ascii_case(display_trim))
+            }) else {
                 continue;
             };
+            let legacy = !query.display_name.eq_ignore_ascii_case(display_trim);
             let version = sub.get_value::<String, _>("DisplayVersion").ok();
             let display_icon = sub.get_value::<String, _>("DisplayIcon").ok();
             let install_location = sub.get_value::<String, _>("InstallLocation").ok();
@@ -101,10 +118,12 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
 
             let scope = Some(if hive == HKEY_CURRENT_USER { "user" } else { "machine" });
             let kind = Some(install_kind(windows_installer, uninstall.as_deref(), inno));
+            let legacy_name = legacy.then(|| display_trim.to_string());
+            let legacy_uninstall = if legacy { uninstall.clone() } else { None };
             // De eerste treffer per tool (HKCU vóór HKLM) is de hoofdkopie; een
             // volgende installatie van dezelfde tool komt in `copies`.
             if let Some(first) = found.iter_mut().find(|f| f.id == query.id) {
-                first.copies.push(InstalledCopy { version, exe_path, scope, kind });
+                first.copies.push(InstalledCopy { version, exe_path, scope, kind, legacy_name, legacy_uninstall });
                 continue;
             }
             found.push(InstalledTool {
@@ -115,6 +134,8 @@ pub fn scan(queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 scope,
                 kind,
                 copies: Vec::new(),
+                legacy_name,
+                legacy_uninstall,
             });
         }
     }

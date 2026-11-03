@@ -79,6 +79,8 @@ fn scan_in(root: &Path, queries: &[ToolQuery]) -> Vec<InstalledTool> {
                 scope: Some("user"),
                 kind: Some("appimage"),
                 copies: Vec::new(),
+                legacy_name: None,
+                legacy_uninstall: None,
             })
         })
         .collect()
@@ -249,6 +251,7 @@ mod tests {
             id: "open-3d-studio".into(),
             display_name: "Open 3D Studio".into(),
             exe_name: None,
+            legacy_names: Vec::new(),
         }]);
         assert_eq!(found.len(), 1);
         assert_eq!(found[0].version.as_deref(), Some("0.8.0"));
@@ -276,6 +279,7 @@ mod tests {
             id: "open-2d-studio".into(),
             display_name: "Open 2D Studio".into(),
             exe_name: None,
+            legacy_names: Vec::new(),
         }];
         let found = scan_in(&apps_root(&tmp), &queries);
         assert_eq!(found.len(), 1);

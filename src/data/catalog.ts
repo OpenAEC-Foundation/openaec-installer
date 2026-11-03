@@ -38,6 +38,12 @@ export interface CatalogTool {
   /** Verwachte exe-naam (fallback voor pad-detectie). */
   exeName?: string;
   /**
+   * Vorige namen in het register (DisplayName). Een installatie onder zo'n naam
+   * telt als deze tool; de kaart meldt bij bijwerken dat de naam verandert, en na
+   * de update ruimt de installer de installatie onder de oude naam op.
+   */
+  legacyNames?: string[];
+  /**
    * Publieke minisign-sleutel van de tool, gelijk aan `plugins.updater.pubkey`
    * in diens `tauri.conf.json`. Met een sleutel leest de installer eerst de
    * `latest.json` van de release (met terugval op de GitHub API) en installeert
@@ -196,6 +202,7 @@ export const ALL_TOOLS: CatalogTool[] = [
     stage: "development",
     repo: "OpenAEC-Foundation/Open-CalcSheet-Studio",
     registryName: "Open CalcSheet Studio",
+    legacyNames: ["Open Calculations Studio"],
     exeName: "open-calcsheet-studio.exe",
     webUrl: "https://open-calculations-studio.open-aec.com/",
     siteUrl: "https://open-aec.com/open-calcsheet-studio/",
