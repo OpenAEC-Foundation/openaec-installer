@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { CATALOG_TAB, toolForTab } from "../lib/tabs";
+import { CATALOG_TAB, HUISSTIJL_TAB, toolForTab } from "../lib/tabs";
 import B2Icon from "./B2Icon";
 import "./TabBar.css";
 
@@ -11,14 +11,11 @@ interface TabBarProps {
 }
 
 /**
- * Browserachtige tabbalk: een vaste catalogus-tab plus een sluitbare tab per
- * geopende webtool. Verschijnt alleen zodra er webtools open staan, zodat de
- * gewone catalogusweergave niet onnodig chrome krijgt.
+ * Browserachtige tabbalk: de vaste tabs Catalogus en Huisstijl, plus een
+ * sluitbare tab per geopende webtool.
  */
 export default function TabBar({ open, active, onSelect, onClose }: TabBarProps) {
   const { t } = useTranslation();
-  if (open.length === 0) return null;
-
   return (
     <div className="tab-bar" role="tablist">
       <button
@@ -34,6 +31,15 @@ export default function TabBar({ open, active, onSelect, onClose }: TabBarProps)
           <rect x="14" y="14" width="7" height="7" />
         </svg>
         <span className="tab-label">{t("tabs.catalog")}</span>
+      </button>
+      <button
+        role="tab"
+        aria-selected={active === HUISSTIJL_TAB}
+        className={`tab${active === HUISSTIJL_TAB ? " active" : ""}`}
+        onClick={() => onSelect(HUISSTIJL_TAB)}
+      >
+        <B2Icon id="report.branding" size={14} />
+        <span className="tab-label">{t("tabs.huisstijl")}</span>
       </button>
 
       {open.map((id) => {

@@ -1,4 +1,4 @@
-# OpenAEC Installer
+# OpenAEC Desktop App
 
 [![Laatste release](https://img.shields.io/github/v/release/OpenAEC-Foundation/openaec-installer?color=D97706&label=release)](https://github.com/OpenAEC-Foundation/openaec-installer/releases/latest)
 [![Build and Release](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/release.yml/badge.svg)](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/release.yml)
@@ -7,17 +7,18 @@
 [![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-D97706)](#downloaden)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/license-CC%20BY--SA%204.0-D97706)](LICENSE)
 
-De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](https://open-aec.com/): één plek om alle tools te ontdekken, te installeren, bij te werken en te starten.
+De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](https://open-aec.com/): één plek om alle tools te ontdekken, te installeren, bij te werken en te starten, en om de huisstijl van je bedrijf te maken. Tot versie 0.2.14 heette de app OpenAEC Installer; de repository, het programmabestand en de map waarin hij staat houden die naam, zodat bijwerken blijft werken.
 
 ## Functies
 
+- **Huisstijlmaker**: begin met de voorbeeldhuisstijl, pas alles in `brand.yaml` aan (naam, kleuren, lettertypen, logo's, kop- en voettekst, tekststijlen, briefpapier), bekijk een voorbeeld en sla het op als nieuwe huisstijl. Rapporten uit elke OpenAEC-tool op de computer gebruiken hem daarna. Zie [docs/huisstijl.md](docs/huisstijl.md)
 - **Catalogus** van alle OpenAEC-tools met omschrijving en categorie — desktop-apps én webtools
 - **Installatiedetectie**: ziet welke tools al geïnstalleerd zijn en welke versie (Windows: via het register; Linux: via de beheerde AppImage-map)
 - **Updatedetectie**: vergelijkt de geïnstalleerde versie met de laatste GitHub-release; tools met een publieke sleutel worden via hun `latest.json` gecontroleerd en alleen geïnstalleerd als de handtekening klopt
 - **Eén klik installeren of bijwerken**: downloadt de officiële installer van GitHub Releases en start hem
 - **Starten** van geïnstalleerde tools
-- **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de installer zelf; open tabs worden onthouden en behouden hun staat bij wisselen. Openen in de externe browser blijft mogelijk
-- **Werkt zichzelf bij**: de installer controleert ook zijn eigen versie en meldt het wanneer er een nieuwe versie is — bijwerken kan met één klik vanuit de app
+- **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de app zelf; open tabs worden onthouden en behouden hun staat bij wisselen. Openen in de externe browser blijft mogelijk
+- **Werkt zichzelf bij**: de app controleert ook zijn eigen versie en meldt het wanneer er een nieuwe versie is — bijwerken kan met één klik vanuit de app
 - **Ontwerp 0.4 van [OpenAEC-Blueprint](https://github.com/OpenAEC-Foundation/OpenAEC-Blueprint)**, voorstel E: het donkere vlak en de tegels van open-aec.com, met filterpillen op status en discipline (Architecture, Engineering, Construction, Infra & GWW), een uitgelichte tool en Alles bijwerken. Tokens, fonts, websitestijl en B2-iconen komen uit het webpakket van Blueprint (`node scripts/sync-openaec.mjs <pad naar OpenAEC-Blueprint>`). Vijf thema's (Licht, Donker, Blueprint, High contrast donker en licht), drie tekstgroottes en een tweetalige interface (NL/EN)
 
 > Installeren, bijwerken en starten werkt op Windows (via de officiële installers) en Linux (via AppImages, zonder beheerdersrechten — inclusief menu-snelkoppeling). De catalogus en websnelkoppelingen werken op alle platformen; macOS-installatie volgt nog.

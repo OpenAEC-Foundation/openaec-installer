@@ -47,8 +47,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: version,
-              name: `OpenAEC Installer ${version}`,
-              body: `## OpenAEC Installer ${version}\n\nCentrale hub voor de open source bouwsoftware van de OpenAEC Foundation: installeren, bijwerken en starten van alle tools.\n\n### Downloads\n- **Windows**: download het \`x64-setup.exe\`-bestand (aanbevolen) of de \`.msi\`\n- **macOS**: download het \`.dmg\`-bestand (universal — Intel en Apple Silicon)\n- **Linux**: download het \`.deb\`-pakket of de \`.AppImage\`\n\n> Installatie- en updatedetectie van tools werkt momenteel op Windows.`,
+              name: `OpenAEC Desktop App ${version}`,
+              body: `## OpenAEC Desktop App ${version}\n\nCentrale hub voor de open source bouwsoftware van de OpenAEC Foundation: installeren, bijwerken en starten van alle tools.\n\n### Downloads\n- **Windows**: download het \`x64-setup.exe\`-bestand (aanbevolen) of de \`.msi\`\n- **macOS**: download het \`.dmg\`-bestand (universal — Intel en Apple Silicon)\n- **Linux**: download het \`.deb\`-pakket of de \`.AppImage\`\n\n> Installatie- en updatedetectie van tools werkt momenteel op Windows.`,
               draft: true,
               prerelease: false
             });

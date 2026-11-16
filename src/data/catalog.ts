@@ -374,8 +374,10 @@ export const ALL_TOOLS: CatalogTool[] = [
     // De sync-client van de OpenAEC SuperCloud (repo openaec-cloud-desktop); tot
     // versie 0.4 heette hij "OpenAEC Storage". Een systeemvak-app: sluiten verbergt
     // het venster, afsluiten gaat via het systeemvak. De setup is per gebruiker.
+    // In het register heet hij "OpenAEC Desktop App"; hier "OpenAEC Cloud", want
+    // de app waar deze catalogus in zit heet nu zelf OpenAEC Desktop App.
     id: "openaec-cloud-desktop",
-    name: "OpenAEC Desktop App",
+    name: "OpenAEC Cloud",
     kind: "desktop",
     category: "documenten",
     disciplines: "AECI",
