@@ -9,7 +9,7 @@
 /* ---------- Base ---------- */
 
 :root {
-  /* Soft shadow of the website tiles: warm grey in light themes, black in dark ones. */
+  /* Soft shadow of the website tiles: neutral grey in light themes, black in dark ones. */
   --oa-c-shadow: rgba(42, 42, 50, 0.2);
   --oa-c-shine: rgba(255, 255, 255, 0.5);
   --oa-c-glass: rgba(255, 255, 255, 0.07);
@@ -57,7 +57,11 @@
 .oa-secondary { color: var(--oa-text-secondary); }
 .oa-mono-label { font-family: var(--oa-font-mono); font-size: var(--oa-size-label); letter-spacing: var(--oa-letter-spacing-mono-label); text-transform: uppercase; color: var(--oa-text-secondary); }
 /* Numbers in Inter AEC: tabular figures and a distinct I and l without OpenType features (issue #28). */
-.oa-number { font-family: var(--oa-font-numbers); text-align: right; font-variant-numeric: tabular-nums; }
+/* .oa-number remains the compatible font + alignment combination.
+   The field selectors keep its font and tabular figures above .oa-field's shorthand. */
+.oa-number, .oa-number-font, .oa-field.oa-number, .oa-field.oa-number-font {
+  font-family: var(--oa-font-numbers); font-variant-numeric: tabular-nums;
+}
 .oa-divider { height: 1px; border: 0; margin: 0; background: var(--oa-border); }
 
 /* ---------- Buttons (besluit 1: 28 px, 24 px compact) ---------- */
@@ -67,13 +71,13 @@
   height: var(--oa-row); padding: 0 12px;
   border: 1px solid var(--oa-border-strong); border-radius: var(--oa-radius-medium);
   background: var(--oa-raised); color: var(--oa-text);
-  font: var(--oa-weight-semibold) var(--oa-size-body) / 1 var(--oa-font-body);
+  font: var(--oa-weight-regular) var(--oa-size-body) / 1 var(--oa-font-body);
   white-space: nowrap; cursor: pointer; text-decoration: none;
 }
 .oa-button:hover { background: var(--oa-hover); }
 .oa-button:active { background: var(--oa-pressed); }
 .oa-button--compact { height: calc(var(--oa-row) - 4px); padding: 0 8px; }
-.oa-button--primary { background: var(--oa-accent); border-color: transparent; color: var(--oa-text-on-accent); }
+.oa-button--primary { font-weight: var(--oa-weight-semibold); background: var(--oa-accent); border-color: transparent; color: var(--oa-text-on-accent); }
 .oa-button--primary .oa-icon { --icon-accent: currentColor; }
 .oa-button--primary:hover { background: var(--oa-accent-hover); }
 .oa-button--primary:active { background: var(--oa-accent-pressed); }
@@ -123,9 +127,10 @@
 .oa-site-button {
   display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
   border: 1px solid var(--oa-border); border-radius: 8px;
+  /* The light end follows the neutral frame token, as does .oa-site-card. */
   background: linear-gradient(180deg, var(--oa-c-shine) 0, var(--oa-raised) 4%, color-mix(in srgb, var(--oa-frame) 30%, var(--oa-raised)) 100%);
   color: var(--oa-text); box-shadow: 0 4px 12px -4px var(--oa-c-shadow);
-  font: var(--oa-weight-semibold) 14px / 1.2 var(--oa-font-body); white-space: nowrap; cursor: pointer; text-decoration: none;
+  font: var(--oa-weight-regular) 14px / 1.2 var(--oa-font-body); white-space: nowrap; cursor: pointer; text-decoration: none;
   transition: transform .15s, box-shadow .15s, border-color .15s;
 }
 .oa-site-button:hover { border-color: var(--oa-accent); transform: translateY(-1px); }
@@ -133,6 +138,7 @@
 .oa-site-button--small { padding: 7px 14px; font-size: 13px; }
 /* Text stays dark on amber: white fails the contrast check. */
 .oa-site-button--primary {
+  font-weight: var(--oa-weight-semibold);
   border-color: transparent; color: var(--oa-text-on-accent);
   background: linear-gradient(180deg, color-mix(in srgb, #fff 35%, var(--oa-accent-hover)) 0, color-mix(in srgb, var(--oa-accent-hover) 60%, var(--oa-accent)) 4%, var(--oa-accent) 100%);
   box-shadow: 0 7px 20px -6px color-mix(in srgb, var(--oa-accent) 70%, transparent);
@@ -171,6 +177,20 @@ textarea.oa-field:focus { padding: 5px 7px; }
 .oa-field-message { margin-top: 4px; font-size: var(--oa-size-label); color: var(--oa-error); }
 select.oa-field { padding-right: 24px; appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--oa-text) 50%), linear-gradient(135deg, var(--oa-text) 50%, transparent 50%); background-position: calc(100% - 12px) 12px, calc(100% - 8px) 12px; background-size: 4px 4px; background-repeat: no-repeat; }
 .oa-label { display: grid; gap: 4px; font-weight: var(--oa-weight-medium); }
+
+/* Numeric stepper (issue #77). Inset keeps both arrows inside the field contour. */
+.oa-number-input { position: relative; display: block; min-width: 0; width: 100%; }
+.oa-number-input > .oa-field { box-sizing: border-box; width: 100%; padding-right: 26px; appearance: textfield; -moz-appearance: textfield; }
+.oa-number-input > .oa-field:focus { padding-right: 25px; }
+.oa-number-input input::-webkit-inner-spin-button, .oa-number-input input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.oa-number-stepper { position: absolute; top: 2px; right: 2px; bottom: 2px; z-index: 1; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); width: 20px; overflow: hidden; border-radius: 0 4px 4px 0; background: var(--oa-field); visibility: hidden; }
+.oa-number-input:hover > .oa-number-stepper, .oa-number-input:focus-within > .oa-number-stepper { visibility: visible; }
+.oa-number-stepper > .oa-button { display: grid; place-items: center; width: 100%; height: auto; min-height: 0; padding: 0; border: 0; border-radius: 0; }
+.oa-number-arrow { width: 0; height: 0; border-left: 3px solid transparent; border-right: 3px solid transparent; }
+.oa-number-arrow--up { border-bottom: 4px solid currentColor; }
+.oa-number-arrow--down { border-top: 4px solid currentColor; }
+@media (hover: none) { .oa-number-input > .oa-number-stepper { visibility: visible; } }
+/* End numeric stepper. */
 
 .oa-check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .oa-check input { width: 16px; height: 16px; margin: 0; accent-color: var(--oa-accent); }
@@ -261,7 +281,7 @@ select.oa-field { padding-right: 24px; appearance: none; background-image: linea
 .oa-recent a:hover { background: var(--oa-hover); }
 .oa-recent b { font-weight: var(--oa-weight-medium); }
 
-/* Website card: white-to-warm gradient, light line on top, 12 px corners, deep soft shadow. */
+/* Website card: raised-to-frame gradient, light line on top, 12 px corners, deep soft shadow. */
 .oa-site-card {
   display: flex; flex-direction: column; gap: 12px; padding: 18px;
   border: 1px solid var(--oa-border); border-radius: 12px;
@@ -297,6 +317,12 @@ select.oa-field { padding-right: 24px; appearance: none; background-image: linea
 /* Update notice in the title bar (issue #33): "Versie … staat klaar" and a compact Bijwerken button. */
 .oa-update-notice { display: inline-flex; align-items: center; gap: 8px; font-size: var(--oa-size-label); color: var(--oa-text-secondary); white-space: nowrap; }
 
+/* Feedback dialog (design 0.4, Feedback, decision 11): to Open Feedback Studio. */
+.oa-feedback-form { display: grid; gap: 12px; }
+.oa-feedback-kinds { display: flex; flex-wrap: wrap; gap: 16px; }
+.oa-feedback-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.oa-feedback-form .oa-secondary { margin: 0; font-size: var(--oa-size-label); }
+
 .oa-toast { display: flex; gap: 10px; width: 340px; padding: 12px; border-radius: var(--oa-radius-large); background: var(--oa-raised); box-shadow: var(--oa-shadow-popup); }
 .oa-toast > div { flex: 1; display: grid; gap: 2px; }
 .oa-toast b { font-weight: var(--oa-weight-semibold); }
@@ -330,6 +356,9 @@ select.oa-field { padding-right: 24px; appearance: none; background-image: linea
 .oa-table tbody tr:hover { background: var(--oa-hover); }
 .oa-table tr[aria-selected="true"] { background: var(--oa-selected); box-shadow: inset 3px 0 var(--oa-selected-bar); }
 .oa-table .oa-number { font-family: var(--oa-font-numbers); }
+/* Alignment is independent of the number font; apps may override the inherited token.
+   Include table specificity so column headings follow the same choice as values. */
+.oa-number, .oa-number-align, .oa-table .oa-number-align { text-align: var(--oa-number-align, right); }
 
 /* Tabs with an amber underline (ribbon tabs, settings pages). */
 .oa-tabs { display: flex; gap: 0; height: var(--oa-shell-ribbon-tabs); border-bottom: 1px solid var(--oa-border); }

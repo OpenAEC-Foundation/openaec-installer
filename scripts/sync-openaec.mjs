@@ -11,6 +11,8 @@
 //   public/icons/installer.svg           alleen de B2-iconen die de installer gebruikt
 //   crates/openaec-update/src/update_core.rs   het updatecontract van openaec-ui
 //                                        (crates/openaec-ui/src/design/update_core.rs)
+//   crates/openaec-huisstijl/            de crate van de bedrijfshuisstijl en de huisstijlmaker,
+//                                        met de voorbeeldhuisstijl (crates/openaec-huisstijl)
 //
 //   node scripts/sync-openaec.mjs ../OpenAEC-Blueprint           schrijven
 //   node scripts/sync-openaec.mjs ../OpenAEC-Blueprint --check   alleen vergelijken
@@ -35,9 +37,10 @@ export const ICONS = {
   standard: [
     "link.open-external", "status.error", "status.info", "status.success", "status.warning",
     "ui.close", "ui.settings", "view.search",
+    "report.branding", "file.new", "file.open", "file.save", "edit.undo",
     "window.close", "window.maximize", "window.minimize", "window.restore",
   ],
-  pdf: ["ui.check-updates"],
+  pdf: ["ui.check-updates", "file.save-as", "edit.delete"],
   calc: ["nav.back"],
 };
 
@@ -71,6 +74,13 @@ function files(web) {
   out.set(join(ROOT, "public/icons/installer.svg"), sprite(web));
   const contract = readFileSync(join(web, "..", "crates/openaec-ui/src/design/update_core.rs"), "utf8");
   out.set(join(ROOT, "crates/openaec-update/src/update_core.rs"), "// Copied from OpenAEC-Blueprint crates/openaec-ui/src/design/update_core.rs by scripts/sync-openaec.mjs; do not edit here.\n" + contract);
+  const crate = join(web, "..", "crates/openaec-huisstijl");
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]));
+  for (const file of walk(crate).sort()) {
+    const rel = file.slice(crate.length + 1).split("\\").join("/");
+    const data = readFileSync(file);
+    out.set(join(ROOT, "crates/openaec-huisstijl", rel), rel.endsWith(".rs") ? "// Copied from OpenAEC-Blueprint crates/openaec-huisstijl by scripts/sync-openaec.mjs; do not edit here.\n" + data.toString("utf8") : data);
+  }
   return out;
 }
 
@@ -92,7 +102,7 @@ const same = (path, data) => {
   if (!existsSync(path)) return false;
   const have = readFileSync(path);
   const want = Buffer.from(data);
-  return path.endsWith(".woff2") ? Buffer.compare(have, want) === 0 : text(have) === text(want);
+  return /\.(woff2|ttf)$/.test(path) ? Buffer.compare(have, want) === 0 : text(have) === text(want);
 };
 const stale = [...want].filter(([path, data]) => !same(path, data)).map(([path]) => path);
 const fontDir = join(ROOT, "src/openaec/fonts");

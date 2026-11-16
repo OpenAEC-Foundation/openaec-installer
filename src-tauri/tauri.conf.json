@@ -13,7 +13,7 @@
     "withGlobalTauri": false,
     "windows": [
       {
-        "title": "OpenAEC Installer",
+        "title": "OpenAEC Desktop App",
         "width": 1280,
         "height": 800,
         "minWidth": 860,

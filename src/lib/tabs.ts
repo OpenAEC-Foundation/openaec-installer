@@ -6,11 +6,13 @@
 import { CATALOG, type CatalogTool } from "../data/catalog";
 
 export const CATALOG_TAB = "catalog";
+/** De huisstijlmaker: een vaste tab naast de catalogus. */
+export const HUISSTIJL_TAB = "huisstijl";
 
 export interface TabState {
   /** Tool-ids van de geopende webtabs, in tabvolgorde. */
   open: string[];
-  /** CATALOG_TAB of een tool-id uit `open`. */
+  /** CATALOG_TAB, HUISSTIJL_TAB of een tool-id uit `open`. */
   active: string;
 }
 
@@ -48,7 +50,7 @@ export function closeTab(state: TabState, id: string): TabState {
 export function restoreTabs(saved: Partial<TabState> | null): TabState {
   const openable = new Set(tabbableTools().map((t) => t.id));
   const open = (saved?.open ?? []).filter((id) => openable.has(id));
-  const active = saved?.active && open.includes(saved.active) ? saved.active : CATALOG_TAB;
+  const active = saved?.active && (open.includes(saved.active) || saved.active === HUISSTIJL_TAB) ? saved.active : CATALOG_TAB;
   return { open, active };
 }
 

@@ -6,9 +6,11 @@ import { getSetting } from "../store";
 // English
 import enCommon from "./locales/en/common.json";
 import enSettings from "./locales/en/settings.json";
+import enHuisstijl from "./locales/en/huisstijl.json";
 // Dutch
 import nlCommon from "./locales/nl/common.json";
 import nlSettings from "./locales/nl/settings.json";
+import nlHuisstijl from "./locales/nl/huisstijl.json";
 
 export const LANGUAGES = [
   { code: "auto", name: "Auto-detect" },
@@ -16,15 +18,15 @@ export const LANGUAGES = [
   { code: "en", name: "English" },
 ];
 
-const ns = ["common", "settings"];
+const ns = ["common", "settings", "huisstijl"];
 
 i18next
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
-      en: { common: enCommon, settings: enSettings },
-      nl: { common: nlCommon, settings: nlSettings },
+      en: { common: enCommon, settings: enSettings, huisstijl: enHuisstijl },
+      nl: { common: nlCommon, settings: nlSettings, huisstijl: nlHuisstijl },
     },
     ns,
     defaultNS: "common",

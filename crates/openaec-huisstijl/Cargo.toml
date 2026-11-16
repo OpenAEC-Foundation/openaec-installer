@@ -1,0 +1,14 @@
+[package]
+name = "openaec-huisstijl"
+version = "2026.45.0"
+edition = "2021"
+description = "The house style of the company from the OpenAEC SuperCloud (schema huisstijl/1): fetch it with the OpenAEC account, keep it on disk and hand it to the report engine as a tenant folder"
+license = "LGPL-3.0-only"
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = { version = "2", features = ["json"] }
+urlencoding = "2"
+serde_yaml = "0.9"

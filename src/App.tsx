@@ -9,6 +9,7 @@ import B2Icon from "./components/B2Icon";
 import SelfUpdateBanner from "./components/SelfUpdateBanner";
 import TabBar from "./components/TabBar";
 import WebToolView from "./components/WebToolView";
+import HuisstijlView from "./components/huisstijl/HuisstijlView";
 import { CATALOG, DESKTOP_TOOLS, SELF_ID, WEB_TOOLS, type CatalogTool } from "./data/catalog";
 import {
   cancelUpdate,
@@ -33,6 +34,7 @@ import { compareVersions, deriveStatus, outdatedCopies, pickUpdateVariant } from
 import {
   CATALOG_TAB,
   EMPTY_TABS,
+  HUISSTIJL_TAB,
   closeTab,
   openTab,
   restoreTabs,
@@ -689,6 +691,8 @@ function App() {
         refreshing={refreshing}
       />
       </div>
+
+      <HuisstijlView hidden={tabs.active !== HUISSTIJL_TAB} />
 
       {/* Open tabs blijven gemount zodat hun staat bewaard blijft bij wisselen. */}
       {tabs.open.map((id) => {

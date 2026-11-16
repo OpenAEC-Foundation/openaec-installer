@@ -17,6 +17,9 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 tauri-plugin-store = "2"
+tauri-plugin-dialog = "2"
+# De bedrijfshuisstijl en de huisstijlmaker, overgenomen uit OpenAEC-Blueprint (scripts/sync-openaec.mjs).
+openaec-huisstijl = { path = "../crates/openaec-huisstijl" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }

@@ -1,5 +1,5 @@
 {
-  "appName": "OpenAEC Installer",
+  "appName": "OpenAEC Desktop App",
   "subtitle": "Open source software voor de bouw — installeren, bijwerken en starten",
   "search": "Zoek een tool",
   "refresh": "Vernieuwen",
@@ -65,6 +65,7 @@
   },
   "community": "Community",
   "tabs": {
+    "huisstijl": "Huisstijl",
     "catalog": "Catalogus",
     "close": "Tabblad sluiten",
     "reload": "Herladen",
@@ -74,14 +75,14 @@
   },
   "selfUpdate": {
     "available": "Nieuwe versie beschikbaar",
-    "description": "Je gebruikt v{{current}} — v{{latest}} van OpenAEC Installer staat klaar.",
+    "description": "Je gebruikt v{{current}} — v{{latest}} van OpenAEC Desktop App staat klaar.",
     "update": "Bijwerken",
     "notes": "Wat is nieuw",
     "dismiss": "Later",
-    "started": "De installer is gestart — volg de stappen. OpenAEC Installer wordt tijdens het bijwerken afgesloten; daarna kun je hem weer starten.",
-    "restartToApply": "De nieuwe versie is geïnstalleerd — sluit OpenAEC Installer af en start hem opnieuw om de update te gebruiken.",
+    "started": "De installer is gestart — volg de stappen. OpenAEC Desktop App wordt tijdens het bijwerken afgesloten; daarna kun je hem weer starten.",
+    "restartToApply": "De nieuwe versie is geïnstalleerd — sluit OpenAEC Desktop App af en start hem opnieuw om de update te gebruiken.",
     "noInstaller": "Geen installer voor dit besturingssysteem in de laatste release — werk handmatig bij via GitHub.",
-    "updating": "De installer wordt bijgewerkt en start zo opnieuw."
+    "updating": "De app wordt bijgewerkt en start zo opnieuw."
   },
   "errors": {
     "no_releases": "Geen releases gevonden",
@@ -96,7 +97,7 @@
   "installedDone": "Geïnstalleerd — je kunt de tool nu starten.",
   "noResults": "Geen tools gevonden voor “{{query}}”.",
   "update": {
-    "waiting": "Sluit {{name}} om bij te werken. De installer sluit de app niet zelf, zodat er geen werk verloren gaat.",
+    "waiting": "Sluit {{name}} om bij te werken. De OpenAEC Desktop App sluit de app niet zelf, zodat er geen werk verloren gaat.",
     "done": "Bijgewerkt naar v{{version}}.",
     "doneRelaunched": "Bijgewerkt naar v{{version}} en opnieuw gestart.",
     "restartRequired": "Bijgewerkt naar v{{version}}. Start Windows opnieuw op om het af te ronden.",
@@ -110,7 +111,7 @@
     "renamedDone": "De oude installatie ({{from}}) is verwijderd; je hebt nu {{to}}."
   },
   "hero": {
-    "label": "OpenAEC Installer",
+    "label": "OpenAEC Desktop App",
     "title": "Alle bouwsoftware,",
     "titleAccent": "één plek.",
     "lead": "Ontdek, installeer, werk bij en start de open source tools van de OpenAEC Foundation.",
@@ -139,10 +140,10 @@
   "catalog": {
     "desktopLabel": "Desktop-apps · {{count}}",
     "desktopTitle": "Installeren en starten op je computer",
-    "desktopText": "Windows-installers en AppImages van GitHub Releases. De installer ziet welke versie je hebt.",
+    "desktopText": "Windows-installers en AppImages van GitHub Releases. De app ziet welke versie je hebt.",
     "webLabel": "Webtools · {{count}}",
     "webTitle": "Direct in je browser",
-    "webText": "Geen installatie nodig. Ze openen in de installer of in je eigen browser.",
+    "webText": "Geen installatie nodig. Ze openen in de app of in je eigen browser.",
     "noDesktop": "Geen desktop-apps voor dit filter.",
     "noWeb": "Geen webtools voor dit filter.",
     "divider": "Webtools"

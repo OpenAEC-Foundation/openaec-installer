@@ -1,5 +1,5 @@
 {
-  "appName": "OpenAEC Installer",
+  "appName": "OpenAEC Desktop App",
   "subtitle": "Open-source software for construction — install, update and launch",
   "search": "Search a tool",
   "refresh": "Refresh",
@@ -65,6 +65,7 @@
   },
   "community": "Community",
   "tabs": {
+    "huisstijl": "House style",
     "catalog": "Catalog",
     "close": "Close tab",
     "reload": "Reload",
@@ -74,14 +75,14 @@
   },
   "selfUpdate": {
     "available": "New version available",
-    "description": "You're on v{{current}} — v{{latest}} of OpenAEC Installer is ready.",
+    "description": "You're on v{{current}} — v{{latest}} of OpenAEC Desktop App is ready.",
     "update": "Update",
     "notes": "What's new",
     "dismiss": "Later",
-    "started": "The installer has started — follow its steps. OpenAEC Installer closes during the update; you can reopen it afterwards.",
-    "restartToApply": "The new version has been installed — close OpenAEC Installer and start it again to use the update.",
+    "started": "The installer has started — follow its steps. OpenAEC Desktop App closes during the update; you can reopen it afterwards.",
+    "restartToApply": "The new version has been installed — close OpenAEC Desktop App and start it again to use the update.",
     "noInstaller": "No installer for this operating system in the latest release — update manually via GitHub.",
-    "updating": "The installer is updating and will start again shortly."
+    "updating": "The app is updating and will start again shortly."
   },
   "errors": {
     "no_releases": "No releases found",
@@ -96,7 +97,7 @@
   "installedDone": "Installed — you can launch the tool now.",
   "noResults": "No tools found for “{{query}}”.",
   "update": {
-    "waiting": "Close {{name}} to update. The installer does not close the app itself, so no work gets lost.",
+    "waiting": "Close {{name}} to update. OpenAEC Desktop App does not close the app itself, so no work gets lost.",
     "done": "Updated to v{{version}}.",
     "doneRelaunched": "Updated to v{{version}} and restarted.",
     "restartRequired": "Updated to v{{version}}. Restart Windows to finish.",
@@ -110,7 +111,7 @@
     "renamedDone": "The old installation ({{from}}) has been removed; you now have {{to}}."
   },
   "hero": {
-    "label": "OpenAEC Installer",
+    "label": "OpenAEC Desktop App",
     "title": "All construction software,",
     "titleAccent": "one place.",
     "lead": "Discover, install, update and launch the open source tools of the OpenAEC Foundation.",
@@ -139,10 +140,10 @@
   "catalog": {
     "desktopLabel": "Desktop apps · {{count}}",
     "desktopTitle": "Install and launch on your computer",
-    "desktopText": "Windows installers and AppImages from GitHub Releases. The installer knows which version you have.",
+    "desktopText": "Windows installers and AppImages from GitHub Releases. The app knows which version you have.",
     "webLabel": "Web tools · {{count}}",
     "webTitle": "Right in your browser",
-    "webText": "No installation needed. They open in the installer or in your own browser.",
+    "webText": "No installation needed. They open in the app or in your own browser.",
     "noDesktop": "No desktop apps for this filter.",
     "noWeb": "No web tools for this filter.",
     "divider": "Web tools"

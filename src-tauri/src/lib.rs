@@ -1,4 +1,5 @@
 mod github;
+mod huisstijl;
 mod installer;
 mod launch;
 #[cfg(target_os = "linux")]
@@ -96,6 +97,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
             get_installed_tools,
             get_latest_releases,
@@ -106,6 +108,15 @@ pub fn run() {
             take_launch_request,
             write_update_status,
             quit,
+            huisstijl::huisstijl_example,
+            huisstijl::huisstijl_load,
+            huisstijl::huisstijl_check,
+            huisstijl::huisstijl_from_yaml,
+            huisstijl::huisstijl_file,
+            huisstijl::huisstijl_save,
+            huisstijl::huisstijl_overview,
+            huisstijl::huisstijl_use,
+            huisstijl::huisstijl_clear,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

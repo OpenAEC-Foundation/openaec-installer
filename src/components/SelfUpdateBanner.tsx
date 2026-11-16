@@ -17,7 +17,7 @@ interface SelfUpdateBannerProps {
 }
 
 /**
- * Melding dat er een nieuwere versie van de OpenAEC Installer zelf is.
+ * Melding dat er een nieuwere versie van de OpenAEC Desktop App zelf is.
  * Volgt het alert-patroon uit het stijlboek: zachte amber-tint met een amber
  * randlijn links — amber wordt nooit als vol achtergrondvlak gebruikt.
  */
