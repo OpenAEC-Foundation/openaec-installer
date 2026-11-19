@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g., v0.1.0)'
+        description: 'Version tag, vJJJJ.W.N (e.g., v2026.47.0)'
         required: true
-        default: 'v0.1.0'
+        default: 'v2026.47.0'
       publish:
         description: 'Publish a release after signing checks pass'
         type: boolean
@@ -35,6 +35,11 @@ jobs:
           else
             echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
+
+      # Versieschema van OpenAEC-Blueprint: tag vJJJJ.W.N, en dat nummer in elk
+      # versiebestand (en zonder de eeuw als MSI-versie). Anders geen release.
+      - name: Check the tag against the version
+        run: node scripts/check-version.mjs "${{ steps.get-version.outputs.version }}"
 
       - name: Create release
         if: github.event_name != 'workflow_dispatch' || inputs.publish
