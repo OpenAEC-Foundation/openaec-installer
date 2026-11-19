@@ -55,6 +55,9 @@ jobs:
       - name: Release-kit tests
         run: node --test release-kit/latest-json.check.mjs
 
+      - name: Version scheme (OpenAEC-Blueprint, JJJJ.W.N)
+        run: node scripts/check-version.mjs
+
       - name: Rust tests
         working-directory: src-tauri
         run: cargo test
