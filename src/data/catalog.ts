@@ -8,7 +8,8 @@
  *   via de eigen beheerde AppImage-map.
  * - `web`-tools draaien in de browser en worden als snelkoppeling geopend.
  *
- * Omschrijvingen komen van https://open-aec.com/.
+ * Welke tools erin staan, de volgorde, de namen en de omschrijvingen komen van
+ * https://open-aec.com/ (zie ALL_TOOLS).
  */
 
 export type ToolKind = "desktop" | "web";
@@ -35,6 +36,11 @@ export interface CatalogTool {
   repo?: string;
   /** DisplayName in de Windows Uninstall-registersleutel. */
   registryName?: string;
+  /**
+   * Begin van de naam van het installer-asset, voor een release met de setups
+   * van meerdere apps (zoals Open Office Studio). Zonder prefix telt elk asset.
+   */
+  assetPrefix?: string;
   /** Verwachte exe-naam (fallback voor pad-detectie). */
   exeName?: string;
   /**
@@ -80,48 +86,64 @@ export interface CatalogTool {
   community?: boolean;
   /**
    * Tijdelijk uit de app gehouden: de tool verdwijnt uit het overzicht, uit de
-   * registerscan en uit de release-check. De entry blijft bewust staan zodat de
-   * onderhoudsronde de repo niet als "nieuwe tool" opnieuw toevoegt; weghalen
-   * van deze vlag zet de tool in één keer weer terug.
+   * registerscan en uit de release-check; weghalen van deze vlag zet de tool in
+   * één keer weer terug. Een tool die niet meer op de website staat, gaat uit de
+   * lijst in plaats van hier verborgen te blijven.
    */
   hidden?: boolean;
 }
 
-/** Alle entries, inclusief verborgen. Gebruik CATALOG tenzij je bewust ook de verborgen tools nodig hebt. */
+/**
+ * Alle entries, inclusief verborgen. Gebruik CATALOG tenzij je bewust ook de verborgen tools nodig hebt.
+ *
+ * Alleen tools die op https://open-aec.com/ staan, in de volgorde van het
+ * ecosysteemoverzicht daar (gelezen 2026-11-19). Namen, omschrijvingen,
+ * disciplines en schermafbeeldingen komen van de website. Kaarten zonder iets
+ * om te installeren of te openen (alleen "binnenkort", een standaard of een
+ * uitbreiding op een andere tool) en tools die de website als "retired"
+ * markeert, staan er niet in.
+ */
 export const ALL_TOOLS: CatalogTool[] = [
-  // ─── Desktop-tools (Windows-installers via GitHub Releases) ───
+  // ─── Desktop-tools (installers via GitHub Releases) ───
   {
-    id: "open-3d-studio",
-    name: "Open 3D Studio",
-    // Op verzoek tot nader bericht uit de installer gehouden (24-08-2026).
-    hidden: true,
+    // Opvolger van Open 3D Viewer Studio: dezelfde app, die nu Viewer, Modeller
+    // en BIM Validator bevat. De setup houdt de map en de uninstall-sleutel van
+    // de oude naam aan; alleen de DisplayName is nieuw.
+    id: "open-bim-suite",
+    name: "Open BIM Suite",
+    preview: "/previews/open-bim-suite.jpg",
     kind: "desktop",
     category: "bim",
-    repo: "OpenAEC-Foundation/open-3d-studio",
-    registryName: "Open 3D Studio",
-    exeName: "open-3d-studio.exe",
+    disciplines: "AEC",
+    stage: "development",
+    repo: "OpenAEC-Foundation/open-bim-suite",
+    registryName: "Open BIM Suite",
+    legacyNames: ["Open 3D Viewer Studio"],
+    exeName: "open-3d-viewer.exe",
+    webUrl: "https://open-3d-viewer.open-aec.com/?product=modeller",
+    siteUrl: "https://open-aec.com/open-bim-suite/",
     description: {
-      nl: "Open source 3D-modelleerstudio met IFC als native output. Teken parametrische componenten op geladen IFC- en DXF-modellen, met sheets, aantallen en STL/PDF-export.",
-      en: "Open-source 3D modelling studio with IFC as native output. Draw parametric components on loaded IFC and DXF models, with sheets, quantities and STL/PDF export.",
+      nl: "N in één: de toekomstige everything-app voor BIM. Nu al Viewer, Modeller en BIM Validator in één programma.",
+      en: "N in One: the future everything BIM app. Already Viewer, Modeller and BIM Validator in one program.",
     },
   },
   {
-    id: "open-calc-studio",
-    name: "Open Calc Studio",
-    preview: "/previews/open-calc-studio.jpg",
+    id: "open-cad-studio",
+    name: "Open CAD Studio",
+    preview: "/previews/open-cad-studio.jpg",
     kind: "desktop",
-    category: "calculatie",
-    disciplines: "CI",
-    repo: "OpenAEC-Foundation/open-calc-studio",
-    registryName: "Open Calc Studio",
-    // Deze tool zet mainBinaryName in tauri.conf.json, waardoor de binary niet
-    // de Cargo-naam (open-calc-studio) krijgt maar de productnaam.
-    exeName: "Open Calc Studio.exe",
-    webUrl: "https://open-calc-studio.open-aec.com/",
+    category: "cad",
+    disciplines: "AEC",
+    repo: "HakanSeven12/OpenCADStudio",
+    registryName: "Open CAD Studio",
+    exeName: "OpenCADStudio.exe",
+    webUrl: "https://www.opencadstudio.com/app/",
+    siteUrl: "https://open-aec.com/open-cad-studio/",
     description: {
-      nl: "Open source calculatie en begroting voor de bouwsector, met AI-assistent.",
-      en: "Open-source cost estimation and budgeting for construction, with AI assistant.",
+      nl: "Volwaardige 2D- en 3D-CAD in Rust die DWG en DXF leest en schrijft. Communityproject van Hakan Seven.",
+      en: "Full 2D and 3D CAD in Rust that reads and writes DWG and DXF. Community project by Hakan Seven.",
     },
+    community: true,
   },
   {
     id: "open-pdf-studio",
@@ -130,13 +152,34 @@ export const ALL_TOOLS: CatalogTool[] = [
     kind: "desktop",
     category: "documenten",
     disciplines: "AECI",
+    stage: "beta",
     repo: "OpenAEC-Foundation/open-pdf-studio",
     registryName: "Open PDF Studio",
     exeName: "open-pdf-studio.exe",
     webUrl: "https://open-pdf-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-pdf-studio/",
     description: {
-      nl: "PDF's bekijken, bewerken en annoteren — gericht op bouwdocumentatie en tekeningen.",
-      en: "View, edit and annotate PDFs — focused on construction documents and drawings.",
+      nl: "PDF-editor met eigen Rust-engine: annoteren, meten op schaal, formulieren en redigeren. In 39 talen.",
+      en: "PDF editor with its own Rust engine: annotate, measure to scale, fill forms and redact. In 39 languages.",
+    },
+  },
+  {
+    id: "open-calculations-studio",
+    name: "Open CalcSheet Studio",
+    preview: "/previews/open-calculations-studio.jpg",
+    kind: "desktop",
+    category: "constructief",
+    disciplines: "EI",
+    stage: "beta",
+    repo: "OpenAEC-Foundation/Open-CalcSheet-Studio",
+    registryName: "Open CalcSheet Studio",
+    legacyNames: ["Open Calculations Studio"],
+    exeName: "open-calcsheet-studio.exe",
+    webUrl: "https://open-calculations-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-calcsheet-studio/",
+    description: {
+      nl: "Constructieve handberekeningen met eenheden, formules, tekeningen en IFC-export.",
+      en: "Structural hand calculations with units, formulas, drawings and IFC export.",
     },
   },
   {
@@ -155,202 +198,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     webUrl: "https://open-planner-studio.open-aec.com/",
     siteUrl: "https://open-aec.com/open-planner-studio/",
     description: {
-      nl: "Open source projectplanning en werkcoördinatie voor bouwprojecten.",
-      en: "Open-source project planning and coordination for construction projects.",
-    },
-  },
-  {
-    id: "open-2d-studio",
-    name: "Open 2D Studio",
-    preview: "/previews/open-2d-studio.jpg",
-    kind: "desktop",
-    category: "cad",
-    disciplines: "AEC",
-    repo: "OpenAEC-Foundation/open-2d-studio",
-    registryName: "Open 2D Studio",
-    exeName: "open-2d-studio.exe",
-    webUrl: "https://open-2d-studio.open-aec.com/",
-    description: {
-      nl: "2D tekeningen en documenten bekijken en bewerken.",
-      en: "View and edit 2D drawings and documents.",
-    },
-  },
-  {
-    id: "open-cad-studio",
-    name: "Open CAD Studio",
-    preview: "/previews/open-cad-studio.jpg",
-    kind: "desktop",
-    category: "cad",
-    disciplines: "AEC",
-    repo: "HakanSeven12/OpenCADStudio",
-    registryName: "Open CAD Studio",
-    exeName: "OpenCADStudio.exe",
-    webUrl: "https://hakanseven12.github.io/OpenCADStudio/",
-    description: {
-      nl: "Volwaardige 2D + 3D CAD-applicatie met DWG/DXF-ondersteuning (community-project).",
-      en: "Full 2D + 3D CAD application with DWG/DXF support (community project).",
-    },
-    community: true,
-  },
-  {
-    id: "open-calculations-studio",
-    name: "Open CalcSheet Studio",
-    preview: "/previews/open-calculations-studio.jpg",
-    kind: "desktop",
-    category: "constructief",
-    disciplines: "EI",
-    stage: "development",
-    repo: "OpenAEC-Foundation/Open-CalcSheet-Studio",
-    registryName: "Open CalcSheet Studio",
-    legacyNames: ["Open Calculations Studio"],
-    exeName: "open-calcsheet-studio.exe",
-    webUrl: "https://open-calculations-studio.open-aec.com/",
-    siteUrl: "https://open-aec.com/open-calcsheet-studio/",
-    description: {
-      nl: "Constructieve handberekeningen met CalcPAD-syntax, herleidbaar en deelbaar.",
-      en: "Structural hand calculations with CalcPAD syntax, traceable and shareable.",
-    },
-  },
-  {
-    id: "open-frame-studio",
-    name: "Open Frame Studio",
-    kind: "desktop",
-    category: "constructief",
-    disciplines: "AC",
-    stage: "alpha",
-    repo: "OpenAEC-Foundation/open-frame-studio",
-    registryName: "Open Frame Studio",
-    exeName: "open-frame-studio.exe",
-    description: {
-      nl: "Parametrisch kozijn- en raamwerkontwerp voor de bouw.",
-      en: "Parametric window frame design software for the construction industry.",
-    },
-  },
-  {
-    id: "open-fem2d-studio",
-    name: "Open FEM2D Studio",
-    kind: "desktop",
-    category: "constructief",
-    repo: "OpenAEC-Foundation/open-fem2d-studio",
-    registryName: "Open FEM2D Studio",
-    exeName: "open-fem2d-studio.exe",
-    description: {
-      nl: "2D eindige-elementenanalyse voor constructies.",
-      en: "2D finite element analysis for structures.",
-    },
-  },
-  {
-    id: "open-geotechniek-studio",
-    name: "Open Geotechniek Studio",
-    preview: "/previews/open-geotechniek-studio.jpg",
-    kind: "desktop",
-    category: "geotechniek",
-    disciplines: "EI",
-    stage: "beta",
-    repo: "OpenAEC-Foundation/open-geotechniek-studio",
-    registryName: "Open Geotechniek Studio",
-    exeName: "open-geotechniek-studio.exe",
-    webUrl: "https://open-geotechniek-studio.open-aec.com/",
-    description: {
-      nl: "Viewer voor sonderingen: CPT's in GEF- en BRO-XML-formaat.",
-      en: "Viewer for cone penetration tests: GEF and BRO-XML (CPT analysis).",
-    },
-  },
-  {
-    id: "monty-ifc-viewer",
-    name: "Monty IFC Viewer",
-    preview: "/previews/monty-ifc-viewer.jpg",
-    kind: "desktop",
-    category: "bim",
-    disciplines: "C",
-    stage: "beta",
-    repo: "OpenAEC-Foundation/monty-ifc-viewer",
-    registryName: "Monty IFC Viewer",
-    exeName: "monty-ifc-viewer.exe",
-    webUrl: "https://monty-ifc-viewer.open-aec.com/",
-    description: {
-      nl: "Open source IFC-viewer voor BIM-modellen, ook op de bouwplaats.",
-      en: "Open-source IFC viewer for BIM models, on site too.",
-    },
-  },
-  {
-    id: "open-speech-studio",
-    name: "Open Speech Studio",
-    preview: "/previews/open-speech-studio.jpg",
-    kind: "desktop",
-    category: "ai",
-    disciplines: "AECI",
-    stage: "beta",
-    repo: "OpenAEC-Foundation/open-speech-studio",
-    registryName: "Open Speech Studio",
-    exeName: "open-speech-studio.exe",
-    siteUrl: "https://open-aec.com/open-speech-studio/",
-    description: {
-      nl: "Lokale spraak-naar-tekst en vergadernotities — 100% op je eigen machine.",
-      en: "Local speech-to-text and meeting notes — 100% on your own machine.",
-    },
-  },
-  {
-    id: "open-stl-3dmap-studio",
-    name: "Open STL-3DMap Studio",
-    kind: "desktop",
-    category: "gis",
-    disciplines: "I",
-    repo: "OpenAEC-Foundation/Open-STL-3DMap-Studio",
-    registryName: "Open STL-3DMap Studio",
-    exeName: "Open STL-3DMap Studio.exe",
-    description: {
-      nl: "Maak 3D-printbare meerkleuren stadskaarten van Nederland op basis van 3DBAG en BGT.",
-      en: "Create 3D-printable multi-colour city maps of the Netherlands from 3DBAG and BGT data.",
-    },
-  },
-
-  // ─── Webtools (browser-snelkoppelingen) ───
-  {
-    id: "open-energy-studio",
-    name: "Open Energy Studio",
-    preview: "/previews/open-energy-studio.jpg",
-    logo: "/logos/open-energy-studio.png",
-    kind: "web",
-    category: "energie",
-    disciplines: "E",
-    stage: "beta",
-    webUrl: "https://open-energy-studio.open-aec.com/",
-    siteUrl: "https://open-aec.com/open-energy-studio/",
-    description: {
-      nl: "Energieprestatie volgens NTA 8800: BENG, energielabel en TOjuli voor woningen en utiliteit.",
-      en: "Energy performance under NTA 8800: BENG, energy label and TOjuli for homes and non-residential buildings.",
-    },
-  },
-  {
-    id: "open-heatloss-studio",
-    name: "Open Heatloss Studio",
-    preview: "/previews/open-heatloss-studio.jpg",
-    kind: "web",
-    category: "energie",
-    disciplines: "E",
-    stage: "beta",
-    webUrl: "https://open-heatloss-studio.open-aec.com/",
-    description: {
-      nl: "Warmteverliesberekeningen voor gebouwen volgens NEN-EN 12831 / ISSO 51.",
-      en: "Building heat-loss calculations per NEN-EN 12831 / ISSO 51.",
-    },
-  },
-  {
-    id: "open-field-studio",
-    name: "Open Field Studio",
-    preview: "/previews/open-field-studio.jpg",
-    kind: "desktop",
-    category: "veld",
-    disciplines: "C",
-    stage: "beta",
-    repo: "OpenAEC-Foundation/Open-Field-Studio",
-    registryName: "Open Field Studio",
-    exeName: "open-field-studio.exe",
-    webUrl: "https://open-field-studio.open-aec.com/",
-    description: {
-      nl: "Inspecties, opleveringen en kwaliteitsborging met checklists.",
-      en: "Inspections, handovers and quality assurance with checklists.",
+      nl: "Planning voor bouw, GWW en civiel: Gantt, kritiek pad, resources en voortgang.",
+      en: "Scheduling for construction, infrastructure and civil works: Gantt, critical path, resources and progress.",
     },
   },
   {
@@ -365,19 +214,147 @@ export const ALL_TOOLS: CatalogTool[] = [
     registryName: "Open Pointcloud Studio",
     exeName: "open-pointcloud-studio.exe",
     webUrl: "https://open-pointcloud-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-pointcloud-studio/",
     description: {
-      nl: "Pointcloud-viewer voor renovatie en analyse.",
-      en: "Point cloud viewer for renovation and analysis.",
+      nl: "Puntenwolken openen, meten en doorsnijden: LAS, LAZ, E57 en complete scanprojecten.",
+      en: "Open, measure and section point clouds: LAS, LAZ, E57 and complete scan projects.",
+    },
+  },
+  {
+    id: "open-calc-studio",
+    name: "Open Calc Studio",
+    preview: "/previews/open-calc-studio.jpg",
+    kind: "desktop",
+    category: "calculatie",
+    disciplines: "CI",
+    stage: "beta",
+    repo: "OpenAEC-Foundation/open-calc-studio",
+    registryName: "Open Calc Studio",
+    // Deze tool zet mainBinaryName in tauri.conf.json, waardoor de binary niet
+    // de Cargo-naam (open-calc-studio) krijgt maar de productnaam.
+    exeName: "Open Calc Studio.exe",
+    webUrl: "https://open-calc-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-calc-studio/",
+    description: {
+      nl: "Kostenramingen en begrotingen voor bouw, GWW en civiele projecten.",
+      en: "Cost estimates and budgets for buildings, infrastructure and civil works.",
+    },
+  },
+  {
+    // De release bevat ook de losse apps (Writer, Spreadsheet, …); de installer
+    // neemt de setup van Open Office Studio zelf.
+    id: "open-office-studio",
+    name: "Open Office Studio",
+    preview: "/previews/open-office-studio.jpg",
+    kind: "desktop",
+    category: "documenten",
+    stage: "alpha",
+    repo: "OpenAEC-Foundation/open-office-studio",
+    assetPrefix: "Open.Office.Studio_",
+    registryName: "Open Office Studio",
+    exeName: "open-office-studio.exe",
+    siteUrl: "https://open-aec.com/open-office-studio/",
+    description: {
+      nl: "Tekst, rekenblad, presentaties, notities, e-mail en Access-databases op je eigen computer.",
+      en: "Documents, spreadsheets, presentations, notes, email and Access databases on your own computer.",
+    },
+  },
+  {
+    id: "open-geotechniek-studio",
+    name: "Open Geotechniek Studio",
+    preview: "/previews/open-geotechniek-studio.jpg",
+    kind: "desktop",
+    category: "geotechniek",
+    disciplines: "EI",
+    stage: "beta",
+    repo: "OpenAEC-Foundation/open-geotechniek-studio",
+    registryName: "Open Geotechniek Studio",
+    exeName: "open-geotechniek-studio.exe",
+    webUrl: "https://open-geotechniek-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-geotechniek-studio/",
+    description: {
+      nl: "Bekijk en analyseer sonderingen (CPT, GEF en BRO-xml) voor fundering en grondwerk.",
+      en: "View and analyse cone penetration tests (CPT, GEF and BRO-xml) for foundations and earthworks.",
+    },
+  },
+  {
+    id: "open-field-studio",
+    name: "Open Field Studio",
+    preview: "/previews/open-field-studio.jpg",
+    kind: "desktop",
+    category: "veld",
+    disciplines: "C",
+    stage: "beta",
+    repo: "OpenAEC-Foundation/Open-Field-Studio",
+    registryName: "Open Field Studio",
+    exeName: "open-field-studio.exe",
+    webUrl: "https://open-field-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-field-studio/",
+    description: {
+      nl: "Inspectie en oplevering: gebreken op de plattegrond, checklists (NEN 2767) en handtekeningen. Werkt offline.",
+      en: "Inspection and handover: defects on the floor plan, checklists (NEN 2767) and signatures. Works offline.",
+    },
+  },
+  {
+    id: "monty-ifc-viewer",
+    name: "Monty IFC Viewer",
+    preview: "/previews/monty-ifc-viewer.jpg",
+    kind: "desktop",
+    category: "bim",
+    disciplines: "C",
+    repo: "OpenAEC-Foundation/monty-ifc-viewer",
+    registryName: "Monty IFC Viewer",
+    exeName: "monty-ifc-viewer.exe",
+    webUrl: "https://monty-ifc-viewer.open-aec.com/",
+    siteUrl: "https://open-aec.com/monty-ifc-viewer/",
+    description: {
+      nl: "IFC-viewer voor montage op de bouw: open BIM-modellen snel bekijken op tablet en telefoon.",
+      en: "IFC viewer for assembly on site: quickly inspect open BIM models on tablet and phone.",
+    },
+  },
+  {
+    id: "open-paint-studio",
+    name: "Open Paint Studio",
+    preview: "/previews/open-paint-studio.jpg",
+    kind: "desktop",
+    category: "documenten",
+    stage: "alpha",
+    repo: "OpenAEC-Foundation/open-paint-studio",
+    // De setup registreert zich onder de productnaam uit tauri.conf.json.
+    registryName: "OpenAEC Paint Studio",
+    exeName: "openaec-paint-studio.exe",
+    siteUrl: "https://open-aec.com/open-paint-studio/",
+    description: {
+      nl: "Eenvoudige beeldbewerker: schetsen en markeren, met bewerkbare vectorobjecten en MCP voor AI.",
+      en: "Simple image editor: sketch and mark up, with editable vector objects and MCP for AI.",
+    },
+  },
+  {
+    id: "open-bim-validator",
+    name: "Open BIM Validator",
+    preview: "/previews/open-bim-validator.jpg",
+    kind: "desktop",
+    category: "bim",
+    disciplines: "AECI",
+    repo: "OpenAEC-Foundation/OpenAEC-BIM-validator",
+    // De setup registreert zich onder de productnaam uit tauri.conf.json.
+    registryName: "BIM Validator",
+    exeName: "openaec-bim-validator.exe",
+    siteUrl: "https://open-aec.com/open-bim-validator/",
+    description: {
+      nl: "Modellen samen controleren: IFC-modellen naast elkaar, toetsen aan IDS, botsingen zoeken en issues vastleggen in BCF.",
+      en: "Check models together: IFC models side by side, checked against IDS, clashes found and issues recorded in BCF.",
     },
   },
   {
     // De sync-client van de OpenAEC SuperCloud (repo openaec-cloud-desktop); tot
     // versie 0.4 heette hij "OpenAEC Storage". Een systeemvak-app: sluiten verbergt
     // het venster, afsluiten gaat via het systeemvak. De setup is per gebruiker.
-    // In het register heet hij "OpenAEC Desktop App"; hier "OpenAEC Cloud", want
-    // de app waar deze catalogus in zit heet nu zelf OpenAEC Desktop App.
+    // In het register heet hij "OpenAEC Desktop App"; hier de naam van de kaart op
+    // de website.
     id: "openaec-cloud-desktop",
-    name: "OpenAEC Cloud",
+    name: "OpenAEC SuperCloud",
+    preview: "/previews/openaec-cloud-desktop.jpg",
     kind: "desktop",
     category: "documenten",
     disciplines: "AECI",
@@ -389,8 +366,101 @@ export const ALL_TOOLS: CatalogTool[] = [
       "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY1Nzg3M0JEQzQxRTNBQjQKUldTME9oN0V2WE40OWZRMCs3eHNSQkxhTEhuOHp1Q0s4dWdOKzJaQXFmK3NQdFJyMCtVTjhDSU8K",
     siteUrl: "https://open-aec.com/openaec-cloud/",
     description: {
-      nl: "Projectbestanden synchroniseren, vergrendelen en delen met je OpenAEC-omgeving.",
-      en: "Sync, lock and share project files with your OpenAEC environment.",
+      nl: "Eigen cloud, account en inlog voor het hele OpenAEC-ecosysteem. Zelf gehost en open.",
+      en: "Own cloud, account and sign-in for the whole OpenAEC ecosystem. Self-hosted and open.",
+    },
+  },
+  {
+    id: "open-speech-studio",
+    name: "Open Speech Studio",
+    preview: "/previews/open-speech-studio.jpg",
+    kind: "desktop",
+    category: "ai",
+    stage: "beta",
+    repo: "OpenAEC-Foundation/open-speech-studio",
+    registryName: "Open Speech Studio",
+    exeName: "open-speech-studio.exe",
+    siteUrl: "https://open-aec.com/open-speech-studio/",
+    description: {
+      nl: "Lokale spraak-naar-tekst en notulen voor bouwoverleg, zonder cloud.",
+      en: "Local speech-to-text and meeting notes for project meetings, without the cloud.",
+    },
+  },
+
+  // ─── Webtools (openen in een tabblad of de browser) ───
+  {
+    id: "y-app",
+    name: "Y-app",
+    preview: "/previews/y-app.jpg",
+    kind: "web",
+    category: "planning",
+    disciplines: "AECI",
+    stage: "beta",
+    webUrl: "https://y-app.impertio.app",
+    siteUrl: "https://open-aec.com/y-app/",
+    description: {
+      nl: "De everything-app: mail, ERP, uren, offertes, projecten en planning in één tool, op ERPNext.",
+      en: "The everything app: mail, ERP, hours, quotes, projects and planning in one tool, on ERPNext.",
+    },
+  },
+  {
+    id: "pile-plan-studio",
+    name: "Open Pile Plan Studio",
+    preview: "/previews/pile-plan-studio.jpg",
+    kind: "web",
+    category: "constructief",
+    disciplines: "EI",
+    stage: "beta",
+    webUrl: "https://pile-plan-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-pile-plan-studio/",
+    description: {
+      nl: "Vergelijk en optimaliseer paalconfiguraties per belastinglocatie tot een praktisch paalplan.",
+      en: "Compare and optimise pile configurations per load location into a practical pile plan.",
+    },
+  },
+  {
+    id: "open-energy-studio",
+    name: "Open Energy Studio",
+    preview: "/previews/open-energy-studio.jpg",
+    logo: "/logos/open-energy-studio.png",
+    kind: "web",
+    category: "energie",
+    disciplines: "E",
+    stage: "beta",
+    webUrl: "https://open-energy-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-energy-studio/",
+    description: {
+      nl: "Energieprestatie volgens NTA 8800: BENG, energielabel en TOjuli, met rapport.",
+      en: "Energy performance to NTA 8800: BENG, energy label and summer overheating, with report.",
+    },
+  },
+  {
+    id: "ifccad",
+    name: "IFCCAD",
+    preview: "/previews/ifccad.jpg",
+    kind: "web",
+    category: "cad",
+    stage: "development",
+    webUrl: "https://ifccad-explorer.open-aec.com/",
+    siteUrl: "https://open-aec.com/ifccad/",
+    description: {
+      nl: "Open CAD-formaat op IFCX, met native alpha, maatvoering en DWG/DXF-uitwisseling via de Format Explorer.",
+      en: "Open CAD format using IFCX, with a native alpha, dimensions and DWG/DXF exchange through the Format Explorer.",
+    },
+  },
+  {
+    id: "open-heatloss-studio",
+    name: "Open Heatloss Studio",
+    preview: "/previews/open-heatloss-studio.jpg",
+    kind: "web",
+    category: "energie",
+    disciplines: "E",
+    stage: "alpha",
+    webUrl: "https://open-heatloss-studio.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-heatloss-studio/",
+    description: {
+      nl: "Warmteverliesberekening per ruimte volgens NEN 12831: transmissie en ventilatie.",
+      en: "Heat loss calculation per room to NEN 12831: transmission and ventilation.",
     },
   },
   {
@@ -402,36 +472,10 @@ export const ALL_TOOLS: CatalogTool[] = [
     disciplines: "A",
     stage: "development",
     webUrl: "https://open-books.open-aec.com/",
+    siteUrl: "https://open-aec.com/open-books/",
     description: {
-      nl: "Digitalisering van historische bouwliteratuur.",
-      en: "Digitisation of historical construction literature.",
-    },
-  },
-  {
-    id: "open-bim-validator",
-    name: "Open BIM Validator Studio",
-    preview: "/previews/open-bim-validator.jpg",
-    kind: "web",
-    category: "bim",
-    repo: "OpenAEC-Foundation/OpenAEC-BIM-validator",
-    webUrl: "https://open-aec.com/bim-validator/",
-    description: {
-      nl: "Valideer IFC-modellen tegen standaarden zoals IDS, NL-BIM Basis ILS en de RVB BIM Norm.",
-      en: "Validate IFC models against standards such as IDS, NL-BIM Basis ILS and the RVB BIM Norm.",
-    },
-  },
-  {
-    id: "pile-plan-studio",
-    name: "Pile Plan Studio",
-    kind: "web",
-    category: "constructief",
-    disciplines: "EI",
-    stage: "beta",
-    repo: "OpenAEC-Foundation/pile-plan-studio",
-    webUrl: "https://pile-plan-studio.open-aec.com/",
-    description: {
-      nl: "Funderingspalenplannen opstellen en beheren, met positionering en technische uitvoer.",
-      en: "Create and manage foundation pile plans, with positioning and technical output.",
+      nl: "Oude bouwkundige boeken ingescand en doorzoekbaar, voor onderzoek en restauratie.",
+      en: "Old building books scanned and searchable, for research and restoration.",
     },
   },
 ];

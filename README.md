@@ -48,9 +48,11 @@ cd src-tauri && cargo test   # backend-tests
 
 ### Een tool toevoegen aan de catalogus
 
-Voeg een entry toe aan [`src/data/catalog.ts`](src/data/catalog.ts):
+De catalogus volgt [open-aec.com](https://open-aec.com/): alleen tools die in het ecosysteemoverzicht van de website staan, in dezelfde volgorde, met de naam, omschrijving en schermafbeelding van de website. Een tool die de website als "retired" markeert of niet meer toont, gaat uit de catalogus. Kaarten zonder iets om te installeren of te openen (alleen "binnenkort", een standaard of een uitbreiding op een andere tool) staan er niet in.
 
-- `kind: "desktop"` — met `repo` (GitHub `owner/naam`), `registryName` (DisplayName in de Windows Uninstall-registersleutel, meestal gelijk aan de productnaam) en `exeName` als fallback
+Voeg een entry toe aan [`src/data/catalog.ts`](src/data/catalog.ts), op de plek die de tool op de website heeft:
+
+- `kind: "desktop"` — met `repo` (GitHub `owner/naam`), `registryName` (DisplayName in de Windows Uninstall-registersleutel, meestal gelijk aan de productnaam) en `exeName` als fallback. Levert de release de setups van meerdere apps (zoals Open Office Studio), zet dan `assetPrefix` op het begin van de bestandsnaam van de juiste setup
 - `kind: "web"` — met alleen een `webUrl`
 
 De laatste release en het juiste installer-asset voor het platform (Windows: `-setup.exe`/`.msi`, Linux: `.AppImage`) worden automatisch via de GitHub API opgehaald.
@@ -82,16 +84,21 @@ Controle tegen de echte release van Open Planner Studio (ongeveer 17 MB): `cd sr
 
 ## Release maken
 
-Een nieuwe versie publiceren werkt zoals bij alle OpenAEC-tools:
+Een nieuwe versie publiceren werkt zoals bij alle OpenAEC-tools. Versienummers volgen het schema van [OpenAEC-Blueprint](https://github.com/OpenAEC-Foundation/OpenAEC-Blueprint): **jaar.week**, `JJJJ.W.N` (jaar, ISO-weeknummer zonder voorloopnul, volgnummer binnen de week vanaf 0). De tag en de GitHub-release heten `vJJJJ.W.N`, de release "OpenAEC Desktop App vJJJJ.W.N".
 
 ```bash
-# 1. Versie bijwerken in package.json, src-tauri/tauri.conf.json en src-tauri/Cargo.toml
-# 2. Tag pushen:
-git tag v0.2.0
-git push origin v0.2.0
+# 1. Versie bijwerken in package.json, package-lock.json, src-tauri/Cargo.toml,
+#    src-tauri/Cargo.lock en src-tauri/tauri.conf.json; in die laatste ook
+#    bundle.windows.wix.version, hetzelfde nummer zonder de eeuw (2026.47.0 → 26.47.0),
+#    omdat een MSI-versie niet boven 255 mag beginnen.
+# 2. Controleren:
+node scripts/check-version.mjs v2026.47.0
+# 3. Tag pushen:
+git tag v2026.47.0
+git push origin v2026.47.0
 ```
 
-De [release-workflow](.github/workflows/release.yml) bouwt daarna automatisch de installers voor Windows, macOS en Linux en publiceert de GitHub-release.
+De [release-workflow](.github/workflows/release.yml) weigert een tag die niet bij de versie past, bouwt daarna de installers voor Windows, macOS en Linux, ondertekent ze (Windows via Azure Trusted Signing, macOS met notarisatie bij Apple), controleert de handtekeningen en publiceert de GitHub-release.
 
 ## Huisstijl
 

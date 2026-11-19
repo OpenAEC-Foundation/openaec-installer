@@ -58,9 +58,9 @@ describe("restoreTabs", () => {
   });
 
   it("laat tools vallen die niet meer bestaan of geen webadres hebben", () => {
-    // open-frame-studio heeft geen webUrl; verwijderd-tool bestaat niet meer.
+    // open-speech-studio heeft geen webUrl; verwijderd-tool bestaat niet meer.
     const restored = restoreTabs({
-      open: ["open-books", "open-frame-studio", "verwijderd-tool"],
+      open: ["open-books", "open-speech-studio", "verwijderd-tool"],
       active: "verwijderd-tool",
     });
     expect(restored).toEqual({ open: ["open-books"], active: CATALOG_TAB });
