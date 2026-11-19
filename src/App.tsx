@@ -65,8 +65,11 @@ type Filter = "all" | "installed" | "updates";
 /** Disciplines van het ecosysteemfilter op open-aec.com. */
 const DISCIPLINES = ["A", "E", "C", "I"] as const;
 
-/** Vaste keuze voor het uitgelichte vak, na de tools met een update. */
-const FEATURED = ["open-calc-studio", "open-planner-studio", "open-energy-studio", "open-pointcloud-studio"];
+/**
+ * Vaste keuze voor het uitgelichte vak, na de tools met een update: de eerste
+ * tools van het ecosysteemoverzicht op open-aec.com.
+ */
+const FEATURED = ["open-bim-suite", "open-cad-studio", "open-pdf-studio", "open-calculations-studio"];
 
 interface ReleaseCache {
   /** Tijdstip van de laatste ronde die iets bruikbaars opleverde. */

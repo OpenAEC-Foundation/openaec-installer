@@ -84,6 +84,10 @@ pub struct RepoRef {
     /// Publieke minisign-sleutel van de tool (base64, zoals in tauri.conf.json).
     #[serde(default)]
     pub pubkey: Option<String>,
+    /// Begin van de naam van het installer-asset, voor een release met de
+    /// setups van meerdere apps. Zonder prefix telt elk asset.
+    #[serde(default)]
+    pub asset_prefix: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -229,7 +233,17 @@ fn from_release(repo: RepoRef, json: &serde_json::Value, source: &'static str) -
     let page_url = json["html_url"].as_str().map(str::to_string);
     let published_at = json["published_at"].as_str().map(str::to_string);
 
-    let assets = json["assets"].as_array().cloned().unwrap_or_default();
+    let prefix = repo.asset_prefix.as_deref().map(str::to_ascii_lowercase);
+    let assets: Vec<serde_json::Value> = json["assets"]
+        .as_array()
+        .cloned()
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|a| match (&prefix, a["name"].as_str()) {
+            (Some(p), Some(name)) => name.to_ascii_lowercase().starts_with(p.as_str()),
+            _ => true,
+        })
+        .collect();
     let best = assets
         .iter()
         .filter_map(|a| {
@@ -482,6 +496,36 @@ mod tests {
     }
 
     #[test]
+    fn asset_prefix_picks_one_app_from_a_suite_release() {
+        // Open Office Studio levert de setups van al zijn apps in één release.
+        let release = serde_json::json!({
+            "tag_name": "v2026.46.2",
+            "assets": [
+                { "name": "Open.Database.Studio_2026.46.2_x64-setup.exe", "browser_download_url": "https://x/Open.Database.Studio_2026.46.2_x64-setup.exe" },
+                { "name": "Open.Office.Studio_2026.46.2_x64-setup.exe", "browser_download_url": "https://x/Open.Office.Studio_2026.46.2_x64-setup.exe" },
+                { "name": "Open.Writer.Studio_2026.46.2_x64-setup.exe", "browser_download_url": "https://x/Open.Writer.Studio_2026.46.2_x64-setup.exe" },
+                { "name": "Open.Database.Studio_2026.46.2_amd64.AppImage", "browser_download_url": "https://x/Open.Database.Studio_2026.46.2_amd64.AppImage" },
+                { "name": "Open.Office.Studio_2026.46.2_amd64.AppImage", "browser_download_url": "https://x/Open.Office.Studio_2026.46.2_amd64.AppImage" }
+            ]
+        });
+        let repo = RepoRef {
+            id: "open-office-studio".into(),
+            owner: "OpenAEC-Foundation".into(),
+            repo: "open-office-studio".into(),
+            pubkey: None,
+            asset_prefix: Some("open.office.studio_".into()),
+        };
+        let info = from_release(repo, &release, "api");
+        assert_eq!(info.version.as_deref(), Some("2026.46.2"));
+        if cfg!(windows) {
+            assert_eq!(info.asset_name.as_deref(), Some("Open.Office.Studio_2026.46.2_x64-setup.exe"));
+        } else if cfg!(target_os = "linux") {
+            assert_eq!(info.asset_name.as_deref(), Some("Open.Office.Studio_2026.46.2_amd64.AppImage"));
+        }
+        assert!(info.variants.iter().all(|v| v.asset_name.starts_with("Open.Office.Studio_")));
+    }
+
+    #[test]
     fn reads_releases_from_the_feed() {
         let feed: Feed = serde_json::from_str(
             r#"{
@@ -501,7 +545,7 @@ mod tests {
             }"#,
         )
         .unwrap();
-        let repo = |owner: &str, name: &str| RepoRef { id: name.to_lowercase(), owner: owner.into(), repo: name.into(), pubkey: None };
+        let repo = |owner: &str, name: &str| RepoRef { id: name.to_lowercase(), owner: owner.into(), repo: name.into(), pubkey: None, asset_prefix: None };
 
         // Hoofdletters in de catalogus maken niet uit.
         let calc = feed.release(&repo("OpenAEC-Foundation", "Open-Calc-Studio")).unwrap().unwrap();

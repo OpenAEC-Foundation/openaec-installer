@@ -116,11 +116,11 @@ export async function getInstalledTools(): Promise<InstalledTool[]> {
 export async function getLatestReleases(): Promise<ReleaseInfo[]> {
   const repos = DESKTOP_TOOLS.filter((t) => t.repo).map((t) => {
     const [owner, repo] = t.repo!.split("/");
-    return { id: t.id, owner, repo, pubkey: t.pubkey ?? null };
+    return { id: t.id, owner, repo, pubkey: t.pubkey ?? null, assetPrefix: t.assetPrefix ?? null };
   });
   // De installer controleert in dezelfde ronde zijn eigen laatste versie.
   const [selfOwner, selfName] = SELF_REPO.split("/");
-  repos.push({ id: SELF_ID, owner: selfOwner, repo: selfName, pubkey: null });
+  repos.push({ id: SELF_ID, owner: selfOwner, repo: selfName, pubkey: null, assetPrefix: null });
   return invoke<ReleaseInfo[]>("get_latest_releases", { repos });
 }
 
