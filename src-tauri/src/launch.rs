@@ -163,7 +163,7 @@ pub fn claim_single_instance(request: &LaunchRequest) -> bool {
     }
     forward(request);
     // De titel van het venster (tauri.conf.json).
-    let title: Vec<u16> = "OpenAEC Desktop App\0".encode_utf16().collect();
+    let title: Vec<u16> = "OpenAEC Installer\0".encode_utf16().collect();
     let window = unsafe { FindWindowW(std::ptr::null(), title.as_ptr()) };
     if !window.is_null() {
         unsafe {

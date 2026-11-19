@@ -10,7 +10,7 @@
 //!   report files) that `openaec-core` reads like any other tenant, the same mapping the cloud uses for its export
 //!   (`openaec_beheer.huisstijl_reports.brand_en_bestanden`);
 //! - [`open_folder`] takes a house style that is a folder with `brand.yaml` instead, for instance on the drive of the
-//!   company: that works without an account, and the OpenAEC desktop app makes and edits such folders with
+//!   company: that works without an account, and the OpenAEC Installer makes and edits such folders with
 //!   [`maker`];
 //! - [`active`], [`set_active`] and [`clear_active`] keep the choice on disk, shared by every OpenAEC tool on the
 //!   computer, like the account. The installed folder keeps working offline.

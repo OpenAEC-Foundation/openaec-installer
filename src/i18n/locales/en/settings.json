@@ -27,7 +27,7 @@
     }
   },
   "about": {
-    "appName": "OpenAEC Desktop App",
+    "appName": "OpenAEC Installer",
     "version": "Version",
     "framework": "Framework",
     "license": "License",

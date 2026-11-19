@@ -2,15 +2,15 @@ name: open-aec-installer
 base: core22
 # Versie wordt in CI overschreven met het release-versienummer (zie .github/workflows/snap.yml).
 version: '0.0.0'
-title: OpenAEC Desktop App
+title: OpenAEC Installer
 summary: Central hub to install, update, and launch OpenAEC Foundation tools
 description: |
-  OpenAEC Desktop App is the central hub for the OpenAEC Foundation family of
+  OpenAEC Installer is the central hub for the OpenAEC Foundation family of
   open-source construction applications (Open Planner Studio, Open Calc
   Studio, Open PDF Studio, Open Geotechniek Studio, and others): install,
   update, and launch them from one place.
 
-  OpenAEC Desktop App is free and open source, part of the OpenAEC Foundation
+  OpenAEC Installer is free and open source, part of the OpenAEC Foundation
   family of applications, and built with Tauri for a small, native footprint.
 
 grade: stable

@@ -1,6 +1,6 @@
 # De huisstijlmaker
 
-In de tab **Huisstijl** van de OpenAEC Desktop App maak je de huisstijl van je bedrijf. Rapporten uit elke OpenAEC-tool
+In de tab **Huisstijl** van de OpenAEC Installer maak je de huisstijl van je bedrijf. Rapporten uit elke OpenAEC-tool
 op de computer gebruiken hem daarna: kleuren, lettertypen, logo, kop- en voettekst en briefpapier.
 
 ![De huisstijlmaker](images/huisstijl.png)
