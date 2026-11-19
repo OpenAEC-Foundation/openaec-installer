@@ -2,7 +2,7 @@
 //! The house style maker (docs/bedrijfshuisstijl.md): start from the example house style, change anything in
 //! `brand.yaml`, add logos, fonts and stationery, and save it as a new folder that every OpenAEC tool can use.
 //!
-//! No interface; the OpenAEC desktop app is the screen. A [`Draft`] is `brand.yaml` as a value plus the files next
+//! No interface; the OpenAEC Installer is the screen. A [`Draft`] is `brand.yaml` as a value plus the files next
 //! to it. The order of the keys is kept, comments are not: a saved house style is a new file.
 use crate::{folder_summary, safe_path, set_active, Installed};
 use serde::{Deserialize, Serialize};
@@ -245,7 +245,7 @@ pub fn list(root: &Path) -> Vec<Installed> {
     out
 }
 
-const HEADER: &str = "# Huisstijl, gemaakt met de OpenAEC Desktop App.\n# Het formaat is dat van OpenAEC Reports (brand.yaml); elke OpenAEC-tool leest deze map.\n\n";
+const HEADER: &str = "# Huisstijl, gemaakt met de OpenAEC Installer.\n# Het formaat is dat van OpenAEC Reports (brand.yaml); elke OpenAEC-tool leest deze map.\n\n";
 
 /// Save the draft in `target`: `brand.yaml`, its files and the added files. A new house style needs a folder
 /// without `brand.yaml`; saving over the folder it was opened from replaces only `brand.yaml` and adds files. With

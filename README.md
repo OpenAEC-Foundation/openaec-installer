@@ -1,4 +1,4 @@
-# OpenAEC Desktop App
+# OpenAEC Installer
 
 [![Laatste release](https://img.shields.io/github/v/release/OpenAEC-Foundation/openaec-installer?color=D97706&label=release)](https://github.com/OpenAEC-Foundation/openaec-installer/releases/latest)
 [![Build and Release](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/release.yml/badge.svg)](https://github.com/OpenAEC-Foundation/openaec-installer/actions/workflows/release.yml)
@@ -7,7 +7,7 @@
 [![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-D97706)](#downloaden)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/license-CC%20BY--SA%204.0-D97706)](LICENSE)
 
-De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](https://open-aec.com/): één plek om alle tools te ontdekken, te installeren, bij te werken en te starten, en om de huisstijl van je bedrijf te maken. Tot versie 0.2.14 heette de app OpenAEC Installer; de repository, het programmabestand en de map waarin hij staat houden die naam, zodat bijwerken blijft werken.
+De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](https://open-aec.com/): één plek om alle tools te ontdekken, te installeren, bij te werken en te starten, en om de huisstijl van je bedrijf te maken. Niet te verwarren met de [OpenAEC Desktop App](https://github.com/OpenAEC-Foundation/openaec-cloud-desktop), de sync-client van de OpenAEC SuperCloud.
 
 ## Functies
 
@@ -84,7 +84,7 @@ Controle tegen de echte release van Open Planner Studio (ongeveer 17 MB): `cd sr
 
 ## Release maken
 
-Een nieuwe versie publiceren werkt zoals bij alle OpenAEC-tools. Versienummers volgen het schema van [OpenAEC-Blueprint](https://github.com/OpenAEC-Foundation/OpenAEC-Blueprint): **jaar.week**, `JJJJ.W.N` (jaar, ISO-weeknummer zonder voorloopnul, volgnummer binnen de week vanaf 0). De tag en de GitHub-release heten `vJJJJ.W.N`, de release "OpenAEC Desktop App vJJJJ.W.N".
+Een nieuwe versie publiceren werkt zoals bij alle OpenAEC-tools. Versienummers volgen het schema van [OpenAEC-Blueprint](https://github.com/OpenAEC-Foundation/OpenAEC-Blueprint): **jaar.week**, `JJJJ.W.N` (jaar, ISO-weeknummer zonder voorloopnul, volgnummer binnen de week vanaf 0). De tag en de GitHub-release heten `vJJJJ.W.N`, de release "OpenAEC Installer vJJJJ.W.N".
 
 ```bash
 # 1. Versie bijwerken in package.json, package-lock.json, src-tauri/Cargo.toml,
