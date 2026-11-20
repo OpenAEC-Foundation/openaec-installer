@@ -64,3 +64,8 @@
   border: none;
   background: var(--theme-content-bg);
 }
+
+.webtool-error {
+  margin: 1rem;
+  color: var(--theme-text-muted);
+}

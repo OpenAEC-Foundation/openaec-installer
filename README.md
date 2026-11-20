@@ -17,7 +17,7 @@ De centrale hub voor de open source bouwsoftware van de [OpenAEC Foundation](htt
 - **Updatedetectie**: vergelijkt de geïnstalleerde versie met de laatste GitHub-release; tools met een publieke sleutel worden via hun `latest.json` gecontroleerd en alleen geïnstalleerd als de handtekening klopt
 - **Eén klik installeren of bijwerken**: downloadt de officiële installer van GitHub Releases en start hem
 - **Starten** van geïnstalleerde tools
-- **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de app zelf; open tabs worden onthouden en behouden hun staat bij wisselen. Openen in de externe browser blijft mogelijk
+- **Webtools in tabbladen**: webtools (en de webversies van desktop-tools) draaien in tabs binnen de app zelf; open tabs worden onthouden en behouden hun staat bij wisselen. De IFCCAD Format Explorer gebruikt op Windows een eigen webweergave zodat zijn iframe-blokkade geldig blijft. Op andere platformen is de Explorer via de knop **Openen in browser** beschikbaar
 - **Werkt zichzelf bij**: de app controleert ook zijn eigen versie en meldt het wanneer er een nieuwe versie is — bijwerken kan met één klik vanuit de app
 - **Ontwerp 0.4 van [OpenAEC-Blueprint](https://github.com/OpenAEC-Foundation/OpenAEC-Blueprint)**, voorstel E: het donkere vlak en de tegels van open-aec.com, met filterpillen op status en discipline (Architecture, Engineering, Construction, Infra & GWW), een uitgelichte tool en Alles bijwerken. Tokens, fonts, websitestijl en B2-iconen komen uit het webpakket van Blueprint (`node scripts/sync-openaec.mjs <pad naar OpenAEC-Blueprint>`). Vijf thema's (Licht, Donker, Blueprint, High contrast donker en licht), drie tekstgroottes en een tweetalige interface (NL/EN)
 

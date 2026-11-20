@@ -71,7 +71,8 @@
     "reload": "Herladen",
     "openHere": "Webversie in tabblad openen",
     "openExternal": "Openen in browser",
-    "loading": "laden..."
+    "loading": "laden...",
+    "explorerUnavailable": "De Explorer is hier niet beschikbaar. Open hem in je browser via de knop hierboven."
   },
   "selfUpdate": {
     "available": "Nieuwe versie beschikbaar",
