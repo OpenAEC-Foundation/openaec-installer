@@ -71,7 +71,8 @@
     "reload": "Reload",
     "openHere": "Open web version in a tab",
     "openExternal": "Open in browser",
-    "loading": "loading..."
+    "loading": "loading...",
+    "explorerUnavailable": "The Explorer is unavailable here. Use the button above to open it in your browser."
   },
   "selfUpdate": {
     "available": "New version available",

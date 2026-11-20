@@ -28,6 +28,7 @@ minisign-verify = "0.3"
 base64 = "0.22"
 
 [target.'cfg(windows)'.dependencies]
+tauri = { version = "2", features = ["unstable"] }
 winreg = "0.55"
 windows-sys = { version = "0.59", features = [
     "Win32_Foundation",
