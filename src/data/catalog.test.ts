@@ -2,6 +2,19 @@ import { describe, expect, it } from "vitest";
 import { ALL_TOOLS, CATALOG, DESKTOP_TOOLS, WEB_TOOLS } from "./catalog";
 import { tabbableTools } from "../lib/tabs";
 
+describe("Open Pile Plan Studio", () => {
+  it("biedt de desktop-app en de browsertab aan via dezelfde vermelding", () => {
+    const desktop = DESKTOP_TOOLS.find((tool) => tool.id === "pile-plan-studio");
+    expect(desktop).toMatchObject({
+      repo: "OpenAEC-Foundation/pile-plan-studio",
+      registryName: "Open Pile Plan Studio",
+      exeName: "pile-plan-studio.exe",
+      webUrl: "https://pile-plan-studio.open-aec.com/",
+    });
+    expect(tabbableTools().find((tool) => tool.id === "pile-plan-studio")).toBe(desktop);
+  });
+});
+
 describe("verborgen tools", () => {
   const hidden = ALL_TOOLS.filter((t) => t.hidden);
 
