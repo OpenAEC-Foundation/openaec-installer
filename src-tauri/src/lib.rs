@@ -1,5 +1,7 @@
 mod github;
 mod huisstijl;
+#[cfg(windows)]
+mod ifccad_tab;
 mod installer;
 mod launch;
 #[cfg(target_os = "linux")]
@@ -94,30 +96,40 @@ pub fn run() {
         return;
     }
     launch::set_startup(request);
+    let shell_commands: fn(tauri::ipc::Invoke) -> bool = tauri::generate_handler![
+        get_installed_tools,
+        get_latest_releases,
+        download_and_run_installer,
+        update_tool,
+        cancel_update,
+        launch_tool,
+        take_launch_request,
+        write_update_status,
+        quit,
+        #[cfg(windows)]
+        ifccad_tab::update_ifccad_tab,
+        huisstijl::huisstijl_example,
+        huisstijl::huisstijl_load,
+        huisstijl::huisstijl_check,
+        huisstijl::huisstijl_from_yaml,
+        huisstijl::huisstijl_file,
+        huisstijl::huisstijl_save,
+        huisstijl::huisstijl_overview,
+        huisstijl::huisstijl_use,
+        huisstijl::huisstijl_clear,
+    ];
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![
-            get_installed_tools,
-            get_latest_releases,
-            download_and_run_installer,
-            update_tool,
-            cancel_update,
-            launch_tool,
-            take_launch_request,
-            write_update_status,
-            quit,
-            huisstijl::huisstijl_example,
-            huisstijl::huisstijl_load,
-            huisstijl::huisstijl_check,
-            huisstijl::huisstijl_from_yaml,
-            huisstijl::huisstijl_file,
-            huisstijl::huisstijl_save,
-            huisstijl::huisstijl_overview,
-            huisstijl::huisstijl_use,
-            huisstijl::huisstijl_clear,
-        ])
+        .invoke_handler(move |invoke| {
+            // De externe Explorer draait in hetzelfde venster, met een eigen webview.
+            if invoke.message.webview().label() != "main" {
+                invoke.resolver.reject("Installer commands require the shell webview");
+                return true;
+            }
+            shell_commands(invoke)
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

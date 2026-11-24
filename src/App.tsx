@@ -701,7 +701,7 @@ function App() {
       {tabs.open.map((id) => {
         const tool = toolForTab(id);
         if (!tool?.webUrl) return null;
-        return <WebToolView key={id} tool={tool} hidden={tabs.active !== id} />;
+        return <WebToolView key={id} tool={tool} hidden={tabs.active !== id} obscured={settingsOpen} />;
       })}
 
       <SettingsDialog
