@@ -213,6 +213,8 @@ export const ALL_TOOLS: CatalogTool[] = [
     repo: "OpenAEC-Foundation/open-pointcloud-studio",
     registryName: "Open Pointcloud Studio",
     exeName: "open-pointcloud-studio.exe",
+    pubkey:
+      "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU0QkVCN0M3NzM3NjkxMjYKUldRbWtYWnp4N2UrNUhNak12MEVWWlNRejF3YXVYaXFOYXVWWTJiQ3VkU3Q1WWtwaG11R3l1dUkK",
     webUrl: "https://open-pointcloud-studio.open-aec.com/",
     siteUrl: "https://open-aec.com/open-pointcloud-studio/",
     description: {

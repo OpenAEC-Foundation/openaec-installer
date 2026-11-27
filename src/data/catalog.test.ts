@@ -41,6 +41,12 @@ describe("verborgen tools", () => {
 });
 
 describe("publieke sleutels", () => {
+  it("gebruikt de releasesleutel van Open Pointcloud Studio", () => {
+    const tool = DESKTOP_TOOLS.find((entry) => entry.id === "open-pointcloud-studio");
+    const keyFile = atob(tool?.pubkey ?? "");
+    expect(keyFile.trim().split("\n")[1]).toBe("RWQmkXZzx7e+5HMjMv0EVZSQz1wauXiqNauVY2bCudSt5YkphmuGyuuI");
+  });
+
   it("zijn base64 van een minisign-sleutelbestand, zoals in tauri.conf.json", () => {
     for (const tool of ALL_TOOLS.filter((t) => t.pubkey)) {
       const lines = atob(tool.pubkey!).trim().split("\n");
